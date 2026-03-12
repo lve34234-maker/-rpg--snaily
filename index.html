@@ -348,6 +348,8 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   cursor:pointer; transition:all 0.2s;
   box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
 }
 #skillBtn.ready { border-color:var(--gold); animation:btn-blink 0.6s ease-in-out infinite; box-shadow:0 0 20px rgba(245,200,66,0.8); background:radial-gradient(circle,#504010,#302800); }
 #skillBtn .skill-icon { font-size:1.6rem; }
@@ -819,18 +821,18 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
   </div>
 
   <!-- SKILL BUTTON -->
-  <button id="skillBtn" onclick="useSkill()">
-    <svg class="sp-arc" viewBox="0 0 72 72">
+  <button id="skillBtn" onclick="useSkill()" ontouchstart="useSkill()">
+    <svg class="sp-arc" viewBox="0 0 72 72" style="pointer-events:none;position:absolute;top:0;left:0;">
       <circle cx="36" cy="36" r="31" fill="none" stroke="rgba(74,208,255,0.15)" stroke-width="4"/>
       <circle id="spArc" cx="36" cy="36" r="31" fill="none" stroke="#4ad0ff" stroke-width="4"
         stroke-dasharray="194.8" stroke-dashoffset="194.8" stroke-linecap="round"/>
     </svg>
-    <div class="skill-icon">⚡</div>
-    <div class="skill-label">TOUCH!!</div>
+    <div class="skill-icon" style="position:relative;z-index:1;">⚡</div>
+    <div class="skill-label" style="position:relative;z-index:1;">TOUCH!!</div>
   </button>
 
   <!-- AUTO BUTTON -->
-  <button id="autoBtn" onclick="toggleAuto()">
+  <button id="autoBtn" onclick="toggleAuto()" ontouchstart="toggleAuto()" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;">
     <div class="auto-icon">🔄</div>
     <div>AUTO</div>
   </button>
@@ -907,7 +909,14 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
     <div class="panel-title">⚒️ 제작</div>
     <button class="panel-close" onclick="closePanel('craftPanel')">✕</button>
   </div>
-  <div class="panel-body" id="craftBody"></div>
+  <div class="panel-body">
+    <div class="shop-tabs" style="margin-bottom:14px;">
+      <div class="shop-tab active" onclick="switchCraftTab('weapon',this)">⚔️ 무기</div>
+      <div class="shop-tab" onclick="switchCraftTab('armor',this)">🛡️ 갑옷</div>
+    </div>
+    <div id="craftTab_weapon"></div>
+    <div id="craftTab_armor" style="display:none;"></div>
+  </div>
 </div>
 
 <!-- Friend Panel -->
@@ -937,7 +946,7 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
     <div class="shop-tabs" style="margin-bottom:16px;">
       <div class="shop-tab active" onclick="switchAdminTab('stat',this)">📊 스탯</div>
       <div class="shop-tab" onclick="switchAdminTab('item',this)">🎁 아이템</div>
-      <div class="shop-tab" onclick="switchAdminTab('weapon',this)">⚔️ 무기제작</div>
+      <div class="shop-tab" onclick="switchAdminTab('weapon',this)">🛠️ 제작</div>
       <div class="shop-tab" onclick="switchAdminTab('notice',this)">📢 공지</div>
     </div>
 
@@ -986,6 +995,7 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
 
     <!-- 무기 제작 탭 -->
     <div id="adminTab_weapon" style="display:none;">
+      <!-- 무기 제작 -->
       <div class="admin-section">
         <div class="admin-section-title">⚔️ 커스텀 무기 제작</div>
         <div class="admin-grid">
@@ -993,24 +1003,20 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
           <div class="admin-field">
             <div class="admin-label">무기 종류</div>
             <select id="craftType" class="admin-input" style="padding:8px;">
-              <option value="sword">검 (sword)</option>
-              <option value="axe">도끼 (axe)</option>
-              <option value="bow">활 (bow)</option>
-              <option value="staff">지팡이 (staff)</option>
-              <option value="dagger">단검 (dagger)</option>
-              <option value="spear">창 (spear)</option>
-              <option value="hammer">망치 (hammer)</option>
+              <option value="sword">검</option>
+              <option value="axe">도끼</option>
+              <option value="bow">활</option>
+              <option value="staff">지팡이</option>
+              <option value="dagger">단검</option>
+              <option value="spear">창</option>
+              <option value="hammer">망치</option>
             </select>
           </div>
           <div class="admin-field">
             <div class="admin-label">등급</div>
             <select id="craftGrade" class="admin-input" style="padding:8px;">
-              <option value="S">S</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-              <option value="F">F</option>
+              <option value="S">S</option><option value="A">A</option><option value="B">B</option>
+              <option value="C">C</option><option value="D">D</option><option value="F">F</option>
             </select>
           </div>
           <div class="admin-field"><div class="admin-label">공격력</div><input type="number" id="craftAtk" class="admin-input" placeholder="예: 9999"></div>
@@ -1020,7 +1026,40 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
       </div>
       <div class="admin-section">
         <div class="admin-section-title">📦 제작된 커스텀 무기 목록</div>
-        <div id="adminCustomWeaponList" style="max-height:240px;overflow-y:auto;"></div>
+        <div id="adminCustomWeaponList" style="max-height:160px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- 갑옷 제작 -->
+      <div class="admin-section" style="border-top:1px solid rgba(245,200,66,0.15);padding-top:16px;margin-top:4px;">
+        <div class="admin-section-title">🛡️ 커스텀 갑옷 제작</div>
+        <div class="admin-grid">
+          <div class="admin-field" style="grid-column:span 2"><div class="admin-label">갑옷 이름</div><input type="text" id="craftArmorName" class="admin-input" placeholder="예: 신의 갑옷"></div>
+          <div class="admin-field">
+            <div class="admin-label">갑옷 종류</div>
+            <select id="craftArmorType" class="admin-input" style="padding:8px;">
+              <option value="plate">판금갑옷</option>
+              <option value="chain">사슬갑옷</option>
+              <option value="leather">가죽갑옷</option>
+              <option value="robe">로브</option>
+              <option value="cloak">망토</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <div class="admin-label">등급</div>
+            <select id="craftArmorGrade" class="admin-input" style="padding:8px;">
+              <option value="S">S</option><option value="A">A</option><option value="B">B</option>
+              <option value="C">C</option><option value="D">D</option><option value="F">F</option>
+            </select>
+          </div>
+          <div class="admin-field"><div class="admin-label">방어력</div><input type="number" id="craftArmorDef" class="admin-input" placeholder="예: 9999"></div>
+          <div class="admin-field"><div class="admin-label">HP 보너스</div><input type="number" id="craftArmorHp" class="admin-input" placeholder="예: 50000"></div>
+          <div class="admin-field"><div class="admin-label">가격</div><input type="number" id="craftArmorPrice" class="admin-input" placeholder="예: 50000"></div>
+        </div>
+        <button class="admin-btn" style="margin-top:8px;background:linear-gradient(135deg,#2050a0,#4080d0);" onclick="adminCraftArmor()">🛡️ 갑옷 제작</button>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">📦 제작된 커스텀 갑옷 목록</div>
+        <div id="adminCustomArmorList" style="max-height:160px;overflow-y:auto;"></div>
       </div>
     </div>
 
@@ -1212,14 +1251,23 @@ const STAGES = [
   {id:20,name:'대마왕의 귀환',waves:10,monsters:['dark_knight','dark_knight','dark_knight'],boss:'demon_king',goldReward:20000,expReward:15000},
 ];
 const CRAFT_RECIPES = [
-  {id:'r1',name:'강철 갑옷 제작',result:{...ALL_ARMORS[2]},materials:[{name:'철 조각',qty:5},{name:'가죽',qty:3}],goldCost:200},
-  {id:'r2',name:'드래곤 갑옷 제작',result:{...ALL_ARMORS[4]},materials:[{name:'드래곤 비늘',qty:10},{name:'미스릴 주괴',qty:5}],goldCost:1000},
-  {id:'r3',name:'신화의 갑옷 제작',result:{...ALL_ARMORS[5]},materials:[{name:'신화의 파편',qty:20},{name:'드래곤 심장',qty:3}],goldCost:5000},
-  {id:'r4',name:'마법사 로브 제작',result:{...ALL_ARMORS[7]},materials:[{name:'마법 섬유',qty:5},{name:'수정 가루',qty:3}],goldCost:150},
-  {id:'r5',name:'별빛 로브 제작',result:{...ALL_ARMORS[10]},materials:[{name:'별빛 원단',qty:15},{name:'달빛 결정',qty:8}],goldCost:3000},
+  // 갑옷
+  {id:'r1',type:'armor',name:'강철 갑옷 제작',result:{...ALL_ARMORS[2]},materials:[{name:'철 조각',qty:5},{name:'가죽',qty:3}],goldCost:200},
+  {id:'r2',type:'armor',name:'드래곤 갑옷 제작',result:{...ALL_ARMORS[4]},materials:[{name:'드래곤 비늘',qty:10},{name:'미스릴 주괴',qty:5}],goldCost:1000},
+  {id:'r3',type:'armor',name:'신화의 갑옷 제작',result:{...ALL_ARMORS[5]},materials:[{name:'신화의 파편',qty:20},{name:'드래곤 심장',qty:3}],goldCost:5000},
+  {id:'r4',type:'armor',name:'마법사 로브 제작',result:{...ALL_ARMORS[7]},materials:[{name:'마법 섬유',qty:5},{name:'수정 가루',qty:3}],goldCost:150},
+  {id:'r5',type:'armor',name:'별빛 로브 제작',result:{...ALL_ARMORS[10]},materials:[{name:'별빛 원단',qty:15},{name:'달빛 결정',qty:8}],goldCost:3000},
+  // 무기
+  {id:'rw1',type:'weapon',name:'미스릴 검 제작',result:{...ALL_WEAPONS[2]},materials:[{name:'미스릴 광석',qty:5},{name:'철 주괴',qty:3}],goldCost:500},
+  {id:'rw2',type:'weapon',name:'드래곤 검 제작',result:{...ALL_WEAPONS[3]},materials:[{name:'드래곤 비늘',qty:8},{name:'미스릴 주괴',qty:4}],goldCost:1500},
+  {id:'rw3',type:'weapon',name:'전설의 검 제작',result:{...ALL_WEAPONS[4]},materials:[{name:'전설의 파편',qty:15},{name:'드래곤 뼈',qty:5}],goldCost:4000},
+  {id:'rw4',type:'weapon',name:'수정 지팡이 제작',result:{...ALL_WEAPONS[9]},materials:[{name:'마법 수정',qty:6},{name:'고대 나무',qty:2}],goldCost:700},
+  {id:'rw5',type:'weapon',name:'대마법사 지팡이 제작',result:{...ALL_WEAPONS[10]},materials:[{name:'용의 눈물',qty:12},{name:'별빛 수정',qty:6}],goldCost:4500},
+  {id:'rw6',type:'weapon',name:'요정의 활 제작',result:{...ALL_WEAPONS[14]},materials:[{name:'엘프 나무',qty:4},{name:'별실',qty:5}],goldCost:600},
+  {id:'rw7',type:'weapon',name:'천둥 활 제작',result:{...ALL_WEAPONS[15]},materials:[{name:'번개 깃털',qty:10},{name:'풍신석',qty:4}],goldCost:3500},
 ];
 const WEAPON_ICONS = {sword:'⚔️',axe:'🪓',bow:'🏹',staff:'🪄',dagger:'🗡️',spear:'🔱',hammer:'🔨'};
-const ARMOR_ICONS = {light:'🥋',medium:'⛓️',heavy:'🛡️',divine:'✨',robe:'👘'};
+const ARMOR_ICONS = { plate:'🛡️', chain:'⛓️', leather:'🧥', robe:'👘', cloak:'🌙', light:'🥋', medium:'⛓️', heavy:'🛡️', divine:'✨' };
 const ENEMY_STATS = {
   goblin:{maxHp:50,atk:5,def:2,expReward:15,goldReward:10},
   orc:{maxHp:150,atk:14,def:8,expReward:35,goldReward:25},
@@ -1332,10 +1380,12 @@ function handleWSMessage(msg) {
   if (msg.type === 'admin_kill') {
     if (msg.target === 'monsters' && battleState) {
       battleState.enemies.forEach(e => e.hp = 0);
+      renderBattle();
       checkBattleEnd();
     }
     if (msg.target === 'player' && msg.username === player.username && battleState) {
       battleState.heroes.forEach(h => h.hp = 0);
+      renderBattle();
       checkBattleEnd();
     }
   }
@@ -1358,6 +1408,56 @@ function handleWSMessage(msg) {
   }
   if (msg.type === 'chat_clear') {
     if (msg.channel === currentChannel) document.getElementById('chatMessages').innerHTML = '';
+  }
+
+  // ====== 파티 메시지 ======
+  if (msg.type === 'party_list') {
+    renderPartyJoinList(msg.parties);
+  }
+  if (msg.type === 'party_update') {
+    myParty = msg.party;
+    renderPartyStatus();
+  }
+  if (msg.type === 'party_disbanded') {
+    myParty = null;
+    partyBattleActive = false;
+    renderPartyStatus();
+    showNotif('💨 파티가 해산되었습니다.');
+  }
+  if (msg.type === 'party_kicked') {
+    myParty = null;
+    partyBattleActive = false;
+    renderPartyStatus();
+    showNotif('❌ 파티에서 추방되었습니다.');
+  }
+  if (msg.type === 'party_battle_start') {
+    myParty = msg.party;
+    document.querySelectorAll('.panel.open').forEach(p => p.classList.remove('open'));
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'flex';
+
+    if (msg.instant) {
+      // ⚡ 전투 중인 파티로 순간이동 연출
+      const flashEl = document.createElement('div');
+      flashEl.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;background:radial-gradient(circle,#a0c0ff,#2040c0,#000);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;';
+      flashEl.innerHTML = '<div style="font-size:3rem;">⚡</div>'
+        + '<div style="font-family:\'Black Han Sans\',sans-serif;font-size:1.4rem;color:#fff;text-shadow:0 0 20px #6af;">전장으로 순간이동!</div>'
+        + '<div style="font-size:0.85rem;color:rgba(255,255,255,0.7);">스테이지 ' + msg.stageId + ' · 웨이브 ' + (msg.wave||1) + '</div>';
+      document.body.appendChild(flashEl);
+      setTimeout(() => {
+        flashEl.style.transition = 'opacity 0.3s';
+        flashEl.style.opacity = '0';
+        setTimeout(() => { flashEl.remove(); startPartyBattleLocal(msg.stageId, msg.memberSlot, msg.wave || 1); }, 300);
+      }, 900);
+    } else {
+      showNotif('⚔️ 파티 전투 시작! 스테이지 ' + msg.stageId);
+      startPartyBattleLocal(msg.stageId, msg.memberSlot, 1);
+    }
+  }
+  if (msg.type === 'party_battle_sync') {
+    if (battleState && msg.username !== player.username) {
+      applyPartyMemberAction(msg);
+    }
   }
 }
 
@@ -2014,17 +2114,39 @@ function buyItem(itemId, tab) {
 // ============================================================
 // CRAFT
 // ============================================================
+function switchCraftTab(tab, el) {
+  ['weapon','armor'].forEach(t => {
+    const e = document.getElementById('craftTab_'+t);
+    if (e) e.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('#craftPanel .shop-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
 function renderCraft() {
-  const body = document.getElementById('craftBody');
-  body.innerHTML = '<div style="font-size:0.75rem;color:rgba(240,232,200,0.4);margin-bottom:12px;">* 제작 재료는 스테이지 클리어로 획득 가능합니다.</div>' +
-    CRAFT_RECIPES.map(r => `
-      <div class="craft-recipe">
-        <div class="recipe-name">${r.name}</div>
-        <div class="recipe-mats">재료: ${r.materials.map(m=>`${m.name} x${m.qty}`).join(', ')} | 비용: ${r.goldCost.toLocaleString()}💰</div>
-        <div class="recipe-result">결과: ${r.result.name} (방어력: ${r.result.def})</div>
-        <button class="mini-btn btn-equip" style="margin-top:8px;padding:6px 14px;" onclick="craftItem('${r.id}')">제작하기</button>
+  const note = '<div style="font-size:0.72rem;color:rgba(240,232,200,0.35);margin-bottom:12px;">* 재료는 스테이지 클리어로 획득합니다 (현재는 골드만 소모)</div>';
+
+  const weaponRecipes = CRAFT_RECIPES.filter(r => r.type === 'weapon');
+  const armorRecipes = CRAFT_RECIPES.filter(r => r.type === 'armor');
+
+  const renderRecipe = r => `
+    <div class="craft-recipe">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:1.3rem;">${r.type==='weapon'?(WEAPON_ICONS[r.result.type]||'⚔️'):(ARMOR_ICONS[r.result.type]||'🛡️')}</span>
+        <div>
+          <div class="recipe-name">${r.result.name} <span class="item-grade grade-${r.result.grade}">${r.result.grade}</span></div>
+          <div style="font-size:0.65rem;color:rgba(240,232,200,0.4);">${r.type==='weapon'?'공격력 '+r.result.atk:'방어력 '+r.result.def}</div>
+        </div>
       </div>
-    `).join('');
+      <div class="recipe-mats">재료: ${r.materials.map(m=>`${m.name} x${m.qty}`).join(', ')}</div>
+      <div style="font-size:0.72rem;color:var(--gold);margin:4px 0;">비용: ${r.goldCost.toLocaleString()} 💰</div>
+      <button class="mini-btn btn-equip" style="margin-top:6px;padding:6px 14px;width:100%;" onclick="craftItem('${r.id}')">⚒️ 제작하기</button>
+    </div>`;
+
+  const wEl = document.getElementById('craftTab_weapon');
+  const aEl = document.getElementById('craftTab_armor');
+  if (wEl) wEl.innerHTML = note + weaponRecipes.map(renderRecipe).join('');
+  if (aEl) aEl.innerHTML = note + armorRecipes.map(renderRecipe).join('');
 }
 
 function craftItem(recipeId) {
@@ -2032,9 +2154,15 @@ function craftItem(recipeId) {
   if (!recipe) return;
   if ((player.gold||0) < recipe.goldCost) { showNotif('💰 골드가 부족합니다!'); return; }
   player.gold -= recipe.goldCost;
-  if (!player.armors) player.armors = [];
-  player.armors.push({...recipe.result, enhance:0});
-  saveGame(); updateHUD(); renderArmors();
+  if (recipe.type === 'weapon') {
+    if (!player.weapons) player.weapons = [];
+    player.weapons.push({...recipe.result, enhance:0});
+    saveGame(); updateHUD(); renderWeapons();
+  } else {
+    if (!player.armors) player.armors = [];
+    player.armors.push({...recipe.result, enhance:0});
+    saveGame(); updateHUD(); renderArmors();
+  }
   showNotif(`⚒️ ${recipe.result.name} 제작 완료!`);
 }
 
@@ -2146,7 +2274,7 @@ function switchAdminTab(tab, el) {
   document.querySelectorAll('#adminPanel .shop-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   if (tab === 'item') { syncAdminTarget2(); loadAdminUserItems(); }
-  if (tab === 'weapon') renderCustomWeaponList();
+  if (tab === 'weapon') { renderCustomWeaponList(); renderCustomArmorList(); }
 }
 
 function syncAdminTarget2() {
@@ -2170,7 +2298,7 @@ async function loadAdminUsers() {
 }
 
 function loadAdminItems() {
-  const items = [...ALL_WEAPONS, ...ALL_ARMORS, ...customWeapons];
+  const items = [...ALL_WEAPONS, ...ALL_ARMORS, ...customWeapons, ...customArmors];
   const sel = document.getElementById('adminItemSelect');
   if (sel) sel.innerHTML = items.map(i => '<option value="'+i.id+'">'+i.name+' ['+i.grade+']</option>').join('');
 }
@@ -2384,6 +2512,79 @@ function adminDeleteCustomWeapon(idx) {
   showNotif('🗑️ ['+name+'] 삭제됨');
 }
 
+// ============================================================
+// 커스텀 갑옷 제작
+// ============================================================
+let customArmors = [];
+
+// customArmors 목록
+
+function adminCraftArmor() {
+  const name = document.getElementById('craftArmorName').value.trim();
+  const type = document.getElementById('craftArmorType').value;
+  const grade = document.getElementById('craftArmorGrade').value;
+  const def = parseInt(document.getElementById('craftArmorDef').value) || 100;
+  const hp = parseInt(document.getElementById('craftArmorHp').value) || 0;
+  const price = parseInt(document.getElementById('craftArmorPrice').value) || 10000;
+  if (!name) { showNotif('❌ 갑옷 이름을 입력하세요'); return; }
+  const newArmor = { id:'custom_armor_'+Date.now(), name, type, def, hp, grade, price, enhance:0, isCustom:true };
+  customArmors.push(newArmor);
+  if (!player.armors) player.armors = [];
+  player.armors.push({...newArmor});
+  saveGame(); renderCustomArmorList(); loadAdminItems();
+  showNotif('🛡️ ['+name+'] 갑옷 제작 완료!');
+  document.getElementById('craftArmorName').value = '';
+  document.getElementById('craftArmorDef').value = '';
+  document.getElementById('craftArmorHp').value = '';
+  document.getElementById('craftArmorPrice').value = '';
+}
+
+function renderCustomArmorList() {
+  const el = document.getElementById('adminCustomArmorList');
+  if (!el) return;
+  if (!customArmors.length) { el.innerHTML='<div style="color:rgba(240,232,200,0.3);font-size:0.8rem;padding:8px;">제작된 커스텀 갑옷 없음</div>'; return; }
+  el.innerHTML = customArmors.map(function(a,i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">'
+      +'<span style="font-size:1.2rem;">'+(ARMOR_ICONS[a.type]||'🛡️')+'</span>'
+      +'<div style="flex:1;"><div style="font-size:0.85rem;font-weight:700;">'+a.name+'</div>'
+      +'<div style="font-size:0.65rem;color:rgba(240,232,200,0.4);">DEF '+a.def+(a.hp?' | HP+'+a.hp:'')+'</div></div>'
+      +'<span class="item-grade grade-'+a.grade+'">'+a.grade+'</span>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;">'
+      +'<button class="mini-btn btn-equip" onclick="adminDistributeArmor('+i+')">배포</button>'
+      +'<button class="mini-btn btn-sell" onclick="adminDeleteCustomArmor('+i+')">삭제</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+async function adminDistributeArmor(idx) {
+  const armor = customArmors[idx];
+  if (!armor) return;
+  try {
+    const res = await fetch(SERVER_URL+'/api/users');
+    const users = await res.json();
+    for (const u of users) {
+      const ur = await fetch(SERVER_URL+'/api/user/'+u.username);
+      const ud = await ur.json();
+      if (!ud.ok) continue;
+      const arr = ud.user.armors||[];
+      arr.push({...armor, enhance:0});
+      await fetch(SERVER_URL+'/api/admin/setuser', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({adminPass:player.password, target:u.username, field:'armors', value:arr})
+      });
+    }
+    wsSend({type:'chat',channel:'global',text:'/announce 🛡️ ['+armor.name+'] 갑옷이 전체 배포되었습니다!'});
+    showNotif('🛡️ ['+armor.name+'] '+users.length+'명에게 배포 완료!');
+  } catch(e) { showNotif('❌ 배포 실패'); }
+}
+
+function adminDeleteCustomArmor(idx) {
+  const name = customArmors[idx].name;
+  customArmors.splice(idx,1);
+  renderCustomArmorList(); loadAdminItems();
+  showNotif('🗑️ ['+name+'] 삭제됨');
+}
+
 
 // ============================================================
 // QUIT POPUP
@@ -2433,72 +2634,6 @@ let myParty = null; // { id, name, leader, members:[], stageId }
 let partyBattleActive = false;
 
 // WS 메시지 핸들러에 파티 메시지 추가
-const _origHandleWS = handleWSMessage;
-handleWSMessage = function(msg) {
-  _origHandleWS(msg);
-
-  if (msg.type === 'party_list') {
-    renderPartyJoinList(msg.parties);
-  }
-  if (msg.type === 'party_update') {
-    myParty = msg.party;
-    renderPartyStatus();
-  }
-  if (msg.type === 'party_disbanded') {
-    myParty = null;
-    partyBattleActive = false;
-    renderPartyStatus();
-    showNotif('💨 파티가 해산되었습니다.');
-  }
-  if (msg.type === 'party_battle_start') {
-    myParty = msg.party;
-    // 모든 패널 닫기
-    document.querySelectorAll('.panel.open').forEach(p => p.classList.remove('open'));
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'flex';
-
-    if (msg.instant) {
-      // ⚡ 전투 중인 파티에 순간이동
-      const flashEl = document.createElement('div');
-      flashEl.style.cssText = `
-        position:fixed;inset:0;z-index:9999;pointer-events:none;
-        background:radial-gradient(circle,#a0c0ff,#4060e0,#000);
-        display:flex;align-items:center;justify-content:center;
-        flex-direction:column;gap:12px;
-      `;
-      flashEl.innerHTML = `
-        <div style="font-size:3rem;animation:hero-idle 0.3s ease-in-out infinite;">⚡</div>
-        <div style="font-family:'Black Han Sans',sans-serif;font-size:1.4rem;color:#fff;text-shadow:0 0 20px #6af;">전장으로 순간이동!</div>
-        <div style="font-size:0.9rem;color:rgba(255,255,255,0.7);">스테이지 ${msg.stageId} · 웨이브 ${msg.wave || 1}</div>
-      `;
-      document.body.appendChild(flashEl);
-      // 0.8초 연출 후 전투 진입
-      setTimeout(() => {
-        flashEl.style.transition = 'opacity 0.3s';
-        flashEl.style.opacity = '0';
-        setTimeout(() => {
-          flashEl.remove();
-          startPartyBattleLocal(msg.stageId, msg.memberSlot, msg.wave || 1);
-        }, 300);
-      }, 800);
-    } else {
-      showNotif('⚔️ 파티 전투 시작! 스테이지 ' + msg.stageId);
-      startPartyBattleLocal(msg.stageId, msg.memberSlot, 1);
-    }
-  }
-  if (msg.type === 'party_battle_sync') {
-    // 다른 파티원 행동 반영
-    if (battleState && msg.username !== player.username) {
-      applyPartyMemberAction(msg);
-    }
-  }
-  if (msg.type === 'party_kicked') {
-    myParty = null;
-    renderPartyStatus();
-    showNotif('❌ 파티에서 추방되었습니다.');
-  }
-};
-
 function createParty() {
   const name = document.getElementById('partyNameInput').value.trim();
   if (!name) { showNotif('❌ 파티 이름을 입력하세요'); return; }
