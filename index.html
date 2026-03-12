@@ -1643,6 +1643,8 @@ function checkBattleEnd() {
     battleState.gameOver = true;
     clearInterval(battleState.autoTimer);
     document.getElementById('gameoverBanner').style.display = 'block';
+    document.getElementById('bossHud').style.display = 'none';
+    document.getElementById('enemiesArea').innerHTML = '';
     return;
   }
 
@@ -1687,6 +1689,9 @@ function checkBattleEnd() {
       document.getElementById('clearBanner').style.display = 'block';
       document.getElementById('quitBtn').style.display = 'none';
       document.getElementById('bossHud').style.display = 'none';
+      // 적·영웅 영역 완전히 비우기
+      document.getElementById('enemiesArea').innerHTML = '';
+      document.getElementById('heroesArea').innerHTML = '';
       renderStageGrid();
     }
   }
