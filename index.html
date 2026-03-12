@@ -600,14 +600,171 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
 
 /* Scrollable fix */
 #battleArea { touch-action:none; }
+
+/* ====== 가로 모드 모바일 최적화 ====== */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+
+  /* 로그인 화면 - 가로 레이아웃 */
+  #loginScreen { flex-direction:row; gap:20px; padding:10px 30px; }
+  .login-logo { font-size:1.6rem; margin-bottom:4px; }
+  .login-sub { font-size:0.65rem; margin-bottom:0; letter-spacing:2px; }
+  .login-left { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .login-box { padding:16px 20px; width:280px; }
+  .login-tabs { margin-bottom:12px; }
+  .login-tab { padding:7px; font-size:0.75rem; }
+  .login-input { padding:8px 12px; font-size:0.85rem; margin-bottom:8px; }
+  .login-btn { padding:10px; font-size:0.9rem; }
+  .login-err { font-size:0.7rem; min-height:16px; }
+
+  /* 상단 HUD - 더 작게 */
+  #topHud {
+    height:56px; padding:4px 6px; gap:4px;
+  }
+  .hero-hud {
+    padding:4px 6px; min-width:100px; gap:2px; border-radius:6px;
+  }
+  .hero-hud-name { font-size:0.6rem; }
+  .bar-row { gap:4px; }
+  .bar-bg { height:5px; }
+  .bar-val { font-size:0.5rem; width:32px; }
+  .bar-label { font-size:0.5rem; width:12px; }
+
+  /* 보스 HP - 위치 조정 */
+  #bossHud {
+    top:4px; right:8px; padding:5px 10px; min-width:130px;
+  }
+  .boss-name { font-size:0.65rem; margin-bottom:3px; }
+  .boss-bar-bg { height:8px; }
+
+  /* 상태바 */
+  #statusBar { top:60px; right:8px; gap:4px; }
+  .stat-chip { padding:3px 7px; font-size:0.6rem; }
+
+  /* 웨이브 인디케이터 */
+  #waveIndicator { top:60px; font-size:0.65rem; padding:3px 8px; }
+
+  /* 배틀 영역 - 하단바 높이 맞춤 */
+  #heroesArea { bottom:62px !important; }
+  #enemiesArea { bottom:62px !important; }
+
+  /* 캐릭터 크기 축소 */
+  .warrior { transform:scale(0.75); transform-origin:bottom center; }
+  .archer { transform:scale(0.75); transform-origin:bottom center; }
+  .mage { transform:scale(0.75); transform-origin:bottom center; }
+  .goblin { transform:scale(0.75); transform-origin:bottom center; }
+  .orc { transform:scale(0.8); transform-origin:bottom center; }
+  .dark-knight { transform:scale(0.75); transform-origin:bottom center; }
+  .boss-enemy { transform:scale(0.65) scaleX(-1); transform-origin:bottom center; }
+  .character-container { gap:0; }
+  .char-name-tag { font-size:0.5rem; }
+  .hp-dot { width:5px; height:5px; }
+
+  /* 스킬 버튼 */
+  #skillBtn {
+    width:58px; height:58px; bottom:68px; right:12px;
+  }
+  #skillBtn .skill-icon { font-size:1.2rem; }
+  #skillBtn .skill-label { font-size:0.45rem; }
+  .sp-arc { width:58px; height:58px; }
+
+  /* AUTO 버튼 */
+  #autoBtn {
+    width:46px; height:46px; bottom:74px; right:80px;
+    font-size:0.5rem;
+  }
+  #autoBtn .auto-icon { font-size:1rem; }
+
+  /* 포기 버튼 */
+  #quitBtn {
+    top:6px; left:50%; font-size:0.65rem; padding:4px 12px;
+  }
+
+  /* 하단 네비게이션 - 더 얇게 */
+  #bottomBar {
+    height:60px; gap:4px; padding:6px 8px;
+  }
+  .nav-btn {
+    padding:5px 8px; min-width:42px; border-radius:7px; gap:1px;
+  }
+  .nav-btn .nb-icon { font-size:1.1rem; }
+  .nav-btn .nb-label { font-size:0.45rem; }
+
+  /* 패널 - 가로 모드 최적화 */
+  .panel-header { padding:8px 14px; }
+  .panel-title { font-size:1rem; }
+  .panel-close { width:30px; height:30px; font-size:1rem; }
+  .panel-body { padding:8px 12px; }
+
+  /* 스테이지 그리드 - 5열 */
+  .stage-grid { grid-template-columns:repeat(5,1fr); gap:5px; }
+  .stage-card { padding:8px 4px; border-radius:7px; }
+  .stage-num { font-size:0.9rem; }
+  .stage-name { font-size:0.55rem; }
+  .stage-stars { font-size:0.6rem; }
+
+  /* 아이템 카드 */
+  .item-card { padding:8px; gap:8px; }
+  .item-icon { width:38px; height:38px; font-size:1.4rem; }
+  .item-name { font-size:0.8rem; }
+  .item-stats { font-size:0.62rem; }
+
+  /* 채팅 패널 */
+  #chatPanel {
+    height:200px; bottom:60px;
+  }
+  .chat-tab { padding:5px; font-size:0.62rem; }
+  .chat-msg { font-size:0.68rem; }
+  .chat-input-row { padding:5px 8px; gap:6px; }
+  #chatInput { padding:6px 10px; font-size:0.72rem; }
+  #chatSend { padding:6px 12px; font-size:0.72rem; }
+
+  /* 팝업 */
+  .popup-box { padding:16px 20px; }
+  .popup-icon { font-size:2rem; margin-bottom:6px; }
+  .popup-title { font-size:1rem; margin-bottom:6px; }
+  .popup-msg { font-size:0.75rem; margin-bottom:12px; }
+  .popup-btn { padding:8px; font-size:0.8rem; }
+
+  /* 강화 팝업 */
+  .enhance-popup { width:260px; padding:16px; }
+
+  /* 클리어 배너 */
+  .clear-banner { padding:14px 24px; }
+  .clear-banner h2 { font-size:1.4rem; }
+  .clear-banner p { font-size:0.8rem; }
+  .clear-banner .reward-line { font-size:0.9rem; }
+
+  /* 어드민 패널 */
+  .admin-grid { grid-template-columns:1fr 1fr 1fr; }
+  .admin-input { padding:6px; font-size:0.75rem; }
+  .admin-btn { padding:7px; font-size:0.75rem; }
+
+  /* 알림 */
+  .notif { font-size:0.7rem; padding:5px 12px; }
+
+  /* 데미지 숫자 */
+  .damage-number { font-size:1rem; }
+  .wave-announce { font-size:1.3rem; }
+
+  /* 친구 */
+  .friend-avatar { width:32px; height:32px; font-size:0.9rem; }
+  .friend-name { font-size:0.8rem; }
+
+  /* 제작 */
+  .craft-recipe { padding:10px; }
+  .recipe-name { font-size:0.8rem; }
+  .recipe-mats { font-size:0.65rem; }
+}
 </style>
 </head>
 <body>
 
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
-  <div class="login-logo">📓 공책<span>RPG</span></div>
-  <div class="login-sub">GONGSAEK RPG ONLINE</div>
+  <div class="login-left">
+    <div class="login-logo">📓 공책<span>RPG</span></div>
+    <div class="login-sub">GONGSAEK RPG ONLINE</div>
+  </div>
   <div class="login-box">
     <div class="login-tabs">
       <button class="login-tab active" onclick="switchAuthTab('login')">로그인</button>
