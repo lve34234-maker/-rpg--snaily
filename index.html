@@ -1768,6 +1768,8 @@ function renderBattle() {
   updateHUDBars();
   renderOtherUsers();
 }
+
+function renderOtherUsers() {
   // 기존 다른 유저 엘리먼트 제거
   document.querySelectorAll('.other-user-char').forEach(el => el.remove());
   if (!battleState) return;
@@ -1778,7 +1780,6 @@ function renderBattle() {
     div.className = 'character-container other-user-char';
     div.style.opacity = '0.45';
     div.style.filter = 'hue-rotate(180deg)';
-    // 순서에 따라 전사/궁수/마법사 반복
     const types = ['warrior','archer','mage'];
     const charType = types[idx % 3];
     div.innerHTML = `
@@ -1791,7 +1792,7 @@ function renderBattle() {
   });
 }
 
-
+function getHeroHTML(idx) {
   if (idx === 0) return `<div class="warrior-body"><div class="w-sword"></div><div class="w-shield"></div><div class="w-helmet"></div><div class="w-head"></div><div class="w-arm-r"></div><div class="w-arm-l"></div><div class="w-torso"></div><div class="w-chest-plate"></div><div class="w-legs"><div class="w-leg"></div><div class="w-leg"></div></div><div class="w-boots"><div class="w-boot"></div><div class="w-boot"></div></div></div>`;
   if (idx === 1) return `<div class="warrior-body" style="transform:none"><div class="a-hat"></div><div class="a-head"></div><div class="a-arm-r"></div><div class="a-bow"></div><div class="a-arm-l"></div><div class="a-torso"></div><div class="a-legs"><div class="a-leg"></div><div class="a-leg"></div></div></div>`;
   return `<div class="warrior-body" style="transform:none"><div class="m-hat"></div><div class="m-head"></div><div class="m-arm-r"></div><div class="m-staff"></div><div class="m-arm-l"></div><div class="m-robe"></div></div>`;
