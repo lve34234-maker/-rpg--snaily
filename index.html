@@ -774,36 +774,104 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
     <button class="panel-close" onclick="closePanel('adminPanel')">✕</button>
   </div>
   <div class="panel-body">
-    <div class="admin-section">
-      <div class="admin-section-title">🎯 대상 선택</div>
-      <select id="adminTargetSelect" class="admin-target-select" onchange="loadAdminTarget()"></select>
+    <!-- 탭 -->
+    <div class="shop-tabs" style="margin-bottom:16px;">
+      <div class="shop-tab active" onclick="switchAdminTab('stat',this)">📊 스탯</div>
+      <div class="shop-tab" onclick="switchAdminTab('item',this)">🎁 아이템</div>
+      <div class="shop-tab" onclick="switchAdminTab('weapon',this)">⚔️ 무기제작</div>
+      <div class="shop-tab" onclick="switchAdminTab('notice',this)">📢 공지</div>
     </div>
-    <div class="admin-section">
-      <div class="admin-section-title">📊 스탯 설정</div>
-      <div class="admin-grid">
-        <div class="admin-field"><div class="admin-label">레벨</div><input type="number" id="adminLevel" class="admin-input"></div>
-        <div class="admin-field"><div class="admin-label">골드</div><input type="number" id="adminGold" class="admin-input"></div>
-        <div class="admin-field"><div class="admin-label">보석</div><input type="number" id="adminGems" class="admin-input"></div>
-        <div class="admin-field"><div class="admin-label">공격력</div><input type="number" id="adminAtk" class="admin-input"></div>
-        <div class="admin-field"><div class="admin-label">방어력</div><input type="number" id="adminDef" class="admin-input"></div>
-        <div class="admin-field"><div class="admin-label">HP</div><input type="number" id="adminHp" class="admin-input"></div>
+
+    <!-- 스탯 탭 -->
+    <div id="adminTab_stat">
+      <div class="admin-section">
+        <div class="admin-section-title">🎯 대상 선택</div>
+        <select id="adminTargetSelect" class="admin-target-select" onchange="loadAdminTarget()"></select>
       </div>
-      <button class="admin-btn" onclick="applyAdminStats()">적용</button>
+      <div class="admin-section">
+        <div class="admin-section-title">📊 스탯 설정</div>
+        <div class="admin-grid">
+          <div class="admin-field"><div class="admin-label">레벨</div><input type="number" id="adminLevel" class="admin-input" min="1"></div>
+          <div class="admin-field"><div class="admin-label">골드</div><input type="number" id="adminGold" class="admin-input" min="0"></div>
+          <div class="admin-field"><div class="admin-label">보석</div><input type="number" id="adminGems" class="admin-input" min="0"></div>
+          <div class="admin-field"><div class="admin-label">공격력</div><input type="number" id="adminAtk" class="admin-input" min="1"></div>
+          <div class="admin-field"><div class="admin-label">방어력</div><input type="number" id="adminDef" class="admin-input" min="0"></div>
+          <div class="admin-field"><div class="admin-label">최대HP</div><input type="number" id="adminHp" class="admin-input" min="1"></div>
+        </div>
+        <div id="adminStatResult" style="font-size:0.8rem;min-height:20px;margin:8px 0;text-align:center;"></div>
+        <button class="admin-btn" onclick="applyAdminStats()">✅ 스탯 적용</button>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">💰 골드 지급</div>
+        <input type="number" id="adminGoldAmount" class="admin-input" placeholder="골드 수량" style="margin-bottom:8px;">
+        <button class="admin-btn" onclick="adminGiveGold()">골드 지급</button>
+      </div>
     </div>
-    <div class="admin-section">
-      <div class="admin-section-title">🎁 아이템 지급</div>
-      <select id="adminItemSelect" class="admin-target-select"></select>
-      <button class="admin-btn" onclick="adminGiveItem()">지급</button>
+
+    <!-- 아이템 탭 -->
+    <div id="adminTab_item" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">🎯 대상 선택</div>
+        <select id="adminTargetSelect2" class="admin-target-select"></select>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🎁 아이템 지급</div>
+        <select id="adminItemSelect" class="admin-target-select" style="margin-bottom:8px;"></select>
+        <button class="admin-btn" onclick="adminGiveItem()">🎁 지급</button>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🗑️ 아이템 삭제</div>
+        <div id="adminUserItemList" style="max-height:200px;overflow-y:auto;"></div>
+      </div>
     </div>
-    <div class="admin-section">
-      <div class="admin-section-title">💰 골드 지급</div>
-      <input type="number" id="adminGoldAmount" class="admin-input" placeholder="골드 수량">
-      <button class="admin-btn" onclick="adminGiveGold()">지급</button>
+
+    <!-- 무기 제작 탭 -->
+    <div id="adminTab_weapon" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">⚔️ 커스텀 무기 제작</div>
+        <div class="admin-grid">
+          <div class="admin-field" style="grid-column:span 2"><div class="admin-label">무기 이름</div><input type="text" id="craftName" class="admin-input" placeholder="예: 신의 검"></div>
+          <div class="admin-field">
+            <div class="admin-label">무기 종류</div>
+            <select id="craftType" class="admin-input" style="padding:8px;">
+              <option value="sword">검 (sword)</option>
+              <option value="axe">도끼 (axe)</option>
+              <option value="bow">활 (bow)</option>
+              <option value="staff">지팡이 (staff)</option>
+              <option value="dagger">단검 (dagger)</option>
+              <option value="spear">창 (spear)</option>
+              <option value="hammer">망치 (hammer)</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <div class="admin-label">등급</div>
+            <select id="craftGrade" class="admin-input" style="padding:8px;">
+              <option value="S">S</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="F">F</option>
+            </select>
+          </div>
+          <div class="admin-field"><div class="admin-label">공격력</div><input type="number" id="craftAtk" class="admin-input" placeholder="예: 9999"></div>
+          <div class="admin-field"><div class="admin-label">가격</div><input type="number" id="craftPrice" class="admin-input" placeholder="예: 50000"></div>
+        </div>
+        <button class="admin-btn" style="margin-top:8px;" onclick="adminCraftWeapon()">⚔️ 무기 제작</button>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">📦 제작된 커스텀 무기 목록</div>
+        <div id="adminCustomWeaponList" style="max-height:240px;overflow-y:auto;"></div>
+      </div>
     </div>
-    <div class="admin-section">
-      <div class="admin-section-title">📢 공지 발송</div>
-      <input type="text" id="adminAnnounce" class="admin-input" placeholder="공지 내용">
-      <button class="admin-btn" onclick="adminAnnounce()">발송</button>
+
+    <!-- 공지 탭 -->
+    <div id="adminTab_notice" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">📢 전체 공지</div>
+        <input type="text" id="adminAnnounce" class="admin-input" placeholder="공지 내용" style="margin-bottom:8px;">
+        <button class="admin-btn" onclick="adminAnnounce()">발송</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1864,26 +1932,50 @@ function deleteFriend(name) { wsSend({type:'friend_delete',target:name}); player
 // ============================================================
 // ADMIN
 // ============================================================
+let customWeapons = [];
+
+function switchAdminTab(tab, el) {
+  ['stat','item','weapon','notice'].forEach(t => {
+    const e = document.getElementById('adminTab_'+t);
+    if (e) e.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('#adminPanel .shop-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (tab === 'item') { syncAdminTarget2(); loadAdminUserItems(); }
+  if (tab === 'weapon') renderCustomWeaponList();
+}
+
+function syncAdminTarget2() {
+  const s1 = document.getElementById('adminTargetSelect');
+  const s2 = document.getElementById('adminTargetSelect2');
+  if (s1 && s2) s2.value = s1.value;
+}
+
 async function loadAdminUsers() {
   if (!player.isAdmin) return;
   try {
-    const res = await fetch(`${SERVER_URL}/api/users`);
+    const res = await fetch(SERVER_URL + '/api/users');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const users = await res.json();
-    const sel = document.getElementById('adminTargetSelect');
-    sel.innerHTML = users.map(u => `<option value="${u.username}">${u.username} (Lv.${u.level})</option>`).join('');
-  } catch(e) {}
+    const opts = users.map(u => '<option value="'+u.username+'">'+u.username+' (Lv.'+u.level+')</option>').join('');
+    const s1 = document.getElementById('adminTargetSelect');
+    const s2 = document.getElementById('adminTargetSelect2');
+    if (s1) { s1.innerHTML = opts; loadAdminTarget(); }
+    if (s2) s2.innerHTML = opts;
+  } catch(e) { showNotif('유저 목록 로드 실패: '+e.message); }
 }
 
 function loadAdminItems() {
-  const items = [...ALL_WEAPONS, ...ALL_ARMORS];
+  const items = [...ALL_WEAPONS, ...ALL_ARMORS, ...customWeapons];
   const sel = document.getElementById('adminItemSelect');
-  sel.innerHTML = items.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+  if (sel) sel.innerHTML = items.map(i => '<option value="'+i.id+'">'+i.name+' ['+i.grade+']</option>').join('');
 }
 
 async function loadAdminTarget() {
-  const target = document.getElementById('adminTargetSelect').value;
+  const target = document.getElementById('adminTargetSelect')?.value;
+  if (!target) return;
   try {
-    const res = await fetch(`${SERVER_URL}/api/user/${target}`);
+    const res = await fetch(SERVER_URL + '/api/user/' + target);
     const data = await res.json();
     if (data.ok) {
       document.getElementById('adminLevel').value = data.user.level || 1;
@@ -1892,53 +1984,202 @@ async function loadAdminTarget() {
       document.getElementById('adminAtk').value = data.user.attack || 10;
       document.getElementById('adminDef').value = data.user.defense || 5;
       document.getElementById('adminHp').value = data.user.maxHp || 100;
+      const r = document.getElementById('adminStatResult');
+      if (r) r.textContent = '';
     }
   } catch(e) {}
 }
 
 async function applyAdminStats() {
-  const target = document.getElementById('adminTargetSelect').value;
+  const target = document.getElementById('adminTargetSelect')?.value;
+  if (!target) { showNotif('대상을 선택하세요'); return; }
+  const resultEl = document.getElementById('adminStatResult');
+  if (resultEl) { resultEl.style.color = 'rgba(240,232,200,0.5)'; resultEl.textContent = '적용 중...'; }
   const fields = {
-    level: parseInt(document.getElementById('adminLevel').value),
-    gold: parseInt(document.getElementById('adminGold').value),
-    gems: parseInt(document.getElementById('adminGems').value),
-    attack: parseInt(document.getElementById('adminAtk').value),
-    defense: parseInt(document.getElementById('adminDef').value),
-    maxHp: parseInt(document.getElementById('adminHp').value),
+    level: parseInt(document.getElementById('adminLevel').value)||1,
+    gold: parseInt(document.getElementById('adminGold').value)||0,
+    gems: parseInt(document.getElementById('adminGems').value)||0,
+    attack: parseInt(document.getElementById('adminAtk').value)||10,
+    defense: parseInt(document.getElementById('adminDef').value)||5,
+    maxHp: parseInt(document.getElementById('adminHp').value)||100,
+    hp: parseInt(document.getElementById('adminHp').value)||100,
   };
   try {
-    for (const [field, value] of Object.entries(fields)) {
-      await fetch(`${SERVER_URL}/api/admin/setuser`, {
+    await Promise.all(Object.entries(fields).map(([field, value]) =>
+      fetch(SERVER_URL + '/api/admin/setuser', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({adminPass: player.password, target, field, value})
-      });
-    }
-    showNotif(`✅ ${target} 스탯 적용 완료`);
+      })
+    ));
+    if (resultEl) { resultEl.style.color = '#60ff80'; resultEl.textContent = '✅ '+target+' 적용 완료!'; }
+    if (target === player.username) { Object.assign(player, fields); updateHUD(); }
+    showNotif('✅ '+target+' 스탯 변경 완료');
+  } catch(e) {
+    if (resultEl) { resultEl.style.color = '#ff6060'; resultEl.textContent = '❌ 적용 실패'; }
+    showNotif('❌ 스탯 적용 실패');
+  }
+}
+
+async function adminGiveItem() {
+  const target = document.getElementById('adminTargetSelect2')?.value;
+  const itemId = document.getElementById('adminItemSelect')?.value;
+  if (!target||!itemId) { showNotif('대상과 아이템을 선택하세요'); return; }
+  const items = [...ALL_WEAPONS,...ALL_ARMORS,...customWeapons];
+  const item = items.find(i=>i.id===itemId);
+  if (!item) return;
+  try {
+    const res = await fetch(SERVER_URL+'/api/user/'+target);
+    const data = await res.json();
+    if (!data.ok) { showNotif('유저를 찾을 수 없습니다.'); return; }
+    const isWeapon = item.hasOwnProperty('atk');
+    const field = isWeapon ? 'weapons' : 'armors';
+    const arr = data.user[field] || [];
+    arr.push({...item, enhance:0});
+    const sr = await fetch(SERVER_URL+'/api/admin/setuser', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({adminPass:player.password, target, field, value:arr})
+    });
+    const sd = await sr.json();
+    if (sd.ok) {
+      showNotif('🎁 '+target+'에게 ['+item.name+'] 지급 완료!');
+      wsSend({type:'chat',channel:'global',text:'/give '+target+' '+item.name});
+      loadAdminUserItems();
+    } else { showNotif('❌ 지급 실패'); }
+  } catch(e) { showNotif('❌ 오류: '+e.message); }
+}
+
+async function loadAdminUserItems() {
+  const target = document.getElementById('adminTargetSelect2')?.value;
+  if (!target) return;
+  try {
+    const res = await fetch(SERVER_URL+'/api/user/'+target);
+    const data = await res.json();
+    if (!data.ok) return;
+    const weapons = data.user.weapons||[];
+    const armors = data.user.armors||[];
+    const all = [...weapons.map(w=>({...w,_f:'weapons'})),...armors.map(a=>({...a,_f:'armors'}))];
+    const listEl = document.getElementById('adminUserItemList');
+    if (!listEl) return;
+    if (!all.length) { listEl.innerHTML = '<div style="color:rgba(240,232,200,0.3);font-size:0.8rem;padding:8px;">보유 아이템 없음</div>'; return; }
+    listEl.innerHTML = all.map(function(item) {
+      var icon = item._f==='weapons'?(WEAPON_ICONS[item.type]||'⚔️'):(ARMOR_ICONS[item.type]||'🛡️');
+      var enhance = item.enhance||0;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(255,255,255,0.03);border-radius:6px;margin-bottom:4px;">'
+        +'<span>'+icon+'</span>'
+        +'<span style="flex:1;font-size:0.8rem;">'+item.name+(enhance>0?' +'+enhance:'')+'</span>'
+        +'<span class="item-grade grade-'+item.grade+'">'+item.grade+'</span>'
+        +'<button class="mini-btn btn-sell" onclick="adminDeleteUserItem(\''+target+'\',\''+item._f+'\',\''+item.name+'\','+enhance+')">삭제</button>'
+        +'</div>';
+    }).join('');
+  } catch(e) {}
+}
+
+async function adminDeleteUserItem(target, field, itemName, enhance) {
+  try {
+    const res = await fetch(SERVER_URL+'/api/user/'+target);
+    const data = await res.json();
+    if (!data.ok) return;
+    const arr = data.user[field]||[];
+    const idx = arr.findIndex(i=>i.name===itemName&&(i.enhance||0)===enhance);
+    if (idx!==-1) arr.splice(idx,1);
+    await fetch(SERVER_URL+'/api/admin/setuser', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({adminPass:player.password, target, field, value:arr})
+    });
+    showNotif('🗑️ ['+itemName+'] 삭제 완료');
+    loadAdminUserItems();
+  } catch(e) { showNotif('❌ 삭제 실패'); }
+}
+
+async function adminGiveGold() {
+  const target = document.getElementById('adminTargetSelect')?.value;
+  const amount = parseInt(document.getElementById('adminGoldAmount').value)||0;
+  if (!target||!amount) { showNotif('대상과 금액을 입력하세요'); return; }
+  try {
+    const res = await fetch(SERVER_URL+'/api/user/'+target);
+    const data = await res.json();
+    if (!data.ok) return;
+    const newGold = (data.user.gold||0)+amount;
+    await fetch(SERVER_URL+'/api/admin/setuser', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({adminPass:player.password, target, field:'gold', value:newGold})
+    });
+    showNotif('💰 '+target+'에게 '+amount.toLocaleString()+' 골드 지급!');
+    if (target===player.username) { player.gold=newGold; updateHUD(); }
   } catch(e) { showNotif('❌ 오류 발생'); }
 }
 
-function adminGiveItem() {
-  const target = document.getElementById('adminTargetSelect').value;
-  const itemId = document.getElementById('adminItemSelect').value;
-  const items = [...ALL_WEAPONS, ...ALL_ARMORS];
-  const item = items.find(i => i.id === itemId);
-  if (!item) return;
-  wsSend({type:'chat', channel:'global', text:`/give ${target} ${item.name}`});
-  showNotif(`🎁 ${target}에게 ${item.name} 지급`);
-}
-
-function adminGiveGold() {
-  const target = document.getElementById('adminTargetSelect').value;
-  const amount = document.getElementById('adminGoldAmount').value;
-  wsSend({type:'chat', channel:'global', text:`/gold ${target} ${amount}`});
-}
-
 function adminAnnounce() {
-  const text = document.getElementById('adminAnnounce').value.trim();
+  const text = document.getElementById('adminAnnounce')?.value.trim();
   if (!text) return;
-  wsSend({type:'chat', channel:'global', text:`/announce ${text}`});
-  document.getElementById('adminAnnounce').value = '';
+  wsSend({type:'chat',channel:'global',text:'/announce '+text});
+  document.getElementById('adminAnnounce').value='';
+  showNotif('📢 공지 발송 완료');
 }
+
+function adminCraftWeapon() {
+  const name = document.getElementById('craftName').value.trim();
+  const type = document.getElementById('craftType').value;
+  const grade = document.getElementById('craftGrade').value;
+  const atk = parseInt(document.getElementById('craftAtk').value)||100;
+  const price = parseInt(document.getElementById('craftPrice').value)||10000;
+  if (!name) { showNotif('❌ 무기 이름을 입력하세요'); return; }
+  const w = {id:'custom_'+Date.now(), name, type, atk, grade, price, enhance:0, isCustom:true};
+  customWeapons.push(w);
+  if (!player.weapons) player.weapons=[];
+  player.weapons.push({...w});
+  saveGame(); renderCustomWeaponList(); loadAdminItems();
+  showNotif('⚔️ ['+name+'] 제작 완료!');
+  document.getElementById('craftName').value='';
+  document.getElementById('craftAtk').value='';
+  document.getElementById('craftPrice').value='';
+}
+
+function renderCustomWeaponList() {
+  const el = document.getElementById('adminCustomWeaponList');
+  if (!el) return;
+  if (!customWeapons.length) { el.innerHTML='<div style="color:rgba(240,232,200,0.3);font-size:0.8rem;padding:8px;">제작된 커스텀 무기 없음</div>'; return; }
+  el.innerHTML = customWeapons.map(function(w,i) {
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">'
+      +'<span style="font-size:1.2rem;">'+(WEAPON_ICONS[w.type]||'⚔️')+'</span>'
+      +'<div style="flex:1;"><div style="font-size:0.85rem;font-weight:700;">'+w.name+'</div><div style="font-size:0.65rem;color:rgba(240,232,200,0.4);">ATK '+w.atk+' | '+w.type+'</div></div>'
+      +'<span class="item-grade grade-'+w.grade+'">'+w.grade+'</span>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;">'
+      +'<button class="mini-btn btn-equip" onclick="adminDistributeWeapon('+i+')">배포</button>'
+      +'<button class="mini-btn btn-sell" onclick="adminDeleteCustomWeapon('+i+')">삭제</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+async function adminDistributeWeapon(idx) {
+  const weapon = customWeapons[idx];
+  if (!weapon) return;
+  try {
+    const res = await fetch(SERVER_URL+'/api/users');
+    const users = await res.json();
+    for (const u of users) {
+      const ur = await fetch(SERVER_URL+'/api/user/'+u.username);
+      const ud = await ur.json();
+      if (!ud.ok) continue;
+      const arr = ud.user.weapons||[];
+      arr.push({...weapon, enhance:0});
+      await fetch(SERVER_URL+'/api/admin/setuser', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({adminPass:player.password, target:u.username, field:'weapons', value:arr})
+      });
+    }
+    wsSend({type:'chat',channel:'global',text:'/announce ⚔️ ['+weapon.name+'] 무기가 전체 배포되었습니다!'});
+    showNotif('⚔️ ['+weapon.name+'] '+users.length+'명에게 배포 완료!');
+  } catch(e) { showNotif('❌ 배포 실패'); }
+}
+
+function adminDeleteCustomWeapon(idx) {
+  const name = customWeapons[idx].name;
+  customWeapons.splice(idx,1);
+  renderCustomWeaponList(); loadAdminItems();
+  showNotif('🗑️ ['+name+'] 삭제됨');
+}
+
 
 // ============================================================
 // QUIT POPUP
