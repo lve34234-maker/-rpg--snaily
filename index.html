@@ -340,39 +340,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
 /* ====== SKILL BUTTON ====== */
-#skillBtn {
-  position:absolute; bottom:100px; right:20px; z-index:60;
-  width:72px; height:72px; border-radius:50%;
-  background:radial-gradient(circle,#303030,#1a1a1a);
-  border:3px solid rgba(245,200,66,0.3);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  cursor:pointer; transition:all 0.2s;
-  box-shadow:0 4px 20px rgba(0,0,0,0.5);
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-  outline:none;
-  /* SP 게이지 CSS 링 (SVG 대신) */
-  --sp-ratio: 0;
-  box-shadow:0 4px 20px rgba(0,0,0,0.5),
-    0 0 0 3px rgba(74,208,255,0.15),
-    inset 0 0 0 3px rgba(74,208,255,0.15);
-}
-#skillBtn.ready {
-  border-color:var(--gold);
-  animation:btn-blink 0.6s ease-in-out infinite;
-  box-shadow:0 0 20px rgba(245,200,66,0.8);
-  background:radial-gradient(circle,#504010,#302800);
-}
-#skillBtn .skill-icon { font-size:1.6rem; pointer-events:none; }
-#skillBtn .skill-label { font-size:0.5rem; color:rgba(245,200,66,0.7); margin-top:1px; pointer-events:none; }
 
-/* SP 링 - 버튼 뒤에 깔리는 별도 엘리먼트 */
-#spRing {
-  position:absolute; bottom:96px; right:16px; z-index:59;
-  width:80px; height:80px; border-radius:50%;
-  pointer-events:none;
-  transform:rotate(-90deg);
-}
 
 #autoBtn {
   position:absolute; bottom:100px; right:102px; z-index:60;
@@ -577,8 +545,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 }
 .enhance-popup.open { display:block; transform:translate(-50%,-50%) scale(1); }
 
-/* Progress bar for SP */
-svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
+
 
 /* Status bar top */
 #statusBar {
@@ -677,13 +644,6 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
   .char-name-tag { font-size:0.5rem; }
   .hp-dot { width:5px; height:5px; }
 
-  /* 스킬 버튼 */
-  #skillBtn {
-    width:58px; height:58px; bottom:68px; right:12px;
-  }
-  #skillBtn .skill-icon { font-size:1.2rem; }
-  #skillBtn .skill-label { font-size:0.45rem; }
-  .sp-arc { width:58px; height:58px; }
 
   /* AUTO 버튼 */
   #autoBtn {
@@ -835,18 +795,7 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
     <div class="stat-chip">⚔️ Lv.<span id="levelDisplay">1</span></div>
   </div>
 
-  <!-- SP 링 (버튼 뒤, 터치 막지 않음) -->
-  <svg id="spRing" viewBox="0 0 80 80">
-    <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(74,208,255,0.15)" stroke-width="4"/>
-    <circle id="spArc" cx="40" cy="40" r="36" fill="none" stroke="#4ad0ff" stroke-width="4"
-      stroke-dasharray="226.2" stroke-dashoffset="226.2" stroke-linecap="round"/>
-  </svg>
 
-  <!-- SKILL BUTTON -->
-  <button id="skillBtn" ontouchend="handleSkillTouch(event)" onclick="handleSkillClick(event)">
-    <div class="skill-icon">⚡</div>
-    <div class="skill-label">TOUCH!!</div>
-  </button>
 
   <!-- AUTO BUTTON -->
   <button id="autoBtn" onclick="toggleAuto()" ontouchstart="toggleAuto()" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;">
@@ -1300,6 +1249,7 @@ let ws = null;
 let currentChannel = 'global';
 let isAutoMode = false;
 let battleState = null;
+let stageOtherUsers = {}; // username -> true (같은 스테이지 유저)
 let enhanceTarget = null;
 let onlineUsers = [];
 let authTab = 'login';
@@ -1476,6 +1426,24 @@ function handleWSMessage(msg) {
       applyPartyMemberAction(msg);
     }
   }
+
+  // ====== 같은 스테이지 유저 ======
+  if (msg.type === 'stage_users') {
+    stageOtherUsers = {};
+    msg.users.forEach(u => { stageOtherUsers[u] = true; });
+    renderOtherUsers();
+  }
+  if (msg.type === 'stage_user_joined') {
+    if (msg.username !== player.username) {
+      stageOtherUsers[msg.username] = true;
+      showNotif(`⚔️ ${msg.username}님이 이 스테이지에 입장했습니다!`);
+      renderOtherUsers();
+    }
+  }
+  if (msg.type === 'stage_user_left') {
+    delete stageOtherUsers[msg.username];
+    renderOtherUsers();
+  }
 }
 
 function wsSend(data) {
@@ -1492,6 +1460,9 @@ function startBattle(stageId) {
     showNotif('⛔ 잠긴 스테이지입니다!'); return;
   }
   closePanel('stagePanel');
+  // 이전 스테이지에서 나가고 새 스테이지 입장 알림
+  wsSend({ type: 'stage_leave' });
+  stageOtherUsers = {};
   battleState = {
     stageId,
     stage,
@@ -1510,6 +1481,7 @@ function startBattle(stageId) {
   document.getElementById('clearBanner').style.display = 'none';
   document.getElementById('gameoverBanner').style.display = 'none';
   document.getElementById('quitBtn').style.display = 'block';
+  wsSend({ type: 'stage_enter', stageId });
   spawnWave();
   renderBattle();
   if (battleState.autoTimer) clearInterval(battleState.autoTimer);
@@ -1718,18 +1690,6 @@ function addExp(exp) {
   updateHUD();
 }
 
-let _skillTouched = false;
-function handleSkillTouch(e) {
-  e.preventDefault();
-  _skillTouched = true;
-  useSkill();
-  setTimeout(() => { _skillTouched = false; }, 500);
-}
-function handleSkillClick(e) {
-  if (_skillTouched) return; // 터치 후 click 이벤트 중복 방지
-  useSkill();
-}
-
 function useSkill() {
   if (!battleState || battleState.gameOver || battleState.cleared) return;
   const heroIdx = battleState.sp.findIndex((sp,i) => sp >= battleState.maxSp[i] && battleState.heroes[i].hp > 0);
@@ -1765,13 +1725,7 @@ function triggerSkill(heroIdx) {
 }
 
 function updateSkillBtn() {
-  const ready = battleState && battleState.sp.some((sp, i) => sp >= battleState.maxSp[i] && battleState.heroes[i].hp > 0);
-  document.getElementById('skillBtn').classList.toggle('ready', !!ready);
-  // SP 링 업데이트
-  const maxRatio = battleState ? Math.max(...battleState.sp.map((sp,i) => sp / battleState.maxSp[i])) : 0;
-  const circumference = 226.2;
-  const arc = document.getElementById('spArc');
-  if (arc) arc.style.strokeDashoffset = circumference * (1 - Math.min(1, maxRatio));
+  // 스킬 버튼 제거됨
 }
 
 function toggleAuto() {
@@ -1812,9 +1766,32 @@ function renderBattle() {
   `).join('');
   
   updateHUDBars();
+  renderOtherUsers();
+}
+  // 기존 다른 유저 엘리먼트 제거
+  document.querySelectorAll('.other-user-char').forEach(el => el.remove());
+  if (!battleState) return;
+  const heroesEl = document.getElementById('heroesArea');
+  const others = Object.keys(stageOtherUsers);
+  others.forEach((uname, idx) => {
+    const div = document.createElement('div');
+    div.className = 'character-container other-user-char';
+    div.style.opacity = '0.45';
+    div.style.filter = 'hue-rotate(180deg)';
+    // 순서에 따라 전사/궁수/마법사 반복
+    const types = ['warrior','archer','mage'];
+    const charType = types[idx % 3];
+    div.innerHTML = `
+      <div class="${charType}">${getHeroHTML(idx % 3)}</div>
+      <div class="char-shadow"></div>
+      <div class="char-name-tag" style="color:#4ad0ff;white-space:nowrap;">${uname}</div>
+      <div class="hp-dot-bar">${Array(3).fill(0).map(()=>'<div class="hp-dot"></div>').join('')}</div>
+    `;
+    heroesEl.appendChild(div);
+  });
 }
 
-function getHeroHTML(idx) {
+
   if (idx === 0) return `<div class="warrior-body"><div class="w-sword"></div><div class="w-shield"></div><div class="w-helmet"></div><div class="w-head"></div><div class="w-arm-r"></div><div class="w-arm-l"></div><div class="w-torso"></div><div class="w-chest-plate"></div><div class="w-legs"><div class="w-leg"></div><div class="w-leg"></div></div><div class="w-boots"><div class="w-boot"></div><div class="w-boot"></div></div></div>`;
   if (idx === 1) return `<div class="warrior-body" style="transform:none"><div class="a-hat"></div><div class="a-head"></div><div class="a-arm-r"></div><div class="a-bow"></div><div class="a-arm-l"></div><div class="a-torso"></div><div class="a-legs"><div class="a-leg"></div><div class="a-leg"></div></div></div>`;
   return `<div class="warrior-body" style="transform:none"><div class="m-hat"></div><div class="m-head"></div><div class="m-arm-r"></div><div class="m-staff"></div><div class="m-arm-l"></div><div class="m-robe"></div></div>`;
@@ -1936,6 +1913,8 @@ function returnToLobby() {
   document.getElementById('gameoverBanner').style.display = 'none';
   document.getElementById('quitBtn').style.display = 'none';
   if (battleState?.autoTimer) clearInterval(battleState.autoTimer);
+  wsSend({ type: 'stage_leave' });
+  stageOtherUsers = {};
   battleState = null;
   document.getElementById('topHud').innerHTML = '';
   document.getElementById('waveIndicator').textContent = '';
@@ -2641,6 +2620,7 @@ function confirmQuit() { closeQuitPopup(); returnToLobby(); }
 // SAVE / NOTIF
 // ============================================================
 function saveGame() {
+  if (!player) return;
   wsSend({type:'save_game', data:{
     level: player.level, exp: player.exp, gold: player.gold, gems: player.gems,
     attack: player.attack, defense: player.defense, hp: player.hp, maxHp: player.maxHp,
