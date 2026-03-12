@@ -350,13 +350,28 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   box-shadow:0 4px 20px rgba(0,0,0,0.5);
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
+  outline:none;
+  /* SP 게이지 CSS 링 (SVG 대신) */
+  --sp-ratio: 0;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5),
+    0 0 0 3px rgba(74,208,255,0.15),
+    inset 0 0 0 3px rgba(74,208,255,0.15);
 }
-#skillBtn.ready { border-color:var(--gold); animation:btn-blink 0.6s ease-in-out infinite; box-shadow:0 0 20px rgba(245,200,66,0.8); background:radial-gradient(circle,#504010,#302800); }
-#skillBtn .skill-icon { font-size:1.6rem; }
-#skillBtn .skill-label { font-size:0.5rem; color:rgba(245,200,66,0.7); margin-top:1px; }
-.sp-arc {
-  position:absolute; top:0; left:0; width:72px; height:72px; transform:rotate(-90deg);
+#skillBtn.ready {
+  border-color:var(--gold);
+  animation:btn-blink 0.6s ease-in-out infinite;
+  box-shadow:0 0 20px rgba(245,200,66,0.8);
+  background:radial-gradient(circle,#504010,#302800);
+}
+#skillBtn .skill-icon { font-size:1.6rem; pointer-events:none; }
+#skillBtn .skill-label { font-size:0.5rem; color:rgba(245,200,66,0.7); margin-top:1px; pointer-events:none; }
+
+/* SP 링 - 버튼 뒤에 깔리는 별도 엘리먼트 */
+#spRing {
+  position:absolute; bottom:96px; right:16px; z-index:59;
+  width:80px; height:80px; border-radius:50%;
   pointer-events:none;
+  transform:rotate(-90deg);
 }
 
 #autoBtn {
@@ -820,15 +835,17 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
     <div class="stat-chip">⚔️ Lv.<span id="levelDisplay">1</span></div>
   </div>
 
+  <!-- SP 링 (버튼 뒤, 터치 막지 않음) -->
+  <svg id="spRing" viewBox="0 0 80 80">
+    <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(74,208,255,0.15)" stroke-width="4"/>
+    <circle id="spArc" cx="40" cy="40" r="36" fill="none" stroke="#4ad0ff" stroke-width="4"
+      stroke-dasharray="226.2" stroke-dashoffset="226.2" stroke-linecap="round"/>
+  </svg>
+
   <!-- SKILL BUTTON -->
-  <button id="skillBtn" onclick="useSkill()" ontouchstart="useSkill()">
-    <svg class="sp-arc" viewBox="0 0 72 72" style="pointer-events:none;position:absolute;top:0;left:0;">
-      <circle cx="36" cy="36" r="31" fill="none" stroke="rgba(74,208,255,0.15)" stroke-width="4"/>
-      <circle id="spArc" cx="36" cy="36" r="31" fill="none" stroke="#4ad0ff" stroke-width="4"
-        stroke-dasharray="194.8" stroke-dashoffset="194.8" stroke-linecap="round"/>
-    </svg>
-    <div class="skill-icon" style="position:relative;z-index:1;">⚡</div>
-    <div class="skill-label" style="position:relative;z-index:1;">TOUCH!!</div>
+  <button id="skillBtn" ontouchend="handleSkillTouch(event)" onclick="handleSkillClick(event)">
+    <div class="skill-icon">⚡</div>
+    <div class="skill-label">TOUCH!!</div>
   </button>
 
   <!-- AUTO BUTTON -->
@@ -1558,7 +1575,7 @@ function spawnWave() {
 
 let lastTick = Date.now();
 function battleTick() {
-  if (!battleState || battleState.gameOver || battleState.cleared) return;
+  if (!battleState || battleState.gameOver || battleState.cleared || !player) return;
   const now = Date.now();
   const dt = now - lastTick;
   lastTick = now;
@@ -1571,7 +1588,7 @@ function battleTick() {
   battleState.heroes.forEach((hero, i) => {
     if (hero.hp <= 0) return;
     hero.attackTimerVal = (hero.attackTimerVal || 0) + dt;
-    const interval = 1200 - (player.level || 1) * 10;
+    const interval = 1200 - ((player && player.level) || 1) * 10;
     if (hero.attackTimerVal >= Math.max(interval, 600)) {
       hero.attackTimerVal = 0;
       const target = aliveEnemies[0];
@@ -1618,7 +1635,7 @@ function battleTick() {
 }
 
 function checkBattleEnd() {
-  if (!battleState) return;
+  if (!battleState || !player) return;
   const aliveHeroes = battleState.heroes.filter(h => h.hp > 0);
   const aliveEnemies = battleState.enemies.filter(e => e.hp > 0);
 
@@ -1681,6 +1698,7 @@ function getDropGrade(stageId) {
 }
 
 function addExp(exp) {
+  if (!player) return;
   player.exp = (player.exp||0) + exp;
   const expNeeded = (player.level||1) * 100;
   while (player.exp >= expNeeded) {
@@ -1693,6 +1711,18 @@ function addExp(exp) {
     showNotif(`🎉 레벨 업! Lv.${player.level}`);
   }
   updateHUD();
+}
+
+let _skillTouched = false;
+function handleSkillTouch(e) {
+  e.preventDefault();
+  _skillTouched = true;
+  useSkill();
+  setTimeout(() => { _skillTouched = false; }, 500);
+}
+function handleSkillClick(e) {
+  if (_skillTouched) return; // 터치 후 click 이벤트 중복 방지
+  useSkill();
 }
 
 function useSkill() {
@@ -1732,10 +1762,11 @@ function triggerSkill(heroIdx) {
 function updateSkillBtn() {
   const ready = battleState && battleState.sp.some((sp, i) => sp >= battleState.maxSp[i] && battleState.heroes[i].hp > 0);
   document.getElementById('skillBtn').classList.toggle('ready', !!ready);
-  // Update SP arc for first hero with most SP
+  // SP 링 업데이트
   const maxRatio = battleState ? Math.max(...battleState.sp.map((sp,i) => sp / battleState.maxSp[i])) : 0;
-  const circumference = 194.8;
-  document.getElementById('spArc').style.strokeDashoffset = circumference * (1 - maxRatio);
+  const circumference = 226.2;
+  const arc = document.getElementById('spArc');
+  if (arc) arc.style.strokeDashoffset = circumference * (1 - Math.min(1, maxRatio));
 }
 
 function toggleAuto() {
@@ -1796,6 +1827,7 @@ function getEnemyHTML(type) {
 // HUD
 // ============================================================
 function updateHUD() {
+  if (!player) return;
   document.getElementById('goldDisplay').textContent = Math.floor(player.gold||0).toLocaleString();
   document.getElementById('gemsDisplay').textContent = Math.floor(player.gems||0).toLocaleString();
   document.getElementById('levelDisplay').textContent = Math.floor(player.level||1);
@@ -1830,6 +1862,8 @@ function updateBossHud() {
     bossHud.style.display = 'block';
     document.getElementById('bossBar').style.width = Math.max(0, boss.hp/boss.maxHp*100) + '%';
     document.getElementById('bossHpText').textContent = `${Math.floor(boss.hp).toLocaleString()} / ${boss.maxHp.toLocaleString()}`;
+  } else {
+    bossHud.style.display = 'none'; // 보스 죽으면 즉시 숨김
   }
 }
 
@@ -1924,6 +1958,7 @@ function closePanel(id) {
 // STAGE GRID
 // ============================================================
 function renderStageGrid() {
+  if (!player) return;
   const grid = document.getElementById('stageGrid');
   const maxUnlocked = player.isAdmin ? 9999 : (player.unlockedStage || 1);
   grid.innerHTML = STAGES.map(s => {
@@ -1945,6 +1980,7 @@ function renderStageGrid() {
 // WEAPON / ARMOR
 // ============================================================
 function renderWeapons() {
+  if (!player) return;
   const list = document.getElementById('weaponList');
   if (!player.weapons?.length) { list.innerHTML = '<div style="text-align:center;color:rgba(240,232,200,0.3);padding:40px;">보유한 무기가 없습니다.</div>'; return; }
   list.innerHTML = player.weapons.map((w,i) => {
@@ -1970,6 +2006,7 @@ function renderWeapons() {
 }
 
 function renderArmors() {
+  if (!player) return;
   const list = document.getElementById('armorList');
   if (!player.armors?.length) { list.innerHTML = '<div style="text-align:center;color:rgba(240,232,200,0.3);padding:40px;">보유한 갑옷이 없습니다.</div>'; return; }
   list.innerHTML = player.armors.map((a,i) => {
@@ -2075,6 +2112,7 @@ function switchShopTab(tab, el) {
 }
 
 function renderShop(tab) {
+  if (!player) return;
   const list = document.getElementById('shopList');
   const items = tab === 'weapons' ? ALL_WEAPONS : ALL_ARMORS;
   list.innerHTML = items.map(item => {
@@ -2124,6 +2162,7 @@ function switchCraftTab(tab, el) {
 }
 
 function renderCraft() {
+  if (!player) return;
   const note = '<div style="font-size:0.72rem;color:rgba(240,232,200,0.35);margin-bottom:12px;">* 재료는 스테이지 클리어로 획득합니다 (현재는 골드만 소모)</div>';
 
   const weaponRecipes = CRAFT_RECIPES.filter(r => r.type === 'weapon');
