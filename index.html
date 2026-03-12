@@ -1358,9 +1358,10 @@ function startBattle(stageId) {
 }
 
 function createHeroes() {
-  const baseAtk = player.attack || 10;
-  const baseDef = player.defense || 5;
-  const baseHp = player.maxHp || 100;
+  const MAX_STAT = 1e12; // 1조 이상은 cap
+  const baseAtk = Math.min(player.attack || 10, MAX_STAT);
+  const baseDef = Math.min(player.defense || 5, MAX_STAT);
+  const baseHp = Math.min(player.maxHp || 100, MAX_STAT);
   const weaponBonus = player.equippedWeapon ? (player.equippedWeapon.atk + player.equippedWeapon.atk * (player.equippedWeapon.enhance||0) * 0.1) : 0;
   const armorBonus = player.equippedArmor ? (player.equippedArmor.def + player.equippedArmor.def * (player.equippedArmor.enhance||0) * 0.1) : 0;
   return [
@@ -1455,7 +1456,9 @@ function battleTick() {
       const target = aliveHeroes[Math.floor(Math.random() * aliveHeroes.length)];
       if (target) {
         const def = target.def || 0;
-        const dmg = Math.max(1, Math.floor(enemy.atk * (0.85 + Math.random()*0.3) - def * 0.3));
+        const rawDmg = enemy.atk * (0.85 + Math.random()*0.3);
+        const defVal = Math.min(target.def || 0, enemy.atk * 0.95); // 방어력은 최대 적 공격력의 95%까지만
+        const dmg = Math.max(1, Math.floor(rawDmg - defVal * 0.3));
         target.hp = Math.max(0, target.hp - dmg);
         showDamage(target, dmg, true);
         shakeEnemy(i);
