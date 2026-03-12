@@ -336,6 +336,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 }
 @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes fadeOut { from{opacity:1} to{opacity:0} }
 @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
 /* ====== SKILL BUTTON ====== */
@@ -1537,6 +1538,7 @@ function checkBattleEnd() {
 
     if (battleState.wave < battleState.totalWaves) {
       battleState.wave++;
+      notifyPartyWave(battleState.wave);
       setTimeout(() => { spawnWave(); renderBattle(); }, 1000);
     } else {
       // Stage cleared!
@@ -2450,9 +2452,39 @@ handleWSMessage = function(msg) {
   }
   if (msg.type === 'party_battle_start') {
     myParty = msg.party;
-    closePanel('partyPanel');
-    showNotif('⚔️ 파티 전투 시작! 스테이지 ' + msg.stageId);
-    startPartyBattleLocal(msg.stageId, msg.memberSlot);
+    // 모든 패널 닫기
+    document.querySelectorAll('.panel.open').forEach(p => p.classList.remove('open'));
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'flex';
+
+    if (msg.instant) {
+      // ⚡ 전투 중인 파티에 순간이동
+      const flashEl = document.createElement('div');
+      flashEl.style.cssText = `
+        position:fixed;inset:0;z-index:9999;pointer-events:none;
+        background:radial-gradient(circle,#a0c0ff,#4060e0,#000);
+        display:flex;align-items:center;justify-content:center;
+        flex-direction:column;gap:12px;
+      `;
+      flashEl.innerHTML = `
+        <div style="font-size:3rem;animation:hero-idle 0.3s ease-in-out infinite;">⚡</div>
+        <div style="font-family:'Black Han Sans',sans-serif;font-size:1.4rem;color:#fff;text-shadow:0 0 20px #6af;">전장으로 순간이동!</div>
+        <div style="font-size:0.9rem;color:rgba(255,255,255,0.7);">스테이지 ${msg.stageId} · 웨이브 ${msg.wave || 1}</div>
+      `;
+      document.body.appendChild(flashEl);
+      // 0.8초 연출 후 전투 진입
+      setTimeout(() => {
+        flashEl.style.transition = 'opacity 0.3s';
+        flashEl.style.opacity = '0';
+        setTimeout(() => {
+          flashEl.remove();
+          startPartyBattleLocal(msg.stageId, msg.memberSlot, msg.wave || 1);
+        }, 300);
+      }, 800);
+    } else {
+      showNotif('⚔️ 파티 전투 시작! 스테이지 ' + msg.stageId);
+      startPartyBattleLocal(msg.stageId, msg.memberSlot, 1);
+    }
   }
   if (msg.type === 'party_battle_sync') {
     // 다른 파티원 행동 반영
@@ -2498,14 +2530,38 @@ function startPartyBattle() {
   closePanel('partyPanel');
 }
 
-function startPartyBattleLocal(stageId, memberSlot) {
-  // 파티 멀티 배틀: memberSlot(0,1,2)에 따라 캐릭터 지정
+function startPartyBattleLocal(stageId, memberSlot, wave) {
   partyBattleActive = true;
+  // 파티원 잠금 해제: 스테이지 제한 우회
+  const origUnlocked = player.unlockedStage;
+  player.unlockedStage = Math.max(player.unlockedStage || 1, stageId);
   startBattle(stageId);
-  // 내 슬롯 강조
-  if (battleState && memberSlot !== undefined) {
-    battleState.mySlot = memberSlot;
+  player.unlockedStage = origUnlocked;
+
+  if (!battleState) return;
+  battleState.mySlot = memberSlot !== undefined ? memberSlot : 0;
+  battleState.isPartyBattle = true;
+
+  // 웨이브 동기화: 파티가 이미 특정 웨이브에 있으면 해당 웨이브로 점프
+  if (wave && wave > 1) {
+    battleState.wave = wave;
+    spawnWave();
+    renderBattle();
+    showWaveAnnounce(`웨이브 ${wave} 합류!`);
   }
+}
+
+// 파티장이 웨이브 변경 시 서버에 알림
+function notifyPartyWave(wave) {
+  if (!partyBattleActive || !myParty || myParty.leader !== player.username) return;
+  wsSend({ type:'party_wave_update', wave });
+}
+
+// 파티 전투 종료 시 서버에 알림
+function notifyPartyBattleEnd() {
+  if (!partyBattleActive || !myParty || myParty.leader !== player.username) return;
+  wsSend({ type:'party_battle_end' });
+  partyBattleActive = false;
 }
 
 function applyPartyMemberAction(msg) {
