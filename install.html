@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>📓 공책RPG - 앱으로 설치하기</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #f5c842;
+  --gold2: #c4981a;
+  --dark: #07050f;
+  --panel: rgba(12,8,28,0.95);
+  --border: rgba(245,200,66,0.3);
+  --text: #f0e8c8;
+  --green: #30c060;
+  --blue: #4ad0ff;
+  --red: #e03030;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  background:var(--dark); color:var(--text);
+  font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh; overflow-x:hidden;
+}
+
+/* BG */
+body::before {
+  content:''; position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(100,50,200,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(245,200,66,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(30,10,60,0.5) 0%, transparent 70%);
+  pointer-events:none;
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f5c842' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+.wrap { position:relative; z-index:1; max-width:520px; margin:0 auto; padding:24px 16px 60px; }
+
+/* 헤더 */
+.header { text-align:center; padding:40px 0 32px; }
+.header-icon {
+  width:90px; height:90px; border-radius:22px; margin:0 auto 16px;
+  background:linear-gradient(135deg,#1a0d30,#2a1550);
+  border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.8rem;
+  box-shadow:0 0 40px rgba(245,200,66,0.3), 0 8px 32px rgba(0,0,0,0.6);
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.header-title {
+  font-family:'Black Han Sans',sans-serif; font-size:2rem; color:var(--gold);
+  text-shadow:0 0 30px rgba(245,200,66,0.6);
+}
+.header-sub { font-size:0.85rem; color:rgba(240,232,200,0.5); margin-top:6px; letter-spacing:2px; }
+.header-desc {
+  margin-top:16px; font-size:0.9rem; color:rgba(240,232,200,0.7); line-height:1.6;
+  background:rgba(245,200,66,0.06); border:1px solid rgba(245,200,66,0.15);
+  border-radius:12px; padding:12px 16px;
+}
+
+/* 탭 */
+.tabs {
+  display:flex; gap:6px; margin-bottom:20px;
+  background:rgba(255,255,255,0.03); border:1px solid var(--border);
+  border-radius:12px; padding:4px;
+}
+.tab {
+  flex:1; padding:10px 6px; text-align:center; border-radius:9px;
+  cursor:pointer; font-size:0.78rem; color:rgba(240,232,200,0.45);
+  transition:all 0.2s; font-weight:700; user-select:none;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.tab-icon { font-size:1.3rem; }
+.tab.active { background:var(--gold); color:#1a0a00; }
+
+/* 카드 */
+.guide-card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:16px; overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,0.5);
+  display:none; animation:slide-up 0.3s ease-out;
+}
+.guide-card.active { display:block; }
+@keyframes slide-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.card-header {
+  padding:18px 20px; border-bottom:1px solid rgba(245,200,66,0.15);
+  display:flex; align-items:center; gap:12px;
+}
+.card-header-icon { font-size:2rem; }
+.card-header-info h2 { font-family:'Black Han Sans',sans-serif; font-size:1.1rem; color:var(--gold); }
+.card-header-info p { font-size:0.75rem; color:rgba(240,232,200,0.45); margin-top:2px; }
+
+/* 스텝 */
+.steps { padding:16px; display:flex; flex-direction:column; gap:10px; }
+.step {
+  display:flex; gap:14px; align-items:flex-start;
+  background:rgba(255,255,255,0.03); border-radius:12px; padding:14px;
+  border:1px solid rgba(255,255,255,0.05);
+  transition:border-color 0.2s;
+}
+.step:hover { border-color:rgba(245,200,66,0.2); }
+.step-num {
+  width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#1a0a00; font-weight:900; font-size:0.9rem;
+  display:flex; align-items:center; justify-content:center;
+}
+.step-body { flex:1; }
+.step-title { font-size:0.9rem; font-weight:700; margin-bottom:4px; }
+.step-desc { font-size:0.78rem; color:rgba(240,232,200,0.55); line-height:1.5; }
+
+/* 이모지 버튼 UI 표현 */
+.ui-btn {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(245,200,66,0.12); border:1px solid rgba(245,200,66,0.3);
+  border-radius:6px; padding:3px 8px; font-size:0.8rem; color:var(--gold);
+  font-weight:700; white-space:nowrap;
+}
+.ui-highlight {
+  background:rgba(74,208,255,0.1); border:1px solid rgba(74,208,255,0.3);
+  border-radius:6px; padding:3px 8px; font-size:0.78rem; color:var(--blue);
+  font-weight:700; white-space:nowrap;
+}
+
+/* 이미지 형태 시뮬 */
+.mock-bar {
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px; padding:10px 14px; margin:8px 0;
+  display:flex; align-items:center; gap:8px; font-size:0.8rem;
+}
+.mock-bar .dot { width:8px; height:8px; border-radius:50%; }
+
+/* 팁 */
+.tip {
+  margin:16px 16px 4px;
+  background:rgba(48,192,96,0.08); border:1px solid rgba(48,192,96,0.25);
+  border-radius:10px; padding:10px 14px;
+  font-size:0.78rem; color:rgba(48,192,96,0.9); line-height:1.5;
+  display:flex; gap:8px;
+}
+.tip-icon { flex-shrink:0; font-size:1rem; }
+
+/* 주의 */
+.warn {
+  margin:8px 16px;
+  background:rgba(245,200,66,0.06); border:1px solid rgba(245,200,66,0.2);
+  border-radius:10px; padding:10px 14px;
+  font-size:0.78rem; color:rgba(245,200,66,0.8); line-height:1.5;
+  display:flex; gap:8px;
+}
+
+/* 하단 CTA */
+.cta {
+  margin-top:24px; text-align:center;
+}
+.cta-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#1a0a00; font-weight:900; font-size:1rem;
+  border:none; border-radius:14px; padding:14px 32px;
+  cursor:pointer; font-family:'Noto Sans KR',sans-serif;
+  box-shadow:0 4px 20px rgba(245,200,66,0.4);
+  transition:transform 0.15s, box-shadow 0.2s;
+  text-decoration:none;
+}
+.cta-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(245,200,66,0.5); }
+.cta-btn:active { transform:translateY(0); }
+.cta-sub { margin-top:10px; font-size:0.75rem; color:rgba(240,232,200,0.35); }
+
+/* 배지 */
+.os-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px; padding:3px 10px; font-size:0.72rem;
+  color:rgba(240,232,200,0.6); margin:4px 2px;
+}
+
+/* 장점 섹션 */
+.benefits { padding:0 16px 16px; display:flex; flex-direction:column; gap:8px; }
+.benefit-row {
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  background:rgba(255,255,255,0.02); border-radius:8px;
+  font-size:0.82rem;
+}
+.benefit-icon { font-size:1.2rem; flex-shrink:0; }
+.benefit-text strong { color:var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="header-icon">📓</div>
+    <div class="header-title">공책RPG</div>
+    <div class="header-sub">앱으로 설치하기</div>
+    <div class="header-desc">
+      📱 홈 화면에 추가하면 <strong style="color:var(--gold)">앱처럼</strong> 전체화면으로 즐길 수 있어!<br>
+      다운로드 없이, 무료로, 바로 설치 가능 ✨
+    </div>
+  </div>
+
+  <!-- 장점 -->
+  <div class="benefits" style="margin-bottom:20px;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;">
+    <div style="font-size:0.7rem;color:var(--gold);font-weight:700;letter-spacing:2px;margin-bottom:6px;">앱으로 설치하면?</div>
+    <div class="benefit-row"><div class="benefit-icon">🖥️</div><div class="benefit-text"><strong>전체화면</strong> — 주소창·메뉴 없이 게임만!</div></div>
+    <div class="benefit-row"><div class="benefit-icon">⚡</div><div class="benefit-text"><strong>빠른 실행</strong> — 아이콘 탭 한 번으로 바로 시작</div></div>
+    <div class="benefit-row"><div class="benefit-icon">📶</div><div class="benefit-text"><strong>앱스토어 불필요</strong> — 설치 파일 0MB</div></div>
+    <div class="benefit-row"><div class="benefit-icon">🎮</div><div class="benefit-text"><strong>가로 모드</strong> 최적화 UI로 플레이</div></div>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('safari')"><div class="tab-icon">🧭</div>Safari</div>
+    <div class="tab" onclick="switchTab('chrome')"><div class="tab-icon">🔵</div>Chrome</div>
+    <div class="tab" onclick="switchTab('samsung')"><div class="tab-icon">🌐</div>삼성</div>
+    <div class="tab" onclick="switchTab('pc')"><div class="tab-icon">💻</div>PC</div>
+  </div>
+
+  <!-- Safari -->
+  <div id="card-safari" class="guide-card active">
+    <div class="card-header">
+      <div class="card-header-icon">🧭</div>
+      <div class="card-header-info">
+        <h2>Safari (iOS · iPhone / iPad)</h2>
+        <p>아이폰 기본 브라우저 · 가장 추천!</p>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-icon">⭐</div>아이폰에서는 Safari가 제일 잘 돼! 크롬 아닌 Safari로 열어줘.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Safari로 게임 페이지 열기</div>
+          <div class="step-desc">
+            아래 버튼 눌러서 게임 주소 복사 후 Safari에 붙여넣기
+            <div class="mock-bar" style="margin-top:8px;">
+              <div class="dot" style="background:#e03030;"></div>
+              <div class="dot" style="background:#f0a020;"></div>
+              <div class="dot" style="background:#30c060;"></div>
+              <span style="color:rgba(240,232,200,0.4);font-size:0.75rem;">lve34234-maker.github.io/-rpg--snaily/</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">하단 <span class="ui-btn">📤 공유</span> 버튼 탭</div>
+          <div class="step-desc">Safari 하단 중앙에 있는 네모+위화살표 아이콘 탭</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title"><span class="ui-btn">홈 화면에 추가</span> 선택</div>
+          <div class="step-desc">스크롤 내리면 "홈 화면에 추가" 메뉴가 보여. 탭!</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">이름 확인 후 <span class="ui-btn">추가</span></div>
+          <div class="step-desc">이름은 "공책RPG"로 자동 설정돼. 오른쪽 위 추가 탭!</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">📱 홈 화면에서 아이콘 탭!</div>
+          <div class="step-desc">이제 전체화면 앱처럼 바로 실행돼 🎉</div>
+        </div>
+      </div>
+    </div>
+    <div class="warn"><div class="tip-icon">⚠️</div>Safari가 아닌 다른 브라우저에서는 "홈 화면에 추가" 옵션이 없을 수 있어!</div>
+  </div>
+
+  <!-- Chrome -->
+  <div id="card-chrome" class="guide-card">
+    <div class="card-header">
+      <div class="card-header-icon">🔵</div>
+      <div class="card-header-info">
+        <h2>Chrome (Android · 안드로이드)</h2>
+        <p>안드로이드 기기에서 설치</p>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-icon">✅</div>안드로이드는 Chrome이 제일 편해! 자동 설치 팝업이 뜨기도 해.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Chrome으로 게임 페이지 열기</div>
+          <div class="step-desc">
+            <div class="mock-bar">
+              <span style="font-size:1rem;">🔵</span>
+              <span style="color:rgba(240,232,200,0.4);font-size:0.75rem;">lve34234-maker.github.io/-rpg--snaily/</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">우측 상단 <span class="ui-btn">⋮ 메뉴</span> 탭</div>
+          <div class="step-desc">점 세 개 버튼 탭</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title"><span class="ui-btn">앱 설치</span> 또는 <span class="ui-btn">홈 화면에 추가</span></div>
+          <div class="step-desc">버전에 따라 이름이 다를 수 있어. 둘 다 같은 기능!</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title"><span class="ui-btn">설치</span> 탭</div>
+          <div class="step-desc">팝업에서 "설치" 버튼 탭. 홈 화면에 아이콘 추가됨!</div>
+        </div>
+      </div>
+    </div>
+    <div class="warn"><div class="tip-icon">💡</div>가끔 주소창 오른쪽에 <span class="ui-highlight">📲 설치</span> 아이콘이 자동으로 나타나기도 해! 그거 눌러도 돼.</div>
+  </div>
+
+  <!-- 삼성 -->
+  <div id="card-samsung" class="guide-card">
+    <div class="card-header">
+      <div class="card-header-icon">🌐</div>
+      <div class="card-header-info">
+        <h2>삼성 인터넷 (갤럭시)</h2>
+        <p>갤럭시 기본 브라우저</p>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">삼성 인터넷으로 게임 열기</div>
+          <div class="step-desc">갤럭시 기본 브라우저(파란 지구본 아이콘)로 주소 입력</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">하단 <span class="ui-btn">☰ 메뉴</span> 탭</div>
+          <div class="step-desc">오른쪽 아래 세 줄 메뉴 버튼 탭</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title"><span class="ui-btn">➕ 페이지 추가</span> 탭</div>
+          <div class="step-desc">메뉴에서 "페이지 추가" 선택</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title"><span class="ui-btn">홈 화면</span> 선택 → 추가</div>
+          <div class="step-desc">"홈 화면" 선택하면 바탕화면에 아이콘 추가됨!</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-icon">✅</div>삼성 인터넷도 전체화면 지원 잘 돼!</div>
+  </div>
+
+  <!-- PC -->
+  <div id="card-pc" class="guide-card">
+    <div class="card-header">
+      <div class="card-header-icon">💻</div>
+      <div class="card-header-info">
+        <h2>PC 설치 (Windows · Mac)</h2>
+        <p>Chrome / Edge 브라우저</p>
+      </div>
+    </div>
+    <div class="tip"><div class="tip-icon">💡</div>PC에서도 앱처럼 설치 가능해! Chrome이나 Edge 추천.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Chrome 또는 Edge로 게임 열기</div>
+          <div class="step-desc">
+            <div class="mock-bar">
+              <div class="dot" style="background:#e03030;"></div>
+              <div class="dot" style="background:#f0a020;"></div>
+              <div class="dot" style="background:#30c060;"></div>
+              <span style="color:rgba(240,232,200,0.4);font-size:0.75rem;">lve34234-maker.github.io/-rpg--snaily/</span>
+              <span style="margin-left:auto;font-size:0.85rem;">📲</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">주소창 오른쪽 <span class="ui-highlight">📲 설치</span> 아이콘 클릭</div>
+          <div class="step-desc">아이콘이 안 보이면: 우측 상단 <span class="ui-btn">⋮ 메뉴</span> → <span class="ui-btn">앱으로 설치</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title"><span class="ui-btn">설치</span> 클릭</div>
+          <div class="step-desc">팝업에서 설치 클릭하면 바탕화면에 아이콘 추가!</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">🖥️ 바탕화면 아이콘으로 실행!</div>
+          <div class="step-desc">별도 창으로 전체화면처럼 실행돼. 작업표시줄에도 핀 가능!</div>
+        </div>
+      </div>
+    </div>
+    <div class="warn"><div class="tip-icon">⚠️</div>Firefox는 PWA 설치를 지원하지 않아. Chrome 또는 Edge를 사용해줘!</div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <a href="https://lve34234-maker.github.io/-rpg--snaily/" class="cta-btn">
+      🎮 지금 바로 플레이!
+    </a>
+    <div class="cta-sub">설치 없이도 브라우저에서 바로 플레이 가능</div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(id) {
+  // 탭 활성화
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const ids = ['safari','chrome','samsung','pc'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  // 카드 활성화
+  document.querySelectorAll('.guide-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card-'+id).classList.add('active');
+}
+
+// 브라우저 자동 감지
+(function() {
+  const ua = navigator.userAgent;
+  if (/SamsungBrowser/i.test(ua)) switchTab('samsung');
+  else if (/CriOS/i.test(ua)) switchTab('chrome'); // iOS Chrome → Safari 안내
+  else if (/Android/i.test(ua) && /Chrome/i.test(ua)) switchTab('chrome');
+  else if (/iPad|iPhone/i.test(ua)) switchTab('safari');
+  else if (!/Mobile/i.test(ua)) switchTab('pc');
+})();
+</script>
+</body>
+</html>
