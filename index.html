@@ -856,7 +856,9 @@ svg.sp-arc circle { transition:stroke-dashoffset 0.2s ease; }
 const SERVER_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:3001' 
   : 'https://rhdcor-rpg-production.up.railway.app';
-const WS_URL = SERVER_URL.replace('http','ws');
+const WS_URL = window.location.hostname === 'localhost'
+  ? 'ws://localhost:3001'
+  : 'wss://rhdcor-rpg-production.up.railway.app';
 
 // ============================================================
 // GAME DATA
@@ -1422,9 +1424,9 @@ function getEnemyHTML(type) {
 // HUD
 // ============================================================
 function updateHUD() {
-  document.getElementById('goldDisplay').textContent = (player.gold||0).toLocaleString();
-  document.getElementById('gemsDisplay').textContent = (player.gems||0).toLocaleString();
-  document.getElementById('levelDisplay').textContent = player.level||1;
+  document.getElementById('goldDisplay').textContent = Math.floor(player.gold||0).toLocaleString();
+  document.getElementById('gemsDisplay').textContent = Math.floor(player.gems||0).toLocaleString();
+  document.getElementById('levelDisplay').textContent = Math.floor(player.level||1);
   updateHUDBars();
 }
 
