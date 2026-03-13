@@ -348,6 +348,48 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 @keyframes fadeOut { from{opacity:1} to{opacity:0} }
 @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
+/* ====== WALK ANIMATION ====== */
+@keyframes char-walk-r {
+  0%,100%{ transform:translateY(0) scaleX(1); }
+  25%,75%{ transform:translateY(-5px) scaleX(1); }
+  50%    { transform:translateY(-1px) scaleX(1); }
+}
+@keyframes char-walk-l {
+  0%,100%{ transform:translateY(0) scaleX(-1); }
+  25%,75%{ transform:translateY(-5px) scaleX(-1); }
+  50%    { transform:translateY(-1px) scaleX(-1); }
+}
+@keyframes char-idle-bob {
+  0%,100%{ transform:translateY(0); }
+  50%    { transform:translateY(-2px); }
+}
+.vc-body { image-rendering:pixelated; display:block; }
+.vc-body.walk-r { animation:char-walk-r 0.32s steps(4) infinite; }
+.vc-body.walk-l { animation:char-walk-l 0.32s steps(4) infinite; }
+.vc-body.idle   { animation:char-idle-bob 1.4s steps(2) infinite; }
+
+/* ====== RANK SYSTEM ====== */
+.rank-badge {
+  display:inline-flex; align-items:center; gap:2px;
+  font-size:0.58rem; font-weight:900; padding:1px 5px; border-radius:3px;
+  border:1px solid; white-space:nowrap; vertical-align:middle;
+}
+.rank-bronze  { background:rgba(140,80,20,0.35);  border-color:#a06030; color:#d09050; }
+.rank-silver  { background:rgba(150,150,170,0.3);  border-color:#9090b0; color:#c8c8e0; }
+.rank-gold    { background:rgba(180,150,20,0.3);   border-color:#c0a030; color:#f0c840; }
+.rank-plat    { background:rgba(80,200,200,0.2);   border-color:#50b0b0; color:#80d8d8; }
+.rank-diamond { background:rgba(80,150,255,0.2);   border-color:#5080e0; color:#80b0ff; }
+.rank-master  { background:rgba(160,60,255,0.2);   border-color:#9040c0; color:#c878ff; }
+.rank-legend  { background:rgba(255,120,20,0.2);   border-color:#e07020; color:#ffb050;
+  animation:legend-glow 2s ease-in-out infinite; }
+.rank-god     { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.6); color:#fff;
+  animation:god-rainbow 3s linear infinite; }
+@keyframes legend-glow {
+  0%,100%{ box-shadow:0 0 4px #f08020; }
+  50%    { box-shadow:0 0 14px #ffa040,0 0 28px rgba(255,160,64,0.4); }
+}
+@keyframes god-rainbow { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+
 /* ====== VILLAGE ====== */
 #villageScreen {
   position:absolute; inset:0; display:none; overflow:hidden; z-index:5;
@@ -1091,6 +1133,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     <div id="villageHud">
       <div class="village-stat">💰 <span id="villageGold">0</span></div>
       <div class="village-stat">💎 <span id="villageGems">0</span></div>
+      <div class="village-stat" id="villageRank"></div>
       <div class="village-stat">🏘️ 마을</div>
     </div>
 
@@ -1128,6 +1171,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     <div class="stat-chip">💰 <span id="goldDisplay">0</span></div>
     <div class="stat-chip">💎 <span id="gemsDisplay">0</span></div>
     <div class="stat-chip">⚔️ Lv.<span id="levelDisplay">1</span></div>
+    <div class="stat-chip" id="rankDisplay"></div>
   </div>
 
 
@@ -2621,6 +2665,9 @@ function updateHUD() {
   document.getElementById('goldDisplay').textContent = Math.floor(player.gold||0).toLocaleString();
   document.getElementById('gemsDisplay').textContent = Math.floor(player.gems||0).toLocaleString();
   document.getElementById('levelDisplay').textContent = Math.floor(player.level||1);
+  // 계급 뱃지 업데이트
+  const rankEl = document.getElementById('rankDisplay');
+  if (rankEl) rankEl.innerHTML = getRankBadge(player.level||1);
   updateHUDBars();
 }
 
@@ -2833,10 +2880,11 @@ let npcVisible = false;
 let npcTimer = null;
 
 // Hero SVGs scaled small for village walking
-function getVillageCharSVG(heroClass) {
-  if (heroClass === 0) return `<svg viewBox="0 0 20 30" width="36" height="54" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="3" height="5" fill="#5068a8"/><rect x="13" y="9" width="3" height="5" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="3" fill="#3c2010"/><rect x="11" y="21" width="4" height="3" fill="#3c2010"/><rect x="15" y="5" width="2" height="12" fill="#c0cce0"/><rect x="13" y="10" width="5" height="2" fill="#b09040"/></svg>`;
-  if (heroClass === 1) return `<svg viewBox="0 0 18 28" width="32" height="50" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="3" fill="#3c200c"/><rect x="10" y="18" width="4" height="3" fill="#3c200c"/><rect x="14" y="1" width="2" height="13" fill="#805020"/></svg>`;
-  return `<svg viewBox="0 0 18 30" width="32" height="52" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018a0"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="3" fill="#281060"/><rect x="10" y="21" width="3" height="3" fill="#281060"/><rect x="0" y="2" width="2" height="16" fill="#806040"/><rect x="0" y="0" width="4" height="3" fill="#c040f0"/></svg>`;
+function getVillageCharSVG(heroClass, animClass) {
+  const cls = `vc-body ${animClass || 'idle'}`;
+  if (heroClass === 0) return `<svg class="${cls}" viewBox="0 0 20 30" width="36" height="54" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="3" height="5" fill="#5068a8"/><rect x="13" y="9" width="3" height="5" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="3" fill="#3c2010"/><rect x="11" y="21" width="4" height="3" fill="#3c2010"/><rect x="15" y="5" width="2" height="12" fill="#c0cce0"/><rect x="13" y="10" width="5" height="2" fill="#b09040"/></svg>`;
+  if (heroClass === 1) return `<svg class="${cls}" viewBox="0 0 18 28" width="32" height="50" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="3" fill="#3c200c"/><rect x="10" y="18" width="4" height="3" fill="#3c200c"/><rect x="14" y="1" width="2" height="13" fill="#805020"/></svg>`;
+  return `<svg class="${cls}" viewBox="0 0 18 30" width="32" height="52" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018a0"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="3" fill="#281060"/><rect x="10" y="21" width="3" height="3" fill="#281060"/><rect x="0" y="2" width="2" height="16" fill="#806040"/><rect x="0" y="0" width="4" height="3" fill="#c040f0"/></svg>`;
 }
 
 function enterVillage(fromLogin) {
@@ -2850,8 +2898,8 @@ function enterVillage(fromLogin) {
 
   // Set my character
   const heroClass = player ? (player.level % 3) : 0;
-  document.getElementById('villageMyCharSvg').innerHTML = getVillageCharSVG(heroClass);
-  document.getElementById('villageMyLabel').textContent = player ? player.username : '나';
+  document.getElementById('villageMyCharSvg').innerHTML = getVillageCharSVG(heroClass, 'idle');
+  document.getElementById('villageMyLabel').innerHTML = `${player ? player.username : '나'} ${getRankBadge(player?.level||1)}`;
   updateVillageHUD();
 
   // Reset position
@@ -2902,6 +2950,8 @@ function updateVillageHUD() {
   if (!player) return;
   document.getElementById('villageGold').textContent = Math.floor(player.gold||0).toLocaleString();
   document.getElementById('villageGems').textContent = Math.floor(player.gems||0).toLocaleString();
+  const vr = document.getElementById('villageRank');
+  if (vr) vr.innerHTML = getRankBadge(player.level||1);
 }
 
 function updateVillageCharPos() {
@@ -2971,13 +3021,29 @@ function setupJoystick() {
 }
 
 let lastVillageMove = 0;
+let villageWalking = false;
+function setVillageWalkAnim(moving, dirX) {
+  const svg = document.querySelector('#villageMyChar .vc-body');
+  if (!svg) return;
+  if (!moving) {
+    if (villageWalking) { svg.className = 'vc-body idle'; villageWalking = false; }
+  } else {
+    const cls = dirX >= 0 ? 'vc-body walk-r' : 'vc-body walk-l';
+    if (svg.className !== cls) { svg.className = cls; villageWalking = true; }
+  }
+}
+
 function villageMoveTick() {
-  if (!villageActive || !joystickActive) return;
-  const speed = 0.4;
-  villagePos.x = Math.max(2, Math.min(94, villagePos.x + joystickDir.x * speed));
-  // Y: bottom 44~50% 사이 (땅 위에서만 이동, 날아다님 방지)
-  villagePos.y = Math.max(44, Math.min(50, villagePos.y + joystickDir.y * -speed));
-  updateVillageCharPos();
+  if (!villageActive) return;
+  const moving = joystickActive && (Math.abs(joystickDir.x) > 0.1 || Math.abs(joystickDir.y) > 0.1);
+  if (moving) {
+    const speed = 0.4;
+    villagePos.x = Math.max(2, Math.min(94, villagePos.x + joystickDir.x * speed));
+    // Y: bottom 44~50% 사이 (땅 위에서만 이동, 날아다님 방지)
+    villagePos.y = Math.max(44, Math.min(50, villagePos.y + joystickDir.y * -speed));
+    updateVillageCharPos();
+  }
+  setVillageWalkAnim(moving, joystickDir.x);
 
   // Throttle server updates to every 100ms
   const now = Date.now();
@@ -2990,40 +3056,6 @@ function villageMoveTick() {
 }
 
 // Other players in village
-function handleVillagePlayers(players) {
-  villageOtherPlayers = {};
-  document.getElementById('villageOtherPlayers').innerHTML = '';
-  players.forEach(p => addVillagePlayer(p.username, p.x, p.y, p.heroClass||0));
-}
-
-function addVillagePlayer(username, x, y, heroClass) {
-  if (villageOtherPlayers[username]) return;
-  const container = document.getElementById('villageOtherPlayers');
-  const el = document.createElement('div');
-  el.className = 'village-char';
-  el.id = 'vplayer_' + username;
-  el.style.left = x + '%';
-  el.style.bottom = y + '%';
-  el.style.filter = 'hue-rotate(120deg)';
-  el.innerHTML = `<div class="village-char-label">${username}</div>${getVillageCharSVG(heroClass)}`;
-  container.appendChild(el);
-  villageOtherPlayers[username] = { x, y, el };
-}
-
-function moveVillagePlayer(username, x, y) {
-  if (!villageOtherPlayers[username]) return;
-  const p = villageOtherPlayers[username];
-  p.x = x; p.y = y;
-  p.el.style.left = x + '%';
-  p.el.style.bottom = y + '%';
-}
-
-function removeVillagePlayer(username) {
-  if (!villageOtherPlayers[username]) return;
-  villageOtherPlayers[username].el.remove();
-  delete villageOtherPlayers[username];
-}
-
 // NPC Merchant system
 function scheduleNpc() {
   if (npcTimer) clearTimeout(npcTimer);
@@ -3138,10 +3170,79 @@ function buyGemItem(itemId) {
   openGemShop();
 }
 
-// Handle village WS messages (add to existing WS handler)
+// ============================================================
+// RANK SYSTEM (계급)
+// ============================================================
+const RANKS = [
+  { name:'브론즈',   cls:'rank-bronze',  icon:'🥉', minLv:1   },
+  { name:'실버',     cls:'rank-silver',  icon:'🥈', minLv:10  },
+  { name:'골드',     cls:'rank-gold',    icon:'🥇', minLv:20  },
+  { name:'플래티넘', cls:'rank-plat',    icon:'💠', minLv:35  },
+  { name:'다이아',   cls:'rank-diamond', icon:'💎', minLv:50  },
+  { name:'마스터',   cls:'rank-master',  icon:'👑', minLv:70  },
+  { name:'레전드',   cls:'rank-legend',  icon:'⭐', minLv:100 },
+  { name:'신',       cls:'rank-god',     icon:'✨', minLv:150 },
+];
+
+function getRank(level) {
+  let rank = RANKS[0];
+  for (const r of RANKS) { if ((level||1) >= r.minLv) rank = r; }
+  return rank;
+}
+
+function getRankBadge(level) {
+  const r = getRank(level);
+  return `<span class="rank-badge ${r.cls}">${r.icon} ${r.name}</span>`;
+}
+
+// Override addVillagePlayer to include rank badge in label
+function addVillagePlayer(username, x, y, heroClass, level) {
+  if (villageOtherPlayers[username]) return;
+  const container = document.getElementById('villageOtherPlayers');
+  const el = document.createElement('div');
+  el.className = 'village-char';
+  el.id = 'vplayer_' + username;
+  el.style.left = x + '%';
+  el.style.bottom = y + '%';
+  const rankBadge = getRankBadge(level || 1);
+  el.innerHTML = `<div class="village-char-label">${username} ${rankBadge}</div>${getVillageCharSVG(heroClass, 'idle')}`;
+  container.appendChild(el);
+  villageOtherPlayers[username] = { x, y, el, lastX: x };
+}
+
+// Update other players walk animation when they move
+function moveVillagePlayer(username, x, y) {
+  if (!villageOtherPlayers[username]) return;
+  const p = villageOtherPlayers[username];
+  const dx = x - p.x;
+  const svg = p.el.querySelector('.vc-body');
+  if (svg && Math.abs(dx) > 0.05) {
+    svg.className = dx >= 0 ? 'vc-body walk-r' : 'vc-body walk-l';
+    if (p.stopTimer) clearTimeout(p.stopTimer);
+    p.stopTimer = setTimeout(() => { if (svg) svg.className = 'vc-body idle'; }, 400);
+  }
+  p.x = x; p.y = y;
+  p.el.style.left = x + '%';
+  p.el.style.bottom = y + '%';
+}
+
+function removeVillagePlayer(username) {
+  if (!villageOtherPlayers[username]) return;
+  villageOtherPlayers[username].el.remove();
+  delete villageOtherPlayers[username];
+}
+
+// Update handleVillagePlayers to use level info
+function handleVillagePlayers(players) {
+  villageOtherPlayers = {};
+  document.getElementById('villageOtherPlayers').innerHTML = '';
+  players.forEach(p => addVillagePlayer(p.username, p.x, p.y, p.heroClass||0, p.level||1));
+}
+
+// Patch handleVillageWsMsg to pass level
 function handleVillageWsMsg(msg) {
   if (msg.type === 'village_players') { handleVillagePlayers(msg.players); return; }
-  if (msg.type === 'village_player_join') { addVillagePlayer(msg.username, msg.x, msg.y, msg.heroClass||0); return; }
+  if (msg.type === 'village_player_join') { addVillagePlayer(msg.username, msg.x, msg.y, msg.heroClass||0, msg.level||1); return; }
   if (msg.type === 'village_player_move') { moveVillagePlayer(msg.username, msg.x, msg.y); return; }
   if (msg.type === 'village_player_leave') { removeVillagePlayer(msg.username); return; }
 }
@@ -3552,7 +3653,10 @@ function addChatMessage(msg, suppressScroll=false) {
   const div = document.createElement('div');
   div.className = `chat-msg${msg.isSystem?` system`:''}${msg.isAdmin&&!msg.isSystem?' announcement':''}`;
   const time = new Date(msg.ts).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'});
-  div.innerHTML = `<span class="cm-name${msg.isAdmin?' admin':''}">[${msg.username}]</span> <span class="cm-text">${escapeHtml(msg.text)}</span> <span style="font-size:0.6rem;color:rgba(240,232,200,0.3);">${time}</span>`;
+  // 계급 뱃지 (시스템 메시지 제외)
+  const rankBadge = (!msg.isSystem && msg.username && !msg.isAdmin && typeof getRankBadge === 'function')
+    ? `<span class="cm-rank">${getRankBadge(msg.userLevel || 1)}</span>` : '';
+  div.innerHTML = `${rankBadge}<span class="cm-name${msg.isAdmin?' admin':''}">[${msg.username}]</span> <span class="cm-text">${escapeHtml(msg.text)}</span> <span style="font-size:0.6rem;color:rgba(240,232,200,0.3);">${time}</span>`;
   el.appendChild(div);
   if (!suppressScroll) scrollChatToBottom();
 }
