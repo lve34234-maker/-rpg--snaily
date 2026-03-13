@@ -170,6 +170,25 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 .hp-dot { width:6px; height:6px; background:var(--green); image-rendering:pixelated; }
 .hp-dot.dead { background:#2a2a2a; }
 
+/* Enemy HP Bar */
+.enemy-hp-wrap { position:relative; margin:0 auto 3px; }
+.enemy-hp-bg {
+  width:100%; height:8px;
+  background:rgba(0,0,0,0.6);
+  border:1px solid rgba(0,0,0,0.8);
+  overflow:hidden;
+  image-rendering:pixelated;
+}
+.enemy-hp-fill {
+  height:100%; transition:width 0.2s, background 0.2s;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,0.25);
+}
+.enemy-hp-text {
+  font-size:0.48rem; color:#fff; text-align:center;
+  text-shadow:1px 1px 0 #000; margin-top:1px;
+  font-family:monospace; letter-spacing:0.3px;
+}
+
 /* Pixel art character wrappers */
 .warrior, .archer, .mage { display:block; image-rendering:pixelated; animation:hero-idle 1.6s steps(2) infinite; }
 .goblin { display:block; image-rendering:pixelated; animation:enemy-idle 1.2s steps(2) infinite; }
@@ -329,7 +348,141 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 @keyframes fadeOut { from{opacity:1} to{opacity:0} }
 @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
-/* ====== SKILL BUTTON ====== */
+/* ====== VILLAGE ====== */
+#villageScreen {
+  position:absolute; inset:0; display:none; overflow:hidden; z-index:5;
+  background: linear-gradient(180deg, #2a7ad0 0%, #4ab0f8 30%, #60d060 55%, #3a9030 100%);
+  image-rendering: pixelated;
+}
+#villageScreen.active { display:block; }
+
+/* Pixel tile floor */
+.village-ground {
+  position:absolute; bottom:0; left:0; right:0; height:45%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%233a9030'/%3E%3Crect width='16' height='1' fill='%2348b038'/%3E%3Crect x='0' y='0' width='1' height='16' fill='%2348b038'/%3E%3Crect x='7' y='3' width='2' height='1' fill='%2358c840'/%3E%3Crect x='3' y='10' width='2' height='1' fill='%2358c840'/%3E%3Crect x='12' y='7' width='1' height='2' fill='%2358c840'/%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  border-top: 3px solid #2a6020;
+}
+/* Path (dirt road) */
+.village-path {
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:80px; height:45%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23a07840'/%3E%3Crect x='2' y='4' width='3' height='1' fill='%23b08850'/%3E%3Crect x='10' y='10' width='2' height='1' fill='%23b08850'/%3E%3Crect x='6' y='8' width='2' height='1' fill='%23988038'/%3E%3C/svg%3E");
+  background-size: 32px 32px;
+}
+/* Sky clouds */
+.village-cloud {
+  position:absolute; image-rendering:pixelated; pointer-events:none; opacity:0.9;
+  animation: cloud-drift 20s linear infinite;
+}
+@keyframes cloud-drift { from{transform:translateX(-120px)} to{transform:translateX(110vw)} }
+
+/* Buildings */
+.village-building { position:absolute; image-rendering:pixelated; pointer-events:none; }
+
+/* Player character in village */
+.village-char {
+  position:absolute; image-rendering:pixelated;
+  transition: left 0.1s linear, bottom 0.1s linear;
+  z-index:10;
+}
+.village-char-label {
+  position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+  font-size:0.55rem; color:#fff; white-space:nowrap;
+  text-shadow:1px 1px 0 #000, -1px 1px 0 #000;
+  background:rgba(0,0,0,0.4); padding:1px 4px; border-radius:2px;
+}
+/* NPC merchant */
+.village-npc {
+  position:absolute; image-rendering:pixelated; cursor:pointer; z-index:8;
+  animation:npc-bounce 1.2s steps(2) infinite;
+}
+@keyframes npc-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+.village-npc-bubble {
+  position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%);
+  background:#ffe860; color:#3a2000; font-size:0.6rem; font-weight:700;
+  padding:3px 7px; border-radius:4px; border:2px solid #c09000; white-space:nowrap;
+  animation:btn-blink 1s steps(2) infinite;
+}
+.village-npc-bubble::after {
+  content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
+  border-top:6px solid #c09000;
+}
+
+/* Joystick */
+#villageJoystick {
+  position:absolute; bottom:90px; left:20px; z-index:20;
+  width:100px; height:100px; pointer-events:none;
+}
+.joystick-base {
+  position:absolute; inset:0; border-radius:50%;
+  background:rgba(0,0,0,0.25); border:3px solid rgba(255,255,255,0.3);
+}
+.joystick-knob {
+  position:absolute; width:40px; height:40px; border-radius:50%;
+  background:rgba(255,255,255,0.6); border:2px solid rgba(255,255,255,0.9);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Battle shortcut button */
+#villageBattleBtn {
+  position:absolute; bottom:90px; right:16px; z-index:20;
+  width:68px; height:68px; border-radius:50%;
+  background:linear-gradient(135deg,#e04020,#ff6040);
+  border:3px solid #c03020; color:#fff; font-size:0.7rem; font-weight:900;
+  box-shadow:0 4px 12px rgba(200,40,0,0.5); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  animation:skill-glow 2s ease-in-out infinite;
+}
+
+/* Gem shop modal */
+#gemShopModal {
+  display:none; position:absolute; inset:0; z-index:50;
+  background:rgba(0,0,0,0.7); align-items:center; justify-content:center;
+}
+#gemShopModal.open { display:flex; }
+.gem-shop-box {
+  background:linear-gradient(180deg,#1a0a30,#0a0518);
+  border:2px solid #c090f0; border-radius:12px;
+  width:88%; max-width:360px; max-height:85vh; overflow-y:auto;
+  padding:16px; position:relative;
+}
+.gem-shop-title {
+  font-size:1.1rem; color:#e0a0ff; font-weight:900; text-align:center; margin-bottom:4px;
+}
+.gem-shop-subtitle { font-size:0.7rem; color:rgba(220,170,255,0.5); text-align:center; margin-bottom:14px; }
+.gem-item {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(200,140,255,0.2);
+  border-radius:8px; padding:10px; margin-bottom:8px; cursor:pointer;
+  transition:background 0.15s;
+}
+.gem-item:hover { background:rgba(200,140,255,0.1); border-color:rgba(200,140,255,0.5); }
+.gem-item-icon { font-size:2rem; width:40px; text-align:center; flex-shrink:0; }
+.gem-item-info { flex:1; }
+.gem-item-name { font-size:0.85rem; font-weight:700; color:#e0c8ff; }
+.gem-item-desc { font-size:0.65rem; color:rgba(220,200,255,0.5); margin-top:2px; }
+.gem-item-price { font-size:0.8rem; color:#80d0ff; font-weight:700; white-space:nowrap; }
+.gem-shop-close {
+  position:absolute; top:10px; right:12px; background:none; border:none;
+  color:#a070c0; font-size:1.2rem; cursor:pointer;
+}
+
+/* Village HUD */
+#villageHud {
+  position:absolute; top:8px; left:8px; z-index:15;
+  display:flex; gap:6px; pointer-events:none;
+}
+.village-stat { background:rgba(0,0,0,0.5); border-radius:6px; padding:3px 8px; font-size:0.7rem; color:#fff; border:1px solid rgba(255,255,255,0.15); }
+
+/* Transition flash */
+.village-transition {
+  position:fixed; inset:0; background:#fff; z-index:9999; pointer-events:none;
+  animation:fadeOut 0.4s ease-out forwards;
+}
+
 
 
 #autoBtn {
@@ -673,6 +826,8 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   .orc { transform:scale(0.8); transform-origin:bottom center; }
   .dark-knight { transform:scale(0.75); transform-origin:bottom center; }
   .boss-enemy { transform:scale(0.65) scaleX(-1); transform-origin:bottom center; }
+  .enemy-hp-bg { height:6px; }
+  .enemy-hp-text { font-size:0.42rem; }
   .character-container { gap:0; }
   .char-name-tag { font-size:0.5rem; }
   .hp-dot { width:5px; height:5px; }
@@ -817,7 +972,150 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     </div>
   </div>
 
-  <!-- TOP HUD -->
+  <!-- VILLAGE SCREEN -->
+  <div id="villageScreen">
+    <!-- Sky -->
+    <div class="village-cloud" style="top:8%;left:-80px;animation-duration:28s;animation-delay:0s;">
+      <svg viewBox="0 0 40 18" width="120" height="54" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="8" width="32" height="8" fill="#fff"/><rect x="0" y="10" width="40" height="6" fill="#fff"/><rect x="8" y="4" width="16" height="8" fill="#fff"/><rect x="12" y="2" width="8" height="4" fill="#fff"/><rect x="24" y="6" width="10" height="4" fill="#f0f0f8"/></svg>
+    </div>
+    <div class="village-cloud" style="top:5%;left:-80px;animation-duration:18s;animation-delay:-8s;">
+      <svg viewBox="0 0 30 14" width="90" height="42" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="26" height="6" fill="#fff"/><rect x="0" y="8" width="30" height="4" fill="#fff"/><rect x="6" y="2" width="12" height="6" fill="#fff"/><rect x="8" y="0" width="6" height="4" fill="#fff"/></svg>
+    </div>
+
+    <!-- Buildings -->
+    <!-- Inn (left) -->
+    <div class="village-building" style="left:4%;bottom:43%;">
+      <svg viewBox="0 0 48 52" width="96" height="104" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="18" width="48" height="34" fill="#c08040"/>
+        <rect x="0" y="18" width="48" height="2" fill="#d09050"/>
+        <rect x="4" y="0" width="40" height="20" fill="#b06828" style="clip-path:polygon(50% 0%,100% 100%,0% 100%)"/>
+        <rect x="14" y="0" width="20" height="18" fill="#a06020" style="clip-path:polygon(50% 0%,100% 100%,0% 100%)"/>
+        <rect x="6" y="28" width="10" height="12" fill="#a06030"/><rect x="32" y="28" width="10" height="12" fill="#a06030"/>
+        <rect x="7" y="29" width="8" height="5" fill="#60c0ff" style="opacity:0.6"/>
+        <rect x="18" y="26" width="12" height="26" fill="#803818"/>
+        <rect x="20" y="26" width="8" height="22" fill="#6a2e10"/>
+        <rect x="22" y="26" width="4" height="15" fill="#501e08"/>
+        <rect x="0" y="50" width="48" height="2" fill="#885530"/>
+        <text x="5" y="46" font-size="5" fill="#ffe080" font-weight="bold">여관</text>
+      </svg>
+    </div>
+    <!-- Blacksmith (right) -->
+    <div class="village-building" style="right:4%;bottom:43%;">
+      <svg viewBox="0 0 44 48" width="88" height="96" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="14" width="40" height="34" fill="#707070"/>
+        <rect x="2" y="14" width="40" height="2" fill="#909090"/>
+        <rect x="0" y="6" width="44" height="10" fill="#505050"/>
+        <rect x="6" y="0" width="32" height="8" fill="#404040"/>
+        <rect x="14" y="22" width="10" height="12" fill="#303030"/>
+        <rect x="15" y="23" width="8" height="6" fill="#ff6010" style="opacity:0.7"/>
+        <rect x="28" y="20" width="12" height="14" fill="#383838"/>
+        <rect x="6" y="20" width="8" height="10" fill="#383838"/>
+        <rect x="7" y="21" width="6" height="4" fill="#60b0d0" style="opacity:0.5"/>
+        <rect x="0" y="46" width="44" height="2" fill="#484848"/>
+        <text x="4" y="44" font-size="5" fill="#c0e0ff" font-weight="bold">대장간</text>
+      </svg>
+    </div>
+    <!-- Well (center) -->
+    <div class="village-building" style="left:50%;transform:translateX(-50%);bottom:42%;">
+      <svg viewBox="0 0 24 28" width="48" height="56" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="10" width="20" height="18" fill="#808880"/>
+        <rect x="2" y="10" width="20" height="2" fill="#a0a8a0"/>
+        <rect x="0" y="10" width="4" height="20" fill="#707870"/><rect x="20" y="10" width="4" height="20" fill="#707870"/>
+        <rect x="4" y="14" width="16" height="12" fill="#4080c0"/>
+        <rect x="4" y="14" width="16" height="2" fill="#60a0e0"/>
+        <rect x="0" y="8" width="24" height="4" fill="#a0a890"/>
+        <rect x="10" y="0" width="4" height="12" fill="#604020"/>
+        <rect x="8" y="2" width="8" height="2" fill="#806030"/>
+        <rect x="8" y="0" width="2" height="6" fill="#784820"/><rect x="14" y="0" width="2" height="6" fill="#784820"/>
+      </svg>
+    </div>
+    <!-- Trees -->
+    <div class="village-building" style="left:24%;bottom:43%;">
+      <svg viewBox="0 0 20 32" width="40" height="64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="18" width="4" height="14" fill="#704820"/>
+        <rect x="2" y="6" width="16" height="16" fill="#2a8020"/><rect x="4" y="2" width="12" height="10" fill="#38a028"/><rect x="6" y="0" width="8" height="6" fill="#48b030"/>
+        <rect x="2" y="6" width="16" height="2" fill="#48b030"/>
+      </svg>
+    </div>
+    <div class="village-building" style="right:22%;bottom:43%;">
+      <svg viewBox="0 0 20 32" width="40" height="64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="18" width="4" height="14" fill="#704820"/>
+        <rect x="2" y="8" width="16" height="14" fill="#2a8020"/><rect x="4" y="4" width="12" height="10" fill="#38a028"/><rect x="6" y="0" width="8" height="8" fill="#48b030"/>
+      </svg>
+    </div>
+
+    <!-- Ground -->
+    <div class="village-path"></div>
+    <div class="village-ground"></div>
+
+    <!-- NPC Merchant (appears randomly) -->
+    <div id="villageNpc" class="village-npc" style="display:none;bottom:44%;left:45%;" onclick="openGemShop()">
+      <div class="village-npc-bubble">✨ 희귀 상인!</div>
+      <svg viewBox="0 0 16 22" width="48" height="66" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <!-- Hat -->
+        <rect x="3" y="0" width="10" height="2" fill="#8020c0"/><rect x="2" y="1" width="12" height="3" fill="#6010a0"/>
+        <rect x="5" y="0" width="6" height="2" fill="#c040ff"/>
+        <!-- Face -->
+        <rect x="4" y="3" width="8" height="6" fill="#e0c090"/>
+        <rect x="4" y="3" width="8" height="1" fill="#d0b080"/>
+        <rect x="5" y="5" width="2" height="1" fill="#402010"/><rect x="9" y="5" width="2" height="1" fill="#402010"/>
+        <rect x="6" y="7" width="4" height="1" fill="#c09070"/>
+        <!-- Beard -->
+        <rect x="4" y="8" width="8" height="2" fill="#e0e0e0"/>
+        <rect x="5" y="9" width="6" height="3" fill="#e0e0e0"/>
+        <!-- Robe (purple merchant) -->
+        <rect x="3" y="10" width="10" height="9" fill="#6010a0"/>
+        <rect x="3" y="10" width="10" height="1" fill="#8020c0"/>
+        <rect x="4" y="12" width="8" height="1" fill="#e0c040"/>
+        <!-- Bag -->
+        <rect x="0" y="11" width="4" height="6" fill="#a07030"/>
+        <rect x="0" y="11" width="4" height="1" fill="#c09040"/>
+        <rect x="1" y="12" width="2" height="4" fill="#c08830"/>
+        <!-- Stars on robe -->
+        <rect x="6" y="14" width="1" height="1" fill="#e0c040"/><rect x="9" y="13" width="1" height="1" fill="#e0c040"/>
+        <!-- Legs -->
+        <rect x="4" y="19" width="3" height="3" fill="#401080"/><rect x="9" y="19" width="3" height="3" fill="#401080"/>
+      </svg>
+    </div>
+
+    <!-- Other village players container -->
+    <div id="villageOtherPlayers"></div>
+
+    <!-- My character -->
+    <div id="villageMyChar" class="village-char" style="bottom:43%;left:46%;">
+      <div class="village-char-label" id="villageMyLabel">나</div>
+      <div id="villageMyCharSvg"></div>
+    </div>
+
+    <!-- HUD -->
+    <div id="villageHud">
+      <div class="village-stat">💰 <span id="villageGold">0</span></div>
+      <div class="village-stat">💎 <span id="villageGems">0</span></div>
+      <div class="village-stat">🏘️ 마을</div>
+    </div>
+
+    <!-- Joystick -->
+    <div id="villageJoystick">
+      <div class="joystick-base"></div>
+      <div class="joystick-knob" id="joystickKnob"></div>
+    </div>
+
+    <!-- Battle button -->
+    <button id="villageBattleBtn" onclick="goToBattle()">
+      <div style="font-size:1.3rem;">⚔️</div>
+      <div>전투</div>
+    </button>
+  </div>
+
+  <!-- GEM SHOP MODAL -->
+  <div id="gemShopModal">
+    <div class="gem-shop-box">
+      <button class="gem-shop-close" onclick="closeGemShop()">✕</button>
+      <div class="gem-shop-title">✨ 신비한 상인</div>
+      <div class="gem-shop-subtitle">💎 보석으로 희귀 아이템을 구매하세요!</div>
+      <div id="gemShopItems"></div>
+    </div>
+  </div>
   <div id="topHud"></div>
   <div id="bossHud">
     <div class="boss-name" id="bossName">😱 대마왕</div>
@@ -1286,7 +1584,7 @@ const ENEMY_STATS = {
   goblin:{maxHp:50,atk:5,def:2,expReward:15,goldReward:10},
   orc:{maxHp:150,atk:14,def:8,expReward:35,goldReward:25},
   dark_knight:{maxHp:380,atk:32,def:20,expReward:80,goldReward:60},
-  demon_king:{maxHp:5000,atk:80,def:40,expReward:500,goldReward:300},
+  demon_king:{maxHp:50000,atk:120,def:60,expReward:500,goldReward:300},
 };
 
 // ============================================================
@@ -1347,8 +1645,8 @@ function initGame() {
   renderFriends();
   loadAdminUsers();
   loadAdminItems();
-  // Start at lobby (no battle)
-  startBattle(player.unlockedStage || 1);
+  // ★ 게임 시작 시 마을로 진입
+  setTimeout(() => enterVillage(), 300);
 }
 
 // ============================================================
@@ -1492,6 +1790,8 @@ function handleWSMessage(msg) {
     delete stageOtherUsers[msg.username];
     renderOtherUsers();
   }
+  // Village messages
+  handleVillageWsMsg(msg);
 }
 
 function wsSend(data) {
@@ -1508,6 +1808,7 @@ function startBattle(stageId) {
     showNotif('⛔ 잠긴 스테이지입니다!'); return;
   }
   closePanel('stagePanel');
+  leaveVillage(); // ★ 전투 시작 시 마을 나가기
   // 이전 스테이지에서 나가고 새 스테이지 입장 알림
   wsSend({ type: 'stage_leave' });
   stageOtherUsers = {};
@@ -1530,6 +1831,7 @@ function startBattle(stageId) {
   document.getElementById('gameoverBanner').style.display = 'none';
   document.getElementById('quitBtn').style.display = 'block';
   wsSend({ type: 'stage_enter', stageId });
+  lastTick = Date.now(); // ★ 스테이지 시작 시 lastTick 리셋
   spawnWave();
   renderBattle();
   if (battleState.autoTimer) clearInterval(battleState.autoTimer);
@@ -1552,22 +1854,32 @@ function createHeroes() {
 }
 
 function spawnWave() {
+  // ★ 영웅 공격 타이머 + SP 리셋 (이전 웨이브 누적 방지)
+  if (battleState.heroes) battleState.heroes.forEach(h => { h.attackTimerVal = 0; });
   const stage = battleState.stage;
   const wave = battleState.wave;
-  const scaleMult = 1 + (stage.id - 1) * 0.3 + (wave - 1) * 0.15;
   const isBossWave = (wave === battleState.totalWaves) && stage.boss;
+
+  // ★ 보스 등장 시 SP 완전 초기화 (즉사 방지)
+  if (isBossWave) {
+    battleState.sp = [0, 0, 0];
+  }
+
+  const scaleMult = 1 + (stage.id - 1) * 0.3 + (wave - 1) * 0.15;
+  // ★ 보스는 별도로 더 강한 배율 적용
+  const bossScaleMult = 1 + (stage.id - 1) * 0.5 + (wave - 1) * 0.2;
   
   battleState.enemies = [];
   if (isBossWave && stage.boss === 'demon_king') {
     const stats = ENEMY_STATS.demon_king;
     battleState.enemies.push({
       type:'demon_king', name:'😱 대마왕',
-      hp: Math.floor(stats.maxHp * scaleMult),
-      maxHp: Math.floor(stats.maxHp * scaleMult),
-      atk: Math.floor(stats.atk * scaleMult),
-      def: Math.floor(stats.def * scaleMult),
+      hp: Math.floor(stats.maxHp * bossScaleMult),
+      maxHp: Math.floor(stats.maxHp * bossScaleMult),
+      atk: Math.floor(stats.atk * bossScaleMult),
+      def: Math.floor(stats.def * bossScaleMult),
       expReward: stats.expReward, goldReward: stats.goldReward,
-      isBoss: true, attackTimer: 0, attackInterval: 2000
+      isBoss: true, attackTimer: 0, attackInterval: 1800
     });
     document.getElementById('bossHud').style.display = 'block';
     updateBossHud();
@@ -1596,12 +1908,14 @@ function spawnWave() {
 let lastTick = Date.now();
 function battleTick() {
   if (!battleState || battleState.gameOver || battleState.cleared || !player) return;
+  if (battleState.wavePending) return; // 웨이브 전환 중에는 틱 건너뜀
   const now = Date.now();
-  const dt = now - lastTick;
+  const dt = Math.min(now - lastTick, 500); // dt 최대 500ms로 제한 (탭 전환 등 방지)
   lastTick = now;
 
   const aliveHeroes = battleState.heroes.filter(h => h.hp > 0);
   const aliveEnemies = battleState.enemies.filter(e => e.hp > 0);
+  battleState.skillFiredThisTick = false; // ★ 틱마다 스킬 발동 플래그 리셋
   if (!aliveHeroes.length || !aliveEnemies.length) { checkBattleEnd(); return; }
 
   // Heroes attack
@@ -1615,13 +1929,16 @@ function battleTick() {
       if (target) {
         const dmg = Math.max(1, Math.floor(hero.atk * (0.9 + Math.random()*0.2) - target.def * 0.5));
         target.hp = Math.max(0, target.hp - dmg);
+        const targetIdx = battleState.enemies.indexOf(target);
         showDamage(target, dmg, false);
         animateHeroAttack(i);
+        updateEnemyHpBar(targetIdx);
         // SP gain
         battleState.sp[i] = Math.min(battleState.maxSp[i], battleState.sp[i] + 15);
         updateSkillBtn();
       }
-      if (isAutoMode && battleState.sp[i] >= battleState.maxSp[i]) {
+      if (isAutoMode && battleState.sp[i] >= battleState.maxSp[i] && !battleState.skillFiredThisTick) {
+        battleState.skillFiredThisTick = true; // ★ 한 틱에 스킬 하나만 발동
         triggerSkill(i);
       }
     }
@@ -1668,7 +1985,7 @@ function checkBattleEnd() {
     return;
   }
 
-  if (!aliveEnemies.length && !battleState.cleared) {
+  if (!aliveEnemies.length && !battleState.cleared && !battleState.wavePending) {
     // Give rewards
     const totalGold = battleState.enemies.reduce((s,e) => s+e.goldReward, 0);
     const totalExp = battleState.enemies.reduce((s,e) => s+e.expReward, 0);
@@ -1676,9 +1993,16 @@ function checkBattleEnd() {
     addExp(totalExp);
 
     if (battleState.wave < battleState.totalWaves) {
+      battleState.wavePending = true; // 중복 실행 방지
       battleState.wave++;
       notifyPartyWave(battleState.wave);
-      setTimeout(() => { spawnWave(); renderBattle(); }, 1000);
+      setTimeout(() => {
+        if (!battleState) return;
+        battleState.wavePending = false;
+        lastTick = Date.now(); // ★ 웨이브 전환 후 lastTick 리셋 (dt 폭주 방지)
+        spawnWave();
+        renderBattle();
+      }, 1000);
     } else {
       // Stage cleared!
       battleState.cleared = true;
@@ -1758,6 +2082,7 @@ function triggerSkill(heroIdx) {
       const dmg = Math.floor(hero.atk * skillMult * (0.9 + Math.random()*0.2));
       e.hp = Math.max(0, e.hp - dmg);
       showDamage(e, dmg, false, true);
+      updateEnemyHpBar(battleState.enemies.indexOf(e));
     });
     showMageSkillEffect();
   } else {
@@ -1765,6 +2090,7 @@ function triggerSkill(heroIdx) {
     const dmg = Math.floor(hero.atk * skillMult * (0.9 + Math.random()*0.2));
     target.hp = Math.max(0, target.hp - dmg);
     showDamage(target, dmg, false, true);
+    updateEnemyHpBar(battleState.enemies.indexOf(target));
   }
   updateSkillBtn();
   updateHUDBars();
@@ -1800,21 +2126,47 @@ function renderBattle() {
     </div>
   `).join('');
   
-  enemiesEl.innerHTML = battleState.enemies.filter(e=>e.hp>0).map((e,i) => `
-    <div class="character-container" id="enemy_${i}">
-      <div class="${e.type==='demon_king'?'boss-enemy':e.type==='dark_knight'?'dark-knight':e.type==='orc'?'orc':'goblin'}" id="enemyChar_${i}">
+  // 실제 인덱스(realIdx) 사용 — 죽은 적도 포함해서 인덱스 유지
+  enemiesEl.innerHTML = battleState.enemies.map((e, realIdx) => {
+    if (e.hp <= 0) return '';
+    const charClass = e.type==='demon_king'?'boss-enemy':e.type==='dark_knight'?'dark-knight':e.type==='orc'?'orc':'goblin';
+    const barW = e.type==='demon_king'?100:e.type==='dark_knight'?72:e.type==='orc'?62:50;
+    const pct = Math.max(0, e.hp/e.maxHp*100);
+    const barColor = pct>50?'#30c060':pct>25?'#f0a020':'#e03030';
+    return `<div class="character-container" id="enemy_${realIdx}">
+      <div class="enemy-hp-wrap" style="width:${barW}px;margin-bottom:2px;">
+        <div class="enemy-hp-bg">
+          <div class="enemy-hp-fill" id="enemyHpFill_${realIdx}" style="width:${pct}%;background:${barColor};"></div>
+        </div>
+        <div class="enemy-hp-text" id="enemyHpText_${realIdx}">${Math.ceil(e.hp)}/${e.maxHp}</div>
+      </div>
+      <div class="${charClass}" id="enemyChar_${realIdx}">
         ${getEnemyHTML(e.type)}
       </div>
       <div class="char-shadow"></div>
-      <div style="width:${e.type==='demon_king'?80:e.type==='dark_knight'?60:e.type==='orc'?50:40}px;height:5px;background:rgba(0,0,0,0.3);border-radius:3px;margin-top:2px;overflow:hidden;">
-        <div style="height:100%;background:${e.hp/e.maxHp>0.5?'#30c060':e.hp/e.maxHp>0.25?'#f0a020':'#e03030'};width:${Math.max(0,e.hp/e.maxHp*100)}%;transition:width 0.3s;border-radius:3px;"></div>
-      </div>
       <div class="char-name-tag">${e.name}</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
   
   updateHUDBars();
   renderOtherUsers();
+}
+
+function updateEnemyHpBar(realIdx) {
+  if (!battleState) return;
+  const e = battleState.enemies[realIdx];
+  if (!e) return;
+  const fill = document.getElementById(`enemyHpFill_${realIdx}`);
+  const txt = document.getElementById(`enemyHpText_${realIdx}`);
+  if (!fill || !txt) return;
+  const pct = Math.max(0, e.hp / e.maxHp * 100);
+  const barColor = pct>50?'#30c060':pct>25?'#f0a020':'#e03030';
+  fill.style.width = pct + '%';
+  fill.style.background = barColor;
+  txt.textContent = `${Math.ceil(Math.max(0,e.hp))}/${e.maxHp}`;
+  // 죽으면 컨테이너 숨기기
+  const container = document.getElementById(`enemy_${realIdx}`);
+  if (e.hp <= 0 && container) container.style.opacity = '0';
 }
 
 function renderOtherUsers() {
@@ -2428,8 +2780,8 @@ function returnToLobby() {
   document.getElementById('bossHud').style.display = 'none';
   document.getElementById('heroesArea').innerHTML = '';
   document.getElementById('enemiesArea').innerHTML = '';
-  renderStageGrid();
-  openPanel('stagePanel');
+  // ★ 전투 끝나면 마을로 순간이동
+  enterVillage();
 }
 
 function openPanel(id) {
@@ -2443,6 +2795,336 @@ function openPanel(id) {
 
 function closePanel(id) {
   document.getElementById(id).classList.remove('open');
+}
+
+function closePanel(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ============================================================
+// VILLAGE SYSTEM
+// ============================================================
+let villageActive = false;
+let villagePos = { x: 46, y: 43 }; // % positions
+let villageOtherPlayers = {}; // username -> {x,y,el}
+let joystickActive = false;
+let joystickOrigin = { x: 0, y: 0 };
+let joystickDir = { x: 0, y: 0 };
+let villageMoveLoop = null;
+let npcVisible = false;
+let npcTimer = null;
+
+// Hero SVGs scaled small for village walking
+function getVillageCharSVG(heroClass) {
+  if (heroClass === 0) return `<svg viewBox="0 0 20 30" width="36" height="54" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="3" height="5" fill="#5068a8"/><rect x="13" y="9" width="3" height="5" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="3" fill="#3c2010"/><rect x="11" y="21" width="4" height="3" fill="#3c2010"/><rect x="15" y="5" width="2" height="12" fill="#c0cce0"/><rect x="13" y="10" width="5" height="2" fill="#b09040"/></svg>`;
+  if (heroClass === 1) return `<svg viewBox="0 0 18 28" width="32" height="50" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="3" fill="#3c200c"/><rect x="10" y="18" width="4" height="3" fill="#3c200c"/><rect x="14" y="1" width="2" height="13" fill="#805020"/></svg>`;
+  return `<svg viewBox="0 0 18 30" width="32" height="52" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018a0"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="3" fill="#281060"/><rect x="10" y="21" width="3" height="3" fill="#281060"/><rect x="0" y="2" width="2" height="16" fill="#806040"/><rect x="0" y="0" width="4" height="3" fill="#c040f0"/></svg>`;
+}
+
+function enterVillage(fromLogin) {
+  villageActive = true;
+  document.getElementById('villageScreen').classList.add('active');
+  // Flash transition
+  const flash = document.createElement('div');
+  flash.className = 'village-transition';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 500);
+
+  // Set my character
+  const heroClass = player ? (player.level % 3) : 0;
+  document.getElementById('villageMyCharSvg').innerHTML = getVillageCharSVG(heroClass);
+  document.getElementById('villageMyLabel').textContent = player ? player.username : '나';
+  updateVillageHUD();
+
+  // Reset position
+  villagePos = { x: 46, y: 43 };
+  updateVillageCharPos();
+
+  // Joystick setup
+  setupJoystick();
+
+  // Start move loop
+  if (villageMoveLoop) clearInterval(villageMoveLoop);
+  villageMoveLoop = setInterval(villageMoveTick, 50);
+
+  // Tell server
+  wsSend({ type: 'village_enter', x: villagePos.x, y: villagePos.y, heroClass });
+
+  // Schedule NPC merchant appearance
+  scheduleNpc();
+
+  // Close all panels
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+}
+
+function leaveVillage() {
+  if (!villageActive) return;
+  villageActive = false;
+  document.getElementById('villageScreen').classList.remove('active');
+  if (villageMoveLoop) clearInterval(villageMoveLoop);
+  if (npcTimer) clearTimeout(npcTimer);
+  hideNpc();
+  villageOtherPlayers = {};
+  document.getElementById('villageOtherPlayers').innerHTML = '';
+  wsSend({ type: 'village_leave' });
+}
+
+function goToBattle() {
+  leaveVillage();
+  // Flash
+  const flash = document.createElement('div');
+  flash.className = 'village-transition';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 400);
+  renderStageGrid();
+  openPanel('stagePanel');
+}
+
+function updateVillageHUD() {
+  if (!player) return;
+  document.getElementById('villageGold').textContent = Math.floor(player.gold||0).toLocaleString();
+  document.getElementById('villageGems').textContent = Math.floor(player.gems||0).toLocaleString();
+}
+
+function updateVillageCharPos() {
+  const el = document.getElementById('villageMyChar');
+  el.style.left = villagePos.x + '%';
+  el.style.bottom = villagePos.y + '%';
+}
+
+// Joystick touch controls
+let joystickSetup = false;
+function setupJoystick() {
+  if (joystickSetup) return; // 중복 등록 방지
+  joystickSetup = true;
+  const jEl = document.getElementById('villageJoystick');
+  const knob = document.getElementById('joystickKnob');
+
+  function startJoy(cx, cy) {
+    joystickActive = true;
+    joystickOrigin = { x: cx, y: cy };
+    jEl.style.opacity = '1';
+  }
+  function moveJoy(cx, cy) {
+    if (!joystickActive) return;
+    const dx = cx - joystickOrigin.x;
+    const dy = cy - joystickOrigin.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const maxR = 30;
+    const clampDist = Math.min(dist, maxR);
+    const angle = Math.atan2(dy, dx);
+    const kx = Math.cos(angle) * clampDist;
+    const ky = Math.sin(angle) * clampDist;
+    knob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+    joystickDir = { x: dx / Math.max(dist, 1), y: dy / Math.max(dist, 1) };
+  }
+  function endJoy() {
+    joystickActive = false;
+    knob.style.transform = 'translate(-50%,-50%)';
+    joystickDir = { x: 0, y: 0 };
+    jEl.style.opacity = '0.7';
+  }
+
+  // Touch events on village screen (조이스틱용, 버튼/NPC 탭은 제외)
+  const vs = document.getElementById('villageScreen');
+  vs.addEventListener('touchstart', e => {
+    // 버튼이나 NPC 클릭이면 조이스틱 무시
+    if (e.target.closest('#villageBattleBtn') || e.target.closest('.village-npc')) return;
+    const t = e.touches[0];
+    startJoy(t.clientX, t.clientY);
+    e.preventDefault();
+  }, { passive: false });
+  vs.addEventListener('touchmove', e => {
+    if (!joystickActive) return;
+    const t = e.touches[0];
+    moveJoy(t.clientX, t.clientY);
+    e.preventDefault();
+  }, { passive: false });
+  vs.addEventListener('touchend', () => endJoy(), { passive: false });
+
+  // Mouse fallback (PC 테스트용)
+  vs.addEventListener('mousedown', e => {
+    if (e.target.closest('#villageBattleBtn') || e.target.closest('.village-npc')) return;
+    startJoy(e.clientX, e.clientY);
+  });
+  vs.addEventListener('mousemove', e => moveJoy(e.clientX, e.clientY));
+  vs.addEventListener('mouseup', () => endJoy());
+  vs.addEventListener('mouseleave', () => endJoy());
+}
+
+let lastVillageMove = 0;
+function villageMoveTick() {
+  if (!villageActive || !joystickActive) return;
+  const speed = 0.4;
+  villagePos.x = Math.max(2, Math.min(94, villagePos.x + joystickDir.x * speed));
+  villagePos.y = Math.max(43, Math.min(65, villagePos.y + joystickDir.y * -speed)); // y inverted
+  updateVillageCharPos();
+
+  // Throttle server updates to every 100ms
+  const now = Date.now();
+  if (now - lastVillageMove > 100) {
+    lastVillageMove = now;
+    wsSend({ type: 'village_move', x: villagePos.x, y: villagePos.y });
+    // Check NPC proximity
+    checkNpcProximity();
+  }
+}
+
+// Other players in village
+function handleVillagePlayers(players) {
+  villageOtherPlayers = {};
+  document.getElementById('villageOtherPlayers').innerHTML = '';
+  players.forEach(p => addVillagePlayer(p.username, p.x, p.y, p.heroClass||0));
+}
+
+function addVillagePlayer(username, x, y, heroClass) {
+  if (villageOtherPlayers[username]) return;
+  const container = document.getElementById('villageOtherPlayers');
+  const el = document.createElement('div');
+  el.className = 'village-char';
+  el.id = 'vplayer_' + username;
+  el.style.left = x + '%';
+  el.style.bottom = y + '%';
+  el.style.filter = 'hue-rotate(120deg)';
+  el.innerHTML = `<div class="village-char-label">${username}</div>${getVillageCharSVG(heroClass)}`;
+  container.appendChild(el);
+  villageOtherPlayers[username] = { x, y, el };
+}
+
+function moveVillagePlayer(username, x, y) {
+  if (!villageOtherPlayers[username]) return;
+  const p = villageOtherPlayers[username];
+  p.x = x; p.y = y;
+  p.el.style.left = x + '%';
+  p.el.style.bottom = y + '%';
+}
+
+function removeVillagePlayer(username) {
+  if (!villageOtherPlayers[username]) return;
+  villageOtherPlayers[username].el.remove();
+  delete villageOtherPlayers[username];
+}
+
+// NPC Merchant system
+function scheduleNpc() {
+  if (npcTimer) clearTimeout(npcTimer);
+  // 첫 등장: 10~30초 후 랜덤
+  const delay = (10 + Math.random() * 20) * 1000;
+  npcTimer = setTimeout(() => showNpc(), delay);
+}
+
+function showNpc() {
+  npcVisible = true;
+  const npc = document.getElementById('villageNpc');
+  // Random position on path area
+  const x = 30 + Math.random() * 35;
+  npc.style.left = x + '%';
+  npc.style.display = 'block';
+  npc.style.animation = 'npc-bounce 1.2s steps(2) infinite, popIn 0.3s steps(3) forwards';
+  // Disappear after 30 seconds if not interacted
+  npcTimer = setTimeout(() => hideNpc(), 30000);
+}
+
+function hideNpc() {
+  npcVisible = false;
+  document.getElementById('villageNpc').style.display = 'none';
+  // Schedule next appearance
+  if (villageActive) scheduleNpc();
+}
+
+function checkNpcProximity() {
+  if (!npcVisible) return;
+  const npc = document.getElementById('villageNpc');
+  const npcX = parseFloat(npc.style.left);
+  const npcY = 44;
+  const dist = Math.sqrt(Math.pow(villagePos.x - npcX, 2) + Math.pow(villagePos.y - npcY, 2));
+  if (dist < 8) {
+    // 가까이 오면 자동 말풍선 강조
+    npc.querySelector('.village-npc-bubble').textContent = '💬 탭해서 구매!';
+  }
+}
+
+// Gem shop
+const GEM_SHOP_ITEMS = [
+  { id:'gs1', name:'전설 랜덤 무기 뽑기', desc:'전설(A)급 무기 중 하나를 무작위 획득', icon:'🗡️', cost:30, type:'weapon_draw', grade:'A' },
+  { id:'gs2', name:'신화 랜덤 무기 뽑기', desc:'신화(S)급 무기 중 하나를 무작위 획득', icon:'⚔️', cost:80, type:'weapon_draw', grade:'S' },
+  { id:'gs3', name:'체력 +500 영구 강화', desc:'캐릭터 최대 HP +500 영구 증가', icon:'❤️', cost:20, type:'stat_up', stat:'maxHp', val:500 },
+  { id:'gs4', name:'공격력 +50 영구 강화', desc:'캐릭터 공격력 +50 영구 증가', icon:'💥', cost:25, type:'stat_up', stat:'attack', val:50 },
+  { id:'gs5', name:'방어력 +30 영구 강화', desc:'캐릭터 방어력 +30 영구 증가', icon:'🛡️', cost:20, type:'stat_up', stat:'defense', val:30 },
+  { id:'gs6', name:'💎 보석 → 골드 교환', desc:'보석 1개 = 골드 500개로 교환', icon:'💰', cost:1, type:'gem_to_gold', val:500 },
+  { id:'gs7', name:'경험치 폭발 포션', desc:'현재 레벨업에 필요한 경험치 50% 즉시 획득', icon:'✨', cost:15, type:'exp_boost' },
+  { id:'gs8', name:'전설 방어구 뽑기', desc:'전설(A)급 방어구 중 하나를 무작위 획득', icon:'🛡️', cost:35, type:'armor_draw', grade:'A' },
+];
+
+function openGemShop() {
+  if (!npcVisible) return;
+  const modal = document.getElementById('gemShopModal');
+  const list = document.getElementById('gemShopItems');
+  list.innerHTML = GEM_SHOP_ITEMS.map(item => `
+    <div class="gem-item" onclick="buyGemItem('${item.id}')">
+      <div class="gem-item-icon">${item.icon}</div>
+      <div class="gem-item-info">
+        <div class="gem-item-name">${item.name}</div>
+        <div class="gem-item-desc">${item.desc}</div>
+      </div>
+      <div class="gem-item-price">💎${item.cost}</div>
+    </div>
+  `).join('');
+  modal.classList.add('open');
+}
+
+function closeGemShop() {
+  document.getElementById('gemShopModal').classList.remove('open');
+}
+
+function buyGemItem(itemId) {
+  const item = GEM_SHOP_ITEMS.find(i => i.id === itemId);
+  if (!item || !player) return;
+  if ((player.gems||0) < item.cost) {
+    showNotif(`💎 보석이 부족합니다! (필요: ${item.cost}개, 보유: ${Math.floor(player.gems||0)}개)`);
+    return;
+  }
+  player.gems = (player.gems||0) - item.cost;
+
+  if (item.type === 'weapon_draw') {
+    const pool = ALL_WEAPONS.filter(w => w.grade === item.grade);
+    if (pool.length) {
+      const drop = { ...pool[Math.floor(Math.random()*pool.length)], enhance:0 };
+      if (!player.weapons) player.weapons = [];
+      player.weapons.push(drop);
+      showNotif(`🎁 [${drop.name}] 획득!`);
+    }
+  } else if (item.type === 'armor_draw') {
+    const pool = ALL_ARMORS.filter(a => a.grade === item.grade);
+    if (pool.length) {
+      const drop = { ...pool[Math.floor(Math.random()*pool.length)], enhance:0 };
+      if (!player.armors) player.armors = [];
+      player.armors.push(drop);
+      showNotif(`🎁 [${drop.name}] 획득!`);
+    }
+  } else if (item.type === 'stat_up') {
+    player[item.stat] = (player[item.stat]||0) + item.val;
+    showNotif(`💪 ${item.name} 완료!`);
+  } else if (item.type === 'gem_to_gold') {
+    player.gold = (player.gold||0) + item.val;
+    showNotif(`💰 골드 ${item.val}개 획득!`);
+  } else if (item.type === 'exp_boost') {
+    const needed = (player.level||1) * 100;
+    addExp(Math.floor(needed * 0.5));
+    showNotif(`✨ 경험치 폭발!`);
+  }
+  saveGame();
+  updateVillageHUD();
+  // Refresh shop display
+  openGemShop();
+}
+
+// Handle village WS messages (add to existing WS handler)
+function handleVillageWsMsg(msg) {
+  if (msg.type === 'village_players') { handleVillagePlayers(msg.players); return; }
+  if (msg.type === 'village_player_join') { addVillagePlayer(msg.username, msg.x, msg.y, msg.heroClass||0); return; }
+  if (msg.type === 'village_player_move') { moveVillagePlayer(msg.username, msg.x, msg.y); return; }
+  if (msg.type === 'village_player_leave') { removeVillagePlayer(msg.username); return; }
 }
 
 // ============================================================
@@ -3363,6 +4045,7 @@ function applyPartyMemberAction(msg) {
   if (msg.action === 'attack' && battleState.enemies[msg.enemyIdx]) {
     battleState.enemies[msg.enemyIdx].hp = Math.max(0, battleState.enemies[msg.enemyIdx].hp - msg.dmg);
     showDamage(battleState.enemies[msg.enemyIdx], msg.dmg, false);
+    updateEnemyHpBar(msg.enemyIdx);
     checkBattleEnd();
   }
 }
