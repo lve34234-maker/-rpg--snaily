@@ -984,7 +984,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 
     <!-- Buildings -->
     <!-- Inn (left) -->
-    <div class="village-building" style="left:4%;bottom:43%;">
+    <div class="village-building" style="left:4%;bottom:44%;">
       <svg viewBox="0 0 48 52" width="96" height="104" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="0" y="18" width="48" height="34" fill="#c08040"/>
         <rect x="0" y="18" width="48" height="2" fill="#d09050"/>
@@ -1000,7 +1000,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
       </svg>
     </div>
     <!-- Blacksmith (right) -->
-    <div class="village-building" style="right:4%;bottom:43%;">
+    <div class="village-building" style="right:4%;bottom:44%;">
       <svg viewBox="0 0 44 48" width="88" height="96" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="14" width="40" height="34" fill="#707070"/>
         <rect x="2" y="14" width="40" height="2" fill="#909090"/>
@@ -1016,7 +1016,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
       </svg>
     </div>
     <!-- Well (center) -->
-    <div class="village-building" style="left:50%;transform:translateX(-50%);bottom:42%;">
+    <div class="village-building" style="left:50%;transform:translateX(-50%);bottom:44%;">
       <svg viewBox="0 0 24 28" width="48" height="56" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="10" width="20" height="18" fill="#808880"/>
         <rect x="2" y="10" width="20" height="2" fill="#a0a8a0"/>
@@ -1030,14 +1030,14 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
       </svg>
     </div>
     <!-- Trees -->
-    <div class="village-building" style="left:24%;bottom:43%;">
+    <div class="village-building" style="left:24%;bottom:44%;">
       <svg viewBox="0 0 20 32" width="40" height="64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="18" width="4" height="14" fill="#704820"/>
         <rect x="2" y="6" width="16" height="16" fill="#2a8020"/><rect x="4" y="2" width="12" height="10" fill="#38a028"/><rect x="6" y="0" width="8" height="6" fill="#48b030"/>
         <rect x="2" y="6" width="16" height="2" fill="#48b030"/>
       </svg>
     </div>
-    <div class="village-building" style="right:22%;bottom:43%;">
+    <div class="village-building" style="right:22%;bottom:44%;">
       <svg viewBox="0 0 20 32" width="40" height="64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="18" width="4" height="14" fill="#704820"/>
         <rect x="2" y="8" width="16" height="14" fill="#2a8020"/><rect x="4" y="4" width="12" height="10" fill="#38a028"/><rect x="6" y="0" width="8" height="8" fill="#48b030"/>
@@ -1049,7 +1049,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     <div class="village-ground"></div>
 
     <!-- NPC Merchant (appears randomly) -->
-    <div id="villageNpc" class="village-npc" style="display:none;bottom:44%;left:45%;" onclick="openGemShop()">
+    <div id="villageNpc" class="village-npc" style="display:none;bottom:47%;left:45%;" onclick="openGemShop()">
       <div class="village-npc-bubble">✨ 희귀 상인!</div>
       <svg viewBox="0 0 16 22" width="48" height="66" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <!-- Hat -->
@@ -1082,7 +1082,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     <div id="villageOtherPlayers"></div>
 
     <!-- My character -->
-    <div id="villageMyChar" class="village-char" style="bottom:43%;left:46%;">
+    <div id="villageMyChar" class="village-char" style="bottom:46%;left:46%;">
       <div class="village-char-label" id="villageMyLabel">나</div>
       <div id="villageMyCharSvg"></div>
     </div>
@@ -1253,6 +1253,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
       <div class="shop-tab" onclick="switchAdminTab('item',this)">🎁 아이템</div>
       <div class="shop-tab" onclick="switchAdminTab('weapon',this)">🛠️ 제작</div>
       <div class="shop-tab" onclick="switchAdminTab('notice',this)">📢 공지</div>
+      <div class="shop-tab" onclick="switchAdminTab('manage',this)">👑 관리</div>
     </div>
 
     <!-- 스탯 탭 -->
@@ -1374,6 +1375,23 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
         <div class="admin-section-title">📢 전체 공지</div>
         <input type="text" id="adminAnnounce" class="admin-input" placeholder="공지 내용" style="margin-bottom:8px;">
         <button class="admin-btn" onclick="adminAnnounce()">발송</button>
+      </div>
+    </div>
+
+    <!-- 관리자 관리 탭 -->
+    <div id="adminTab_manage" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">👑 관리자 추가/제거</div>
+        <select id="adminManageSelect" class="admin-target-select" style="margin-bottom:8px;"></select>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="admin-btn" style="flex:1;background:linear-gradient(135deg,#206040,#40a060);" onclick="adminMakeAdmin(true)">👑 관리자 추가</button>
+          <button class="admin-btn" style="flex:1;background:linear-gradient(135deg,#602020,#a04040);" onclick="adminMakeAdmin(false)">❌ 관리자 제거</button>
+        </div>
+        <div id="adminManageResult" style="font-size:0.8rem;min-height:20px;margin-top:8px;text-align:center;"></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">📋 전체 유저 목록</div>
+        <div id="adminUserListFull" style="max-height:200px;overflow-y:auto;font-size:0.75rem;"></div>
       </div>
     </div>
   </div>
@@ -2837,7 +2855,7 @@ function enterVillage(fromLogin) {
   updateVillageHUD();
 
   // Reset position
-  villagePos = { x: 46, y: 43 };
+  villagePos = { x: 46, y: 46 };
   updateVillageCharPos();
 
   // Joystick setup
@@ -2957,7 +2975,8 @@ function villageMoveTick() {
   if (!villageActive || !joystickActive) return;
   const speed = 0.4;
   villagePos.x = Math.max(2, Math.min(94, villagePos.x + joystickDir.x * speed));
-  villagePos.y = Math.max(43, Math.min(65, villagePos.y + joystickDir.y * -speed)); // y inverted
+  // Y: bottom 44~50% 사이 (땅 위에서만 이동, 날아다님 방지)
+  villagePos.y = Math.max(44, Math.min(50, villagePos.y + joystickDir.y * -speed));
   updateVillageCharPos();
 
   // Throttle server updates to every 100ms
@@ -3604,7 +3623,7 @@ function deleteFriend(name) { wsSend({type:'friend_delete',target:name}); player
 let customWeapons = [];
 
 function switchAdminTab(tab, el) {
-  ['stat','item','weapon','notice'].forEach(t => {
+  ['stat','item','weapon','notice','manage'].forEach(t => {
     const e = document.getElementById('adminTab_'+t);
     if (e) e.style.display = t === tab ? 'block' : 'none';
   });
@@ -3612,6 +3631,7 @@ function switchAdminTab(tab, el) {
   el.classList.add('active');
   if (tab === 'item') { syncAdminTarget2(); loadAdminUserItems(); }
   if (tab === 'weapon') { renderCustomWeaponList(); renderCustomArmorList(); }
+  if (tab === 'manage') { loadAdminManageUsers(); }
 }
 
 function syncAdminTarget2() {
@@ -3632,6 +3652,49 @@ async function loadAdminUsers() {
     if (s1) { s1.innerHTML = opts; loadAdminTarget(); }
     if (s2) s2.innerHTML = opts;
   } catch(e) { showNotif('유저 목록 로드 실패: '+e.message); }
+}
+
+async function loadAdminManageUsers() {
+  if (!player.isAdmin) return;
+  try {
+    const res = await fetch(SERVER_URL + '/api/users');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const users = await res.json();
+    // 관리자 선택 드롭다운
+    const sel = document.getElementById('adminManageSelect');
+    if (sel) sel.innerHTML = users.filter(u => u.username !== player.username).map(u =>
+      `<option value="${u.username}">${u.username} (Lv.${u.level})${u.isAdmin ? ' 👑' : ''}</option>`
+    ).join('');
+    // 전체 유저 목록
+    const list = document.getElementById('adminUserListFull');
+    if (list) list.innerHTML = users.map(u => `
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <span style="flex:1;color:${u.isAdmin?'#f5c842':'rgba(240,232,200,0.7)'};">${u.isAdmin?'👑 ':''} ${u.username}</span>
+        <span style="color:rgba(240,232,200,0.4);">Lv.${u.level}</span>
+      </div>`).join('');
+  } catch(e) { showNotif('목록 로드 실패: '+e.message); }
+}
+
+async function adminMakeAdmin(grant) {
+  const target = document.getElementById('adminManageSelect')?.value;
+  if (!target) return;
+  if (target === 'admin') { showNotif('⛔ 기본 admin 계정은 변경 불가'); return; }
+  const result = document.getElementById('adminManageResult');
+  try {
+    const res = await fetch(SERVER_URL + '/api/admin/makeadmin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminUser: player.username, adminPass: player.password, target, grant })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      result.textContent = grant ? `✅ ${target}님을 관리자로 임명했습니다!` : `✅ ${target}님의 관리자 권한을 제거했습니다.`;
+      result.style.color = grant ? '#60d060' : '#f08080';
+      loadAdminManageUsers();
+    } else {
+      result.textContent = '❌ ' + (data.msg || '실패');
+      result.style.color = '#f08080';
+    }
+  } catch(e) { result.textContent = '❌ 오류: ' + e.message; }
 }
 
 function loadAdminItems() {
@@ -3677,7 +3740,7 @@ async function applyAdminStats() {
     await Promise.all(Object.entries(fields).map(([field, value]) =>
       fetch(SERVER_URL + '/api/admin/setuser', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({adminPass: player.password, target, field, value})
+        body: JSON.stringify({adminUser: player.username, adminPass: player.password, target, field, value})
       })
     ));
     if (resultEl) { resultEl.style.color = '#60ff80'; resultEl.textContent = '✅ '+target+' 적용 완료!'; }
@@ -3706,7 +3769,7 @@ async function adminGiveItem() {
     arr.push({...item, enhance:0});
     const sr = await fetch(SERVER_URL+'/api/admin/setuser', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({adminPass:player.password, target, field, value:arr})
+      body: JSON.stringify({adminUser:player.username, adminPass:player.password, target, field, value:arr})
     });
     const sd = await sr.json();
     if (sd.ok) {
@@ -3753,7 +3816,7 @@ async function adminDeleteUserItem(target, field, itemName, enhance) {
     if (idx!==-1) arr.splice(idx,1);
     await fetch(SERVER_URL+'/api/admin/setuser', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({adminPass:player.password, target, field, value:arr})
+      body: JSON.stringify({adminUser:player.username, adminPass:player.password, target, field, value:arr})
     });
     showNotif('🗑️ ['+itemName+'] 삭제 완료');
     loadAdminUserItems();
@@ -3771,7 +3834,7 @@ async function adminGiveGold() {
     const newGold = (data.user.gold||0)+amount;
     await fetch(SERVER_URL+'/api/admin/setuser', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({adminPass:player.password, target, field:'gold', value:newGold})
+      body: JSON.stringify({adminUser:player.username, adminPass:player.password, target, field:'gold', value:newGold})
     });
     showNotif('💰 '+target+'에게 '+amount.toLocaleString()+' 골드 지급!');
     if (target===player.username) { player.gold=newGold; updateHUD(); }
@@ -3834,7 +3897,7 @@ async function adminDistributeWeapon(idx) {
       arr.push({...weapon, enhance:0});
       await fetch(SERVER_URL+'/api/admin/setuser', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({adminPass:player.password, target:u.username, field:'weapons', value:arr})
+        body: JSON.stringify({adminUser:player.username, adminPass:player.password, target:u.username, field:'weapons', value:arr})
       });
     }
     wsSend({type:'chat',channel:'global',text:'/announce ⚔️ ['+weapon.name+'] 무기가 전체 배포되었습니다!'});
@@ -3907,7 +3970,7 @@ async function adminDistributeArmor(idx) {
       arr.push({...armor, enhance:0});
       await fetch(SERVER_URL+'/api/admin/setuser', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({adminPass:player.password, target:u.username, field:'armors', value:arr})
+        body: JSON.stringify({adminUser:player.username, adminPass:player.password, target:u.username, field:'armors', value:arr})
       });
     }
     wsSend({type:'chat',channel:'global',text:'/announce 🛡️ ['+armor.name+'] 갑옷이 전체 배포되었습니다!'});
