@@ -92,217 +92,207 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 .boss-bar-bg { height:12px; background:rgba(255,255,255,0.1); border-radius:6px; overflow:hidden; }
 .boss-bar-fill { height:100%; background:linear-gradient(90deg,#800000,#e03030,#ff8060); border-radius:6px; transition:width 0.3s ease; }
 
-/* ====== BATTLE AREA ====== */
+/* ====== BATTLE AREA - PIXEL ART ====== */
 #battleArea {
   position:absolute; inset:0; overflow:hidden;
-  background: radial-gradient(ellipse at 30% 70%,#1a0f08 0%,#0a0508 50%,#050308 100%);
+  background: linear-gradient(180deg, #04020e 0%, #08041c 25%, #0c0628 50%, #08041c 75%, #04020e 100%);
+  image-rendering: pixelated;
 }
+/* Stars layer */
 .battle-bg-layer {
-  position:absolute; inset:0;
-  background:
-    linear-gradient(180deg,transparent 60%,rgba(10,5,3,0.8) 100%),
-    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,200,100,0.01) 2px,rgba(255,200,100,0.01) 4px);
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 5% 8%, #fff 0, transparent 0),
+    radial-gradient(1px 1px at 12% 15%, rgba(255,220,180,.9) 0, transparent 0),
+    radial-gradient(1px 1px at 22% 6%, #fff 0, transparent 0),
+    radial-gradient(1px 1px at 30% 20%, rgba(200,200,255,.8) 0, transparent 0),
+    radial-gradient(1px 1px at 42% 10%, #fff 0, transparent 0),
+    radial-gradient(1px 1px at 55% 5%, rgba(255,220,180,.7) 0, transparent 0),
+    radial-gradient(1px 1px at 65% 18%, #fff 0, transparent 0),
+    radial-gradient(1px 1px at 73% 8%, rgba(200,220,255,.9) 0, transparent 0),
+    radial-gradient(1px 1px at 80% 14%, #fff 0, transparent 0),
+    radial-gradient(1px 1px at 88% 7%, rgba(255,255,200,.8) 0, transparent 0),
+    radial-gradient(1px 1px at 95% 20%, #fff 0, transparent 0),
+    radial-gradient(1px 1px at 18% 30%, rgba(255,255,255,.3) 0, transparent 0),
+    radial-gradient(1px 1px at 48% 28%, rgba(255,255,255,.4) 0, transparent 0),
+    radial-gradient(1px 1px at 77% 25%, rgba(255,255,255,.3) 0, transparent 0);
+  animation: star-twinkle 4s ease-in-out infinite;
 }
+@keyframes star-twinkle {
+  0%,100%{opacity:1} 50%{opacity:0.6}
+}
+/* Pixel castle silhouette */
+.pixel-castle {
+  position:absolute; bottom:76px; left:0; right:0; height:220px; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 110'%3E%3Crect x='0' y='50' width='200' height='60' fill='%23080418'/%3E%3Crect x='10' y='30' width='16' height='80' fill='%230a0520'/%3E%3Crect x='12' y='20' width='4' height='12' fill='%230a0520'/%3E%3Crect x='16' y='20' width='4' height='12' fill='%230a0520'/%3E%3Crect x='20' y='25' width='4' height='12' fill='%230a0520'/%3E%3Crect x='40' y='38' width='22' height='72' fill='%230a0520'/%3E%3Crect x='42' y='28' width='4' height='12' fill='%230a0520'/%3E%3Crect x='47' y='26' width='4' height='14' fill='%230a0520'/%3E%3Crect x='52' y='28' width='4' height='12' fill='%230a0520'/%3E%3Crect x='58' y='42' width='60' height='68' fill='%23090418'/%3E%3Crect x='60' y='32' width='6' height='12' fill='%23090418'/%3E%3Crect x='68' y='28' width='6' height='16' fill='%23090418'/%3E%3Crect x='78' y='30' width='6' height='14' fill='%23090418'/%3E%3Crect x='88' y='28' width='6' height='16' fill='%23090418'/%3E%3Crect x='98' y='32' width='6' height='12' fill='%23090418'/%3E%3Crect x='108' y='38' width='18' height='72' fill='%230a0520'/%3E%3Crect x='126' y='45' width='20' height='65' fill='%23080418'/%3E%3Crect x='110' y='28' width='4' height='12' fill='%230a0520'/%3E%3Crect x='115' y='26' width='4' height='14' fill='%230a0520'/%3E%3Crect x='150' y='50' width='14' height='60' fill='%230a0520'/%3E%3Crect x='152' y='40' width='4' height='12' fill='%230a0520'/%3E%3Crect x='156' y='40' width='4' height='12' fill='%230a0520'/%3E%3Crect x='170' y='55' width='12' height='55' fill='%23080418'/%3E%3Crect x='185' y='42' width='14' height='68' fill='%230a0520'/%3E%3Crect x='187' y='32' width='4' height='12' fill='%230a0520'/%3E%3Crect x='191' y='30' width='4' height='14' fill='%230a0520'/%3E%3Crect x='60' y='68' width='16' height='42' fill='%23060312'/%3E%3Crect x='62' y='68' width='12' height='42' fill='%23040210'/%3E%3Crect x='78' y='70' width='8' height='6' fill='%23180c38'/%3E%3Crect x='95' y='72' width='8' height='6' fill='%23180c38'/%3E%3Crect x='30' y='55' width='8' height='6' fill='%23180c38'/%3E%3Crect x='112' y='56' width='8' height='6' fill='%23180c38'/%3E%3C/svg%3E");
+  background-size: 100% 100%; background-repeat: no-repeat;
+  opacity: 0.85;
+}
+/* Moon */
+.pixel-moon {
+  position:absolute; top:8%; right:15%; width:48px; height:48px; pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Crect x='3' y='0' width='6' height='1' fill='%23f0e8b0'/%3E%3Crect x='1' y='1' width='10' height='2' fill='%23f0e8b0'/%3E%3Crect x='0' y='3' width='12' height='6' fill='%23f0e8b0'/%3E%3Crect x='1' y='9' width='10' height='2' fill='%23f0e8b0'/%3E%3Crect x='3' y='11' width='6' height='1' fill='%23f0e8b0'/%3E%3Crect x='5' y='2' width='2' height='2' fill='%23d8d098'/%3E%3Crect x='2' y='5' width='3' height='2' fill='%23d8d098'/%3E%3Crect x='8' y='7' width='2' height='2' fill='%23d8d098'/%3E%3C/svg%3E") no-repeat; background-size:100%;
+  image-rendering:pixelated; animation:moon-glow 3s ease-in-out infinite;
+}
+@keyframes moon-glow { 0%,100%{filter:drop-shadow(0 0 6px rgba(240,232,176,.5))} 50%{filter:drop-shadow(0 0 14px rgba(240,232,176,.8))} }
+/* Pixel ground tiles */
 .ground {
   position:absolute; bottom:0; left:0; right:0; height:80px;
-  background:linear-gradient(180deg,#1a0f08 0%,#2a1a0a 40%,#1a0f05 100%);
-  border-top:2px solid rgba(200,150,80,0.2);
+  background-color: #130d06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 8'%3E%3Crect width='32' height='8' fill='%23180e06'/%3E%3Crect width='32' height='1' fill='%23241508'/%3E%3Crect width='1' height='8' fill='%23201008'/%3E%3Crect x='16' width='1' height='8' fill='%23201008'/%3E%3Crect x='31' width='1' height='8' fill='%230c0804'/%3E%3Crect x='4' y='3' width='3' height='1' fill='%23201008'/%3E%3Crect x='22' y='5' width='3' height='1' fill='%23201008'/%3E%3Crect x='10' y='6' width='2' height='1' fill='%23201008'/%3E%3Crect x='26' y='2' width='2' height='1' fill='%23201008'/%3E%3C/svg%3E");
+  background-size: 64px 16px; border-top: 2px solid #2a1a0a;
 }
 .ground::before {
   content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  background:linear-gradient(90deg,transparent,rgba(245,200,66,0.3),transparent);
+  background:linear-gradient(90deg,transparent,rgba(245,200,66,0.25),transparent);
+}
+/* Torch lights (atmospheric) */
+.torch-l, .torch-r {
+  position:absolute; bottom:78px; width:12px; height:24px; pointer-events:none;
+}
+.torch-l { left:20%; } .torch-r { right:20%; }
+.torch-l::before, .torch-r::before {
+  content:'🔥'; position:absolute; bottom:8px; left:0; font-size:1rem;
+  animation:torch-flicker 0.4s steps(2) infinite;
+}
+.torch-l::after, .torch-r::after {
+  content:''; position:absolute; bottom:-2px; left:2px; width:8px; height:82px;
+  background:linear-gradient(180deg,rgba(255,150,30,0.12),transparent);
+  pointer-events:none;
+}
+@keyframes torch-flicker { 0%{transform:scaleX(1) translateX(0)} 50%{transform:scaleX(-1) translateX(1px)} }
+
+/* ====== PIXEL ART CHARACTERS ====== */
+.character-container { display:flex; flex-direction:column; align-items:center; width:80px; flex-shrink:0; }
+.char-shadow { width:56px; height:6px; background:rgba(0,0,0,0.6); border-radius:50%; margin-top:2px; filter:blur(4px); }
+.char-name-tag { font-size:0.58rem; color:#fff; text-align:center; margin-top:2px; text-shadow:1px 1px 0 #000,2px 2px 0 rgba(0,0,0,0.5); white-space:nowrap; letter-spacing:0.5px; }
+.hp-dot-bar { display:flex; gap:2px; margin-top:2px; }
+.hp-dot { width:6px; height:6px; background:var(--green); image-rendering:pixelated; }
+.hp-dot.dead { background:#2a2a2a; }
+
+/* Pixel art character wrappers */
+.warrior, .archer, .mage { display:block; image-rendering:pixelated; animation:hero-idle 1.6s steps(2) infinite; }
+.goblin { display:block; image-rendering:pixelated; animation:enemy-idle 1.2s steps(2) infinite; }
+.orc { display:block; image-rendering:pixelated; animation:enemy-idle 1.8s steps(2) infinite 0.2s; }
+.dark-knight { display:block; image-rendering:pixelated; animation:enemy-idle 2.2s steps(2) infinite 0.4s; }
+.boss-enemy { display:block; image-rendering:pixelated; animation:boss-idle 1s steps(2) infinite; }
+
+/* Attack animation classes */
+.hero-attacking { animation:hero-lunge 0.35s steps(3) forwards !important; }
+.enemy-hit { animation:enemy-hit-flash 0.3s steps(2) forwards !important; }
+
+/* Projectiles */
+.projectile { position:absolute; z-index:70; pointer-events:none; image-rendering:pixelated; }
+.proj-slash {
+  width:48px; height:6px;
+  background: linear-gradient(90deg,transparent,#c8d8ff,#e8f0ff,#ffffff,transparent);
+  box-shadow: 0 0 8px #a0c0ff, 0 0 16px rgba(160,192,255,0.5);
+  border-radius:0;
+}
+.proj-arrow {
+  width:28px; height:4px;
+  background: linear-gradient(90deg,#e0c040,#f0d850,#e0c040,#805020);
+}
+.proj-arrow::after {
+  content:''; position:absolute; right:-6px; top:-3px;
+  width:0; height:0; border-left:10px solid #e0c040;
+  border-top:5px solid transparent; border-bottom:5px solid transparent;
+}
+.proj-fireball {
+  width:20px; height:20px;
+  background: radial-gradient(circle,#fff 0%,#ff8020 40%,#ff4010 70%,transparent 100%);
+  box-shadow: 0 0 12px #ff6020, 0 0 24px rgba(255,80,20,0.5);
+  border-radius:2px;
+}
+.proj-dark {
+  width:24px; height:8px;
+  background: linear-gradient(90deg,transparent,#800000,#ff2020,#800000,transparent);
+  box-shadow: 0 0 10px #800000;
+}
+/* Hit effects */
+.hit-effect { position:absolute; z-index:71; pointer-events:none; }
+.hit-slash-fx {
+  width:40px; height:40px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect x='0' y='4' width='10' height='2' fill='%23c8d8ff'/%3E%3Crect x='4' y='0' width='2' height='10' fill='%23c8d8ff'/%3E%3Crect x='1' y='1' width='2' height='2' fill='%23e8f0ff'/%3E%3Crect x='7' y='7' width='2' height='2' fill='%23e8f0ff'/%3E%3C/svg%3E") no-repeat center;
+  background-size:100%; image-rendering:pixelated; animation:hit-pop 0.3s steps(3) forwards;
+}
+.hit-arrow-fx {
+  width:32px; height:32px;
+  background:radial-gradient(circle,#e0c040 0%,rgba(224,192,64,0) 70%);
+  animation:hit-pop 0.25s steps(2) forwards;
+}
+.hit-fire-fx {
+  width:48px; height:48px;
+  background:radial-gradient(circle,#fff 0%,#ff8020 30%,rgba(255,80,20,0) 70%);
+  animation:hit-pop 0.35s steps(3) forwards;
+}
+@keyframes hit-pop {
+  0%{transform:scale(0.5);opacity:1} 60%{transform:scale(1.2);opacity:0.8} 100%{transform:scale(1.5);opacity:0}
 }
 
-/* ====== CHARACTERS ====== */
-.character-container { display:flex; flex-direction:column; align-items:center; width:80px; flex-shrink:0; }
-.char-shadow { width:60px; height:8px; background:rgba(0,0,0,0.5); border-radius:50%; margin-top:4px; filter:blur(3px); }
-.char-name-tag { font-size:0.6rem; color:#fff; text-align:center; margin-top:2px; text-shadow:1px 1px 2px #000; white-space:nowrap; }
-.hp-dot-bar { display:flex; gap:2px; margin-top:2px; }
-.hp-dot { width:6px; height:6px; border-radius:50%; background:var(--green); }
-.hp-dot.dead { background:#333; }
+/* Pixel damage numbers */
+.px-dmg {
+  position:absolute; z-index:72; pointer-events:none; font-family:monospace;
+  font-size:1rem; font-weight:900; text-shadow:2px 2px 0 #000;
+  animation:px-float 0.8s steps(8) forwards;
+  image-rendering:pixelated;
+}
+@keyframes px-float {
+  0%{transform:translateY(0);opacity:1}
+  100%{transform:translateY(-50px);opacity:0}
+}
 
-/* WARRIOR */
-.warrior { width:60px; height:80px; position:relative; animation:hero-idle 2s ease-in-out infinite; }
-.warrior-body { position:absolute; bottom:0; left:50%; transform:translateX(-50%); }
-.w-head { width:28px; height:28px; background:linear-gradient(180deg,#f0c8a0,#e0a870); border-radius:50% 50% 40% 40%; position:absolute; top:0; left:50%; transform:translateX(-50%); box-shadow:0 2px 6px rgba(0,0,0,0.5); }
-.w-helmet { width:30px; height:16px; background:linear-gradient(180deg,#7090c0,#4060a0); border-radius:50% 50% 0 0; position:absolute; top:-4px; left:50%; transform:translateX(-50%); box-shadow:0 -2px 8px rgba(100,150,255,0.4); }
-.w-helmet::after { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:4px; height:10px; background:#e0c040; border-radius:2px; }
-.w-torso { width:32px; height:30px; background:linear-gradient(180deg,#5070b0,#304080); border-radius:4px 4px 0 0; position:absolute; top:26px; left:50%; transform:translateX(-50%); box-shadow:inset 0 2px 0 rgba(255,255,255,0.2); }
-.w-chest-plate { width:28px; height:22px; background:linear-gradient(180deg,#8090c0,#5060a0); border-radius:3px; position:absolute; top:28px; left:50%; transform:translateX(-50%); clip-path:polygon(10% 0%,90% 0%,100% 100%,0% 100%); }
-.w-legs { display:flex; gap:2px; position:absolute; top:56px; left:50%; transform:translateX(-50%); }
-.w-leg { width:13px; height:22px; background:linear-gradient(180deg,#304080,#202860); border-radius:2px 2px 4px 4px; }
-.w-boots { display:flex; gap:2px; position:absolute; top:76px; left:50%; transform:translateX(-50%); }
-.w-boot { width:14px; height:8px; background:linear-gradient(180deg,#3a2010,#2a1808); border-radius:2px 2px 4px 4px; }
-.w-arm-r { width:10px; height:26px; background:linear-gradient(180deg,#5070b0,#304080); border-radius:4px; position:absolute; top:28px; left:2px; transform-origin:top center; animation:arm-swing-r 2s ease-in-out infinite; box-shadow:2px 2px 0 rgba(0,0,0,0.3); }
-.w-arm-l { width:10px; height:26px; background:linear-gradient(180deg,#5070b0,#304080); border-radius:4px; position:absolute; top:28px; right:2px; transform-origin:top center; animation:arm-swing-l 2s ease-in-out infinite; }
-.w-sword { width:6px; height:36px; background:linear-gradient(180deg,#e0e8ff,#a0b0e0); position:absolute; top:28px; left:-4px; border-radius:3px 3px 1px 1px; transform-origin:top center; animation:arm-swing-r 2s ease-in-out infinite; box-shadow:0 0 8px rgba(160,180,255,0.6); }
-.w-sword::before { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:10px; height:6px; background:#a08040; border-radius:2px; }
-.w-shield { width:14px; height:18px; background:linear-gradient(135deg,#8090c0,#4060a0); border-radius:3px; position:absolute; top:30px; right:-4px; transform-origin:top center; animation:arm-swing-l 2s ease-in-out infinite; box-shadow:0 0 8px rgba(100,120,200,0.4); }
-.w-shield::after { content:''; position:absolute; inset:3px; border:1px solid rgba(255,255,255,0.2); border-radius:2px; }
-
-/* ARCHER */
-.archer { width:60px; height:75px; position:relative; animation:hero-idle 2.2s ease-in-out infinite 0.3s; }
-.a-head { width:24px; height:24px; background:linear-gradient(180deg,#d8b090,#c09070); border-radius:50% 50% 40% 40%; position:absolute; top:0; left:50%; transform:translateX(-50%); }
-.a-hat { width:28px; height:10px; background:linear-gradient(180deg,#306020,#204010); border-radius:50% 50% 0 0; position:absolute; top:-2px; left:50%; transform:translateX(-50%); }
-.a-hat::after { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:8px solid #306020; }
-.a-torso { width:26px; height:28px; background:linear-gradient(180deg,#406830,#284020); border-radius:3px 3px 0 0; position:absolute; top:22px; left:50%; transform:translateX(-50%); }
-.a-legs { display:flex; gap:2px; position:absolute; top:48px; left:50%; transform:translateX(-50%); }
-.a-leg { width:11px; height:20px; background:linear-gradient(180deg,#284020,#1a2814); border-radius:2px 2px 4px 4px; }
-.a-arm-r { width:8px; height:22px; background:linear-gradient(180deg,#406830,#284020); border-radius:3px; position:absolute; top:22px; left:4px; transform-origin:top center; animation:archer-draw 1.5s ease-in-out infinite; }
-.a-arm-l { width:8px; height:22px; background:linear-gradient(180deg,#406830,#284020); border-radius:3px; position:absolute; top:22px; right:4px; transform-origin:top center; animation:archer-hold 1.5s ease-in-out infinite; }
-.a-bow { width:4px; height:40px; background:linear-gradient(180deg,#805020,#604010); border-radius:2px; position:absolute; top:15px; right:-2px; transform-origin:center; }
-.a-bow::before, .a-bow::after { content:''; position:absolute; width:14px; height:1px; background:#a08060; left:50%; transform:translateX(-50%); }
-.a-bow::before { top:2px; transform:translateX(-50%) rotate(20deg); }
-.a-bow::after { bottom:2px; transform:translateX(-50%) rotate(-20deg); }
-.a-arrow { width:2px; height:28px; background:#c0a060; position:absolute; top:18px; right:-1px; transform-origin:center; }
-.a-arrow::after { content:''; position:absolute; top:-2px; left:-2px; width:0; height:0; border-bottom:6px solid #e0c080; border-left:3px solid transparent; border-right:3px solid transparent; transform:rotate(180deg); }
-
-/* MAGE */
-.mage { width:60px; height:78px; position:relative; animation:hero-idle 1.8s ease-in-out infinite 0.6s; }
-.m-head { width:26px; height:26px; background:linear-gradient(180deg,#e8d0e0,#d0b0c8); border-radius:50% 50% 40% 40%; position:absolute; top:0; left:50%; transform:translateX(-50%); }
-.m-hat { width:32px; height:8px; background:linear-gradient(180deg,#6020a0,#401070); border-radius:4px; position:absolute; top:18px; left:50%; transform:translateX(-50%); }
-.m-hat::before { content:''; position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:20px solid #6020a0; }
-.m-robe { width:30px; height:40px; background:linear-gradient(180deg,#5020a0 0%,#380080 40%,#2a0060 100%); border-radius:4px 4px 0 0; position:absolute; top:24px; left:50%; transform:translateX(-50%); clip-path:polygon(0 0,100% 0,110% 100%,-10% 100%); }
-.m-robe::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(200,100,255,0.1),transparent); }
-.m-arm-r { width:8px; height:24px; background:linear-gradient(180deg,#5020a0,#380080); border-radius:3px; position:absolute; top:26px; left:5px; transform-origin:top center; animation:mage-cast 2s ease-in-out infinite; }
-.m-staff { width:5px; height:50px; background:linear-gradient(180deg,#a060e0,#604080); border-radius:2px; position:absolute; top:10px; left:3px; }
-.m-staff::before { content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:14px; height:14px; background:radial-gradient(circle,#e080ff,#8020c0); border-radius:50%; box-shadow:0 0 15px rgba(200,100,255,0.8); animation:orb-pulse 1.5s ease-in-out infinite; }
-.m-arm-l { width:8px; height:24px; background:linear-gradient(180deg,#5020a0,#380080); border-radius:3px; position:absolute; top:26px; right:5px; transform-origin:top center; animation:mage-cast 2s ease-in-out infinite 0.5s; }
-
-/* ENEMIES */
-.goblin { width:50px; height:65px; position:relative; animation:enemy-idle 1.5s ease-in-out infinite; }
-.g-head { width:26px; height:24px; background:linear-gradient(180deg,#507840,#385828); border-radius:50% 50% 30% 30%; position:absolute; top:0; left:50%; transform:translateX(-50%); }
-.g-ear-l, .g-ear-r { width:10px; height:14px; background:#507840; border-radius:50%; position:absolute; top:4px; }
-.g-ear-l { left:-4px; transform:rotate(-20deg); }
-.g-ear-r { right:-4px; transform:rotate(20deg); }
-.g-eye-l, .g-eye-r { width:6px; height:6px; background:#ff4020; border-radius:50%; position:absolute; top:8px; }
-.g-eye-l { left:5px; }
-.g-eye-r { right:5px; }
-.g-eye-l::after, .g-eye-r::after { content:''; position:absolute; top:1px; left:1px; width:3px; height:3px; background:#800; border-radius:50%; }
-.g-torso { width:24px; height:22px; background:linear-gradient(180deg,#383018,#282010); border-radius:3px; position:absolute; top:22px; left:50%; transform:translateX(-50%); }
-.g-arm-r { width:8px; height:20px; background:#507840; border-radius:4px; position:absolute; top:24px; left:2px; transform-origin:top; animation:enemy-arm 1.5s ease-in-out infinite; }
-.g-arm-l { width:8px; height:20px; background:#507840; border-radius:4px; position:absolute; top:24px; right:2px; transform-origin:top; animation:enemy-arm 1.5s ease-in-out infinite 0.3s; }
-.g-club { width:6px; height:26px; background:#604030; border-radius:3px; position:absolute; top:20px; left:-4px; transform-origin:top; animation:enemy-arm 1.5s ease-in-out infinite; }
-.g-club::before { content:''; position:absolute; top:-2px; left:50%; transform:translateX(-50%); width:12px; height:10px; background:#806050; border-radius:3px; }
-.g-legs { display:flex; gap:2px; position:absolute; top:42px; left:50%; transform:translateX(-50%); }
-.g-leg { width:10px; height:18px; background:linear-gradient(180deg,#507840,#385828); border-radius:2px 2px 4px 4px; }
-
-/* ORC */
-.orc { width:70px; height:90px; position:relative; animation:enemy-idle 2s ease-in-out infinite 0.2s; }
-.o-head { width:36px; height:32px; background:linear-gradient(180deg,#406030,#304020); border-radius:40% 40% 30% 30%; position:absolute; top:0; left:50%; transform:translateX(-50%); }
-.o-tusk-l, .o-tusk-r { width:6px; height:12px; background:#e0d0a0; position:absolute; top:20px; border-radius:2px 2px 4px 4px; }
-.o-tusk-l { left:6px; transform:rotate(10deg); }
-.o-tusk-r { right:6px; transform:rotate(-10deg); }
-.o-eye-l, .o-eye-r { width:8px; height:8px; background:#ff3010; border-radius:50%; position:absolute; top:10px; box-shadow:0 0 6px rgba(255,80,20,0.6); }
-.o-eye-l { left:6px; }
-.o-eye-r { right:6px; }
-.o-torso { width:46px; height:38px; background:linear-gradient(180deg,#302818,#201808); border-radius:4px; position:absolute; top:30px; left:50%; transform:translateX(-50%); }
-.o-armor { width:40px; height:30px; background:linear-gradient(180deg,#505050,#303030); border-radius:3px; position:absolute; top:32px; left:50%; transform:translateX(-50%); clip-path:polygon(5% 0%,95% 0%,100% 100%,0% 100%); }
-.o-arm-r { width:14px; height:34px; background:linear-gradient(180deg,#406030,#304020); border-radius:5px; position:absolute; top:32px; left:0; transform-origin:top; animation:enemy-arm 2s ease-in-out infinite; }
-.o-arm-l { width:14px; height:34px; background:linear-gradient(180deg,#406030,#304020); border-radius:5px; position:absolute; top:32px; right:0; transform-origin:top; animation:enemy-arm 2s ease-in-out infinite 0.4s; }
-.o-wep { width:10px; height:44px; background:linear-gradient(180deg,#707070,#404040); border-radius:5px; position:absolute; top:22px; left:-6px; }
-.o-wep::before { content:''; position:absolute; top:-4px; left:-4px; width:18px; height:14px; background:linear-gradient(135deg,#909090,#505050); border-radius:2px; }
-.o-legs { display:flex; gap:4px; position:absolute; top:66px; left:50%; transform:translateX(-50%); }
-.o-leg { width:18px; height:22px; background:linear-gradient(180deg,#302818,#201808); border-radius:3px 3px 5px 5px; }
-
-/* DARK KNIGHT */
-.dark-knight { width:80px; height:100px; position:relative; animation:enemy-idle 2.5s ease-in-out infinite; }
-.dk-head { width:38px; height:36px; background:linear-gradient(180deg,#202020,#101010); border-radius:3px; position:absolute; top:0; left:50%; transform:translateX(-50%); box-shadow:0 0 20px rgba(200,0,0,0.5); }
-.dk-visor { width:30px; height:8px; background:linear-gradient(90deg,#800000,#ff4020,#800000); border-radius:2px; position:absolute; top:14px; left:4px; box-shadow:0 0 12px rgba(255,60,0,0.8); }
-.dk-torso { width:52px; height:42px; background:linear-gradient(180deg,#1a1a1a,#0a0a0a); border-radius:4px; position:absolute; top:34px; left:50%; transform:translateX(-50%); box-shadow:0 0 15px rgba(150,0,0,0.3); }
-.dk-rune { width:20px; height:20px; background:transparent; border:2px solid rgba(255,0,0,0.6); border-radius:50%; position:absolute; top:40px; left:50%; transform:translateX(-50%); }
-.dk-rune::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:8px; height:8px; background:rgba(255,0,0,0.6); border-radius:50%; box-shadow:0 0 8px rgba(255,0,0,0.8); animation:orb-pulse 1s ease-in-out infinite; }
-.dk-arm-r { width:16px; height:38px; background:linear-gradient(180deg,#1a1a1a,#0a0a0a); border-radius:6px; position:absolute; top:36px; left:-2px; transform-origin:top; animation:enemy-arm 2.5s ease-in-out infinite; }
-.dk-arm-l { width:16px; height:38px; background:linear-gradient(180deg,#1a1a1a,#0a0a0a); border-radius:6px; position:absolute; top:36px; right:-2px; transform-origin:top; animation:enemy-arm 2.5s ease-in-out infinite 0.5s; }
-.dk-sword { width:8px; height:56px; background:linear-gradient(180deg,rgba(200,0,0,0.8),#303030); border-radius:4px; position:absolute; top:20px; left:-8px; box-shadow:0 0 12px rgba(200,0,0,0.5); }
-.dk-legs { display:flex; gap:4px; position:absolute; top:74px; left:50%; transform:translateX(-50%); }
-.dk-leg { width:22px; height:26px; background:linear-gradient(180deg,#1a1a1a,#0a0a0a); border-radius:3px 3px 6px 6px; }
-
-/* BOSS - DEMON KING */
-.boss-enemy { width:120px; height:150px; position:relative; animation:boss-idle 1.5s ease-in-out infinite; }
-.boss-body { position:absolute; bottom:0; left:50%; transform:translateX(-50%); }
-.bk-head { width:70px; height:65px; background:radial-gradient(circle at 50% 60%,#400000,#200000); border-radius:40% 40% 30% 30%; position:absolute; top:0; left:50%; transform:translateX(-50%); box-shadow:0 0 40px rgba(255,0,0,0.6); }
-.bk-crown { width:80px; height:24px; background:linear-gradient(180deg,#c0a000,#806800); position:absolute; top:-20px; left:50%; transform:translateX(-50%); clip-path:polygon(0% 100%,8% 0%,20% 60%,35% 0%,50% 60%,65% 0%,80% 60%,92% 0%,100% 100%); }
-.bk-eye-l, .bk-eye-r { width:14px; height:14px; background:#ff0000; border-radius:50%; position:absolute; top:20px; box-shadow:0 0 20px rgba(255,0,0,0.9); animation:boss-eye 1s ease-in-out infinite; }
-.bk-eye-l { left:10px; }
-.bk-eye-r { right:10px; }
-.bk-horn-l, .bk-horn-r { width:14px; height:40px; background:linear-gradient(0deg,#400000,#800000); position:absolute; top:-30px; clip-path:polygon(50% 0%,100% 100%,0% 100%); }
-.bk-horn-l { left:4px; transform:rotate(-15deg); }
-.bk-horn-r { right:4px; transform:rotate(15deg); }
-.bk-torso { width:80px; height:60px; background:radial-gradient(circle at 50% 30%,#300000,#150000); border-radius:6px 6px 0 0; position:absolute; top:62px; left:50%; transform:translateX(-50%); box-shadow:0 0 25px rgba(200,0,0,0.4); }
-.bk-rune { width:30px; height:30px; background:transparent; border:3px solid rgba(255,50,0,0.7); border-radius:50%; position:absolute; top:70px; left:50%; transform:translateX(-50%) rotate(0deg); animation:boss-rune 2s linear infinite; }
-.bk-rune::after { content:''; position:absolute; inset:4px; border:2px solid rgba(255,50,0,0.4); border-radius:50%; }
-.bk-arm-r { width:22px; height:54px; background:linear-gradient(180deg,#300000,#180000); border-radius:8px; position:absolute; top:64px; left:-8px; transform-origin:top; animation:enemy-arm 1.5s ease-in-out infinite; }
-.bk-arm-l { width:22px; height:54px; background:linear-gradient(180deg,#300000,#180000); border-radius:8px; position:absolute; top:64px; right:-8px; transform-origin:top; animation:enemy-arm 1.5s ease-in-out infinite 0.4s; }
-.bk-claw-r { width:24px; height:24px; position:absolute; top:114px; left:-14px; }
-.bk-claw-r::before, .bk-claw-r::after { content:''; position:absolute; width:10px; height:18px; background:#600000; border-radius:2px 2px 6px 6px; transform-origin:top; }
-.bk-claw-r::before { left:0; transform:rotate(-20deg); }
-.bk-claw-r::after { right:0; transform:rotate(20deg); }
-.bk-scythe { width:10px; height:80px; background:linear-gradient(180deg,#505050,#202020); border-radius:5px; position:absolute; top:10px; left:-20px; transform:rotate(-20deg); }
-.bk-scythe::before { content:''; position:absolute; top:0; left:-10px; width:30px; height:30px; background:radial-gradient(circle,rgba(255,0,0,0.8),transparent); border-radius:50% 50% 0 50%; border:3px solid rgba(200,0,0,0.8); box-shadow:0 0 20px rgba(255,0,0,0.8); }
-.bk-legs { display:flex; gap:6px; position:absolute; top:120px; left:50%; transform:translateX(-50%); }
-.bk-leg { width:32px; height:32px; background:linear-gradient(180deg,#300000,#150000); border-radius:4px 4px 8px 8px; }
 
 /* ====== ANIMATIONS ====== */
+/* ====== PIXEL ART ANIMATIONS ====== */
 @keyframes hero-idle {
-  0%,100% { transform:translateY(0); }
-  50% { transform:translateY(-4px); }
+  0%,49%{ transform:translateY(0); }
+  50%,100%{ transform:translateY(-3px); }
 }
-@keyframes hero-attack {
-  0% { transform:translateX(0); }
-  30% { transform:translateX(30px); }
-  60% { transform:translateX(20px); }
-  100% { transform:translateX(0); }
+@keyframes hero-lunge {
+  0%{ transform:translateX(0) scaleX(1); }
+  40%{ transform:translateX(28px) scaleX(1.05); }
+  70%{ transform:translateX(18px) scaleX(1); }
+  100%{ transform:translateX(0); }
 }
 @keyframes enemy-idle {
-  0%,100% { transform:translateY(0) scaleX(-1); }
-  50% { transform:translateY(-3px) scaleX(-1); }
+  0%,49%{ transform:scaleX(-1) translateY(0); }
+  50%,100%{ transform:scaleX(-1) translateY(-3px); }
 }
 @keyframes boss-idle {
-  0%,100% { transform:translateY(0) scaleX(-1); }
-  25% { transform:translateY(-6px) scaleX(-1); }
-  75% { transform:translateY(-3px) scaleX(-1); }
+  0%,49%{ transform:scaleX(-1) translateY(0); }
+  50%,100%{ transform:scaleX(-1) translateY(-5px); }
 }
-@keyframes arm-swing-r {
-  0%,100% { transform:rotate(-10deg); }
-  50% { transform:rotate(10deg); }
+@keyframes enemy-hit-flash {
+  0%,100%{ filter:none; }
+  25%,75%{ filter:brightness(10) saturate(0); }
+  50%{ filter:brightness(0); }
 }
-@keyframes arm-swing-l {
-  0%,100% { transform:rotate(10deg); }
-  50% { transform:rotate(-10deg); }
+@keyframes attack-flash {
+  0%{opacity:0;transform:scale(0.5)} 30%{opacity:1;transform:scale(1.2)} 100%{opacity:0;transform:scale(1.5)}
 }
-@keyframes archer-draw {
-  0%,100% { transform:rotate(-30deg); }
-  50% { transform:rotate(-60deg); }
+@keyframes damage-float {
+  0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-60px);opacity:0}
 }
-@keyframes archer-hold {
-  0%,100% { transform:rotate(30deg); }
-  50% { transform:rotate(10deg); }
+@keyframes skill-glow {
+  0%,100%{box-shadow:0 0 10px rgba(245,200,66,0.5)} 50%{box-shadow:0 0 30px rgba(245,200,66,1),0 0 60px rgba(245,200,66,0.5)}
 }
-@keyframes mage-cast {
-  0%,100% { transform:rotate(-20deg); }
-  50% { transform:rotate(20deg); }
+@keyframes btn-blink {
+  0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.7;transform:scale(1.05)}
 }
-@keyframes enemy-arm {
-  0%,100% { transform:rotate(15deg) scaleX(-1); }
-  50% { transform:rotate(-15deg) scaleX(-1); }
+@keyframes wave-in {
+  from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1}
 }
-@keyframes orb-pulse {
-  0%,100% { transform:translate(-50%,-50%) scale(1); opacity:1; }
-  50% { transform:translate(-50%,-50%) scale(1.3); opacity:0.8; }
+@keyframes slide-up {
+  from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1}
 }
-@keyframes boss-rune {
-  from { transform:translateX(-50%) rotate(0deg); }
-  to { transform:translateX(-50%) rotate(360deg); }
+@keyframes shake {
+  0%,100%{transform:translateX(0) scaleX(-1)} 25%{transform:translateX(-6px) scaleX(-1)} 75%{transform:translateX(6px) scaleX(-1)}
 }
-@keyframes boss-eye {
-  0%,100% { box-shadow:0 0 20px rgba(255,0,0,0.9); }
-  50% { box-shadow:0 0 40px rgba(255,80,0,1); transform:scale(1.2); }
-}
-@keyframes hero-walk {
-  0%,100% { transform:translateY(0); }
-  25% { transform:translateY(-3px) translateX(2px); }
-  75% { transform:translateY(-3px) translateX(-2px); }
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes popIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
 }
 @keyframes attack-flash {
   0% { opacity:0; transform:scale(0.5); }
@@ -398,20 +388,63 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 .panel-body::-webkit-scrollbar-thumb { background:rgba(245,200,66,0.3); border-radius:2px; }
 
 /* Stage Select */
-.stage-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-.stage-card {
-  background:rgba(15,10,30,0.8); border:1px solid rgba(245,200,66,0.15);
-  border-radius:10px; padding:12px 8px; text-align:center; cursor:pointer;
-  transition:all 0.2s; position:relative;
+/* World Map Stage Grid */
+.world-map-grid {
+  position:relative; min-height:520px; width:100%;
+  background:
+    radial-gradient(ellipse at 50% 80%, #2a6b1a 0%, #1d5214 30%, #0e3808 60%,#072004 100%),
+    linear-gradient(180deg, #1a4a8a 0%, #1a5a9a 100%);
+  background-blend-mode: normal;
+  image-rendering:pixelated; overflow:hidden;
 }
-.stage-card:hover:not(.locked) { border-color:var(--gold); background:rgba(40,30,5,0.5); transform:scale(1.02); }
-.stage-card.locked { opacity:0.4; cursor:not-allowed; }
-.stage-card.current { border-color:var(--gold); box-shadow:0 0 15px rgba(245,200,66,0.3); }
-.stage-card.cleared { border-color:var(--green); }
-.stage-num { font-family:'Black Han Sans',sans-serif; font-size:1.1rem; color:var(--gold); }
-.stage-name { font-size:0.65rem; color:rgba(240,232,200,0.6); margin-top:2px; }
-.stage-stars { color:var(--gold); font-size:0.7rem; margin-top:4px; }
-.stage-lock-icon { position:absolute; top:8px; right:8px; font-size:0.7rem; opacity:0.5; }
+/* Sea overlay (top portion = sea) */
+.world-map-grid::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:40%;
+  background: linear-gradient(180deg,#0a3060 0%,#1a5a9a 50%,transparent 100%);
+  pointer-events:none; z-index:0;
+}
+/* Stage node on the map */
+.stage-node {
+  position:absolute; cursor:pointer; text-align:center;
+  width:52px; transform:translateX(-50%);
+  z-index:5; transition:filter 0.15s;
+}
+.stage-node:hover:not(.locked) { filter:brightness(1.3) drop-shadow(0 0 6px #f5c842); }
+.stage-node.locked { cursor:not-allowed; }
+/* Island tile */
+.stage-island {
+  width:52px; height:36px; position:relative; margin:0 auto;
+  image-rendering:pixelated;
+}
+/* The actual clickable area */
+.stage-tap {
+  position:absolute; inset:0;
+}
+/* Stage label */
+.stage-node-label {
+  font-size:0.6rem; color:#fff; text-shadow:1px 1px 0 #000,0 0 6px rgba(0,0,0,0.8);
+  margin-top:2px; white-space:nowrap; font-weight:700; letter-spacing:0.5px;
+}
+.stage-node-num {
+  position:absolute; top:-8px; left:50%; transform:translateX(-50%);
+  background:#f5c842; color:#1a0a00; font-size:0.55rem; font-weight:900;
+  border-radius:2px; padding:1px 4px; border:1px solid #b8920a; white-space:nowrap;
+  font-family:monospace;
+}
+.stage-node.current .stage-node-num { background:#ff8020; border-color:#c04000; animation:btn-blink 1s steps(2) infinite; }
+.stage-node.cleared .stage-node-num { background:#20a020; border-color:#105010; color:#fff; }
+.stage-node.locked .stage-node-num { background:#444; border-color:#222; color:#888; }
+/* Stars */
+.stage-node-stars { font-size:0.7rem; line-height:1; }
+/* Path line between stages */
+.map-path {
+  position:absolute; z-index:2; pointer-events:none;
+  background:repeating-linear-gradient(90deg,#a08040 0px,#a08040 6px,transparent 6px,transparent 10px);
+  height:3px; transform-origin:left center;
+}
+
+/* Removed old stage card styles but keep them empty for compat */
+.stage-grid { } .stage-card { } .stage-num { } .stage-name { } .stage-stars { } .stage-lock-icon { }
 
 /* Weapon/Armor Cards */
 .item-list { display:flex; flex-direction:column; gap:8px; }
@@ -763,9 +796,13 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   <!-- BATTLE AREA -->
   <div id="battleArea">
     <div class="battle-bg-layer"></div>
+    <div class="pixel-moon"></div>
+    <div class="pixel-castle"></div>
+    <div class="torch-l"></div>
+    <div class="torch-r"></div>
     <div class="ground"></div>
-    <div id="heroesArea" style="position:absolute;left:10px;bottom:80px;display:flex;gap:6px;align-items:flex-end;"></div>
-    <div id="enemiesArea" style="position:absolute;right:10px;bottom:80px;display:flex;gap:6px;align-items:flex-end;flex-direction:row-reverse;"></div>
+    <div id="heroesArea" style="position:absolute;left:8px;bottom:80px;display:flex;gap:4px;align-items:flex-end;"></div>
+    <div id="enemiesArea" style="position:absolute;right:8px;bottom:80px;display:flex;gap:4px;align-items:flex-end;flex-direction:row-reverse;"></div>
     <div id="waveIndicator">웨이브 1 / 3</div>
     <div id="clearBanner" class="clear-banner">
       <h2>🎉 스테이지 클리어!</h2>
@@ -820,15 +857,19 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   </div>
 </div>
 
+
 <!-- PANELS -->
 <!-- Stage Panel -->
 <div id="stagePanel" class="panel">
   <div class="panel-header">
-    <div class="panel-title">🗺️ 스테이지 선택</div>
+    <div class="panel-title">🗺️ 모험 지도</div>
     <button class="panel-close" onclick="closePanel('stagePanel')">✕</button>
   </div>
-  <div class="panel-body">
-    <div id="stageGrid" class="stage-grid"></div>
+  <div class="panel-body" style="padding:0;overflow:hidden;">
+    <div id="worldMapWrap" style="position:relative;width:100%;overflow-x:auto;overflow-y:auto;background:#1a4a8a;">
+      <!-- World map SVG background -->
+      <div id="stageGrid" class="world-map-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -1046,37 +1087,44 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     <div class="panel-title">⚔️ 파티 멀티플레이</div>
     <button class="panel-close" onclick="closePanel('partyPanel')">✕</button>
   </div>
-  <div class="panel-body">
+  <div class="panel-body" style="padding:10px;">
     <!-- 현재 파티 상태 -->
-    <div id="partyStatus" style="background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);border-radius:10px;padding:14px;margin-bottom:16px;">
-      <div style="font-size:0.8rem;color:var(--gold);font-weight:700;margin-bottom:8px;">📋 현재 파티</div>
-      <div id="partyMemberList" style="display:flex;flex-direction:column;gap:6px;"></div>
-      <div id="noPartyMsg" style="font-size:0.8rem;color:rgba(240,232,200,0.3);text-align:center;padding:12px;">파티가 없습니다</div>
+    <div id="partyStatus" style="background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
+      <div style="font-size:0.75rem;color:var(--gold);font-weight:700;margin-bottom:6px;">📋 파티원</div>
+      <div id="partyMemberList" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <div id="noPartyMsg" style="font-size:0.75rem;color:rgba(240,232,200,0.3);text-align:center;padding:8px;">파티가 없습니다</div>
     </div>
 
-    <!-- 파티 만들기 -->
-    <div class="admin-section">
-      <div class="admin-section-title">🏕️ 파티 만들기</div>
-      <input type="text" id="partyNameInput" class="admin-input" placeholder="파티 이름 (예: 용사의파티)" style="margin-bottom:8px;">
-      <button class="admin-btn" onclick="createParty()">파티 생성</button>
-    </div>
-
-    <!-- 파티 참가 -->
-    <div class="admin-section">
-      <div class="admin-section-title">🚪 파티 참가</div>
-      <select id="partyJoinSelect" class="admin-target-select" style="margin-bottom:8px;"></select>
-      <button class="admin-btn" onclick="joinParty()">참가하기</button>
-    </div>
-
-    <!-- 파티 전투 시작 (파티장만) -->
+    <!-- 파티장: 섬 지도 스테이지 선택 -->
     <div id="partyBattleSection" style="display:none;">
-      <div class="admin-section-title" style="color:var(--green);border-color:rgba(48,192,96,0.3);">⚔️ 파티 전투</div>
-      <div style="font-size:0.75rem;color:rgba(240,232,200,0.5);margin-bottom:8px;">파티장이 스테이지 선택 후 전투 시작!</div>
-      <button class="admin-btn" style="background:linear-gradient(135deg,#206020,#30a030);" onclick="startPartyBattle()">파티 전투 시작!</button>
-      <button class="admin-btn" style="background:rgba(150,50,50,0.6);color:#ff8080;margin-top:6px;" onclick="leaveParty()">파티 해산</button>
+      <div style="font-size:0.75rem;color:var(--green);font-weight:700;margin-bottom:6px;">🗺️ 스테이지 선택 (파티장)</div>
+      <div id="partyIslandMap" style="position:relative;width:100%;height:260px;border-radius:10px;overflow:hidden;border:2px solid rgba(245,200,66,0.3);"></div>
+      <div style="font-size:0.65rem;color:rgba(240,232,200,0.4);text-align:center;margin:6px 0;">섬을 탭하면 파티 전투 시작!</div>
+      <button class="admin-btn" style="background:rgba(150,50,50,0.6);color:#ff8080;margin-top:4px;" onclick="leaveParty()">파티 해산</button>
     </div>
+
+    <!-- 파티원: 대기 화면 -->
     <div id="partyMemberSection" style="display:none;">
+      <div style="background:rgba(30,20,60,0.8);border-radius:8px;padding:14px;text-align:center;margin-bottom:8px;">
+        <div style="font-size:2rem;margin-bottom:6px;">⚓</div>
+        <div style="font-size:0.8rem;color:var(--gold);font-weight:700;">파티장의 출항을 기다리는 중...</div>
+        <div style="font-size:0.65rem;color:rgba(240,232,200,0.4);margin-top:4px;">파티장이 스테이지를 선택하면 전투 시작</div>
+      </div>
       <button class="admin-btn" style="background:rgba(150,50,50,0.6);color:#ff8080;" onclick="leaveParty()">파티 탈퇴</button>
+    </div>
+
+    <!-- 파티 만들기 / 참가 -->
+    <div id="partyCreateJoinSection">
+      <div class="admin-section" style="margin-bottom:10px;">
+        <div class="admin-section-title">🏕️ 파티 만들기</div>
+        <input type="text" id="partyNameInput" class="admin-input" placeholder="파티 이름" style="margin-bottom:6px;">
+        <button class="admin-btn" onclick="createParty()">파티 생성</button>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🚪 파티 참가</div>
+        <select id="partyJoinSelect" class="admin-target-select" style="margin-bottom:6px;"></select>
+        <button class="admin-btn" onclick="joinParty()">참가하기</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1793,16 +1841,405 @@ function renderOtherUsers() {
 }
 
 function getHeroHTML(idx) {
-  if (idx === 0) return `<div class="warrior-body"><div class="w-sword"></div><div class="w-shield"></div><div class="w-helmet"></div><div class="w-head"></div><div class="w-arm-r"></div><div class="w-arm-l"></div><div class="w-torso"></div><div class="w-chest-plate"></div><div class="w-legs"><div class="w-leg"></div><div class="w-leg"></div></div><div class="w-boots"><div class="w-boot"></div><div class="w-boot"></div></div></div>`;
-  if (idx === 1) return `<div class="warrior-body" style="transform:none"><div class="a-hat"></div><div class="a-head"></div><div class="a-arm-r"></div><div class="a-bow"></div><div class="a-arm-l"></div><div class="a-torso"></div><div class="a-legs"><div class="a-leg"></div><div class="a-leg"></div></div></div>`;
-  return `<div class="warrior-body" style="transform:none"><div class="m-hat"></div><div class="m-head"></div><div class="m-arm-r"></div><div class="m-staff"></div><div class="m-arm-l"></div><div class="m-robe"></div></div>`;
+  // ★ 픽셀아트 SVG 캐릭터
+  if (idx === 0) return `<svg viewBox="0 0 20 30" width="70" height="100" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+  <!-- Warrior: Blue plate armor knight -->
+  <!-- Gold plume -->
+  <rect x="9" y="0" width="2" height="3" fill="#e8d040"/><rect x="9" y="0" width="2" height="1" fill="#fff060"/>
+  <!-- Helmet -->
+  <rect x="6" y="2" width="8" height="1" fill="#9898d0"/><rect x="5" y="3" width="10" height="4" fill="#6878b8"/>
+  <rect x="4" y="4" width="1" height="3" fill="#6878b8"/><rect x="15" y="4" width="1" height="3" fill="#6878b8"/>
+  <rect x="5" y="3" width="10" height="1" fill="#8898c8"/><!-- helmet highlight -->
+  <!-- Visor slit -->
+  <rect x="5" y="5" width="10" height="2" fill="#181c38"/>
+  <rect x="6" y="5" width="3" height="1" fill="#3858a0"/><rect x="11" y="5" width="3" height="1" fill="#3858a0"/>
+  <!-- Face/chin guard -->
+  <rect x="6" y="7" width="8" height="2" fill="#7888b8"/>
+  <!-- Left shoulder pauldron -->
+  <rect x="1" y="9" width="5" height="4" fill="#5068a8"/><rect x="1" y="9" width="5" height="1" fill="#8898c8"/>
+  <rect x="0" y="10" width="2" height="3" fill="#4058a0"/>
+  <!-- Right shoulder pauldron -->
+  <rect x="14" y="9" width="5" height="4" fill="#5068a8"/><rect x="14" y="9" width="5" height="1" fill="#8898c8"/>
+  <rect x="18" y="10" width="2" height="3" fill="#4058a0"/>
+  <!-- Chest armor -->
+  <rect x="5" y="9" width="10" height="9" fill="#4058a0"/>
+  <rect x="6" y="10" width="8" height="1" fill="#6878b8"/><!-- chest highlight -->
+  <rect x="7" y="12" width="6" height="2" fill="#3048900"/>
+  <!-- Center chest gem -->
+  <rect x="9" y="13" width="2" height="2" fill="#80d0ff"/><rect x="9" y="13" width="1" height="1" fill="#c0f0ff"/>
+  <!-- Belt -->
+  <rect x="5" y="18" width="10" height="2" fill="#c08030"/><rect x="9" y="18" width="2" height="2" fill="#e8d040"/>
+  <!-- Hip guards / tassets -->
+  <rect x="3" y="20" width="5" height="3" fill="#3850900"/><rect x="12" y="20" width="5" height="3" fill="#384090"/>
+  <rect x="3" y="20" width="5" height="1" fill="#5068a8"/><rect x="12" y="20" width="5" height="1" fill="#5068a8"/>
+  <!-- Legs -->
+  <rect x="5" y="23" width="4" height="4" fill="#30406a"/><rect x="11" y="23" width="4" height="4" fill="#30406a"/>
+  <rect x="5" y="23" width="4" height="1" fill="#485880"/><rect x="11" y="23" width="4" height="1" fill="#485880"/>
+  <!-- Boots -->
+  <rect x="4" y="27" width="5" height="3" fill="#3c2010"/><rect x="11" y="27" width="5" height="3" fill="#3c2010"/>
+  <rect x="4" y="27" width="5" height="1" fill="#5a3018"/><rect x="11" y="27" width="5" height="1" fill="#5a3018"/>
+  <!-- Sword (right side, vertical) -->
+  <rect x="17" y="8" width="2" height="16" fill="#c0cce0"/>
+  <rect x="17" y="8" width="2" height="3" fill="#e0ecf8"/><!-- blade tip -->
+  <rect x="15" y="15" width="6" height="2" fill="#b09040"/><!-- crossguard -->
+  <rect x="17" y="23" width="2" height="3" fill="#908878"/><!-- pommel -->
+  <rect x="17" y="14" width="1" height="2" fill="#d8e4f0"/><!-- blade edge highlight -->
+  <!-- Shield (left side) -->
+  <rect x="0" y="9" width="4" height="9" fill="#4060b8"/>
+  <rect x="0" y="9" width="4" height="1" fill="#6888d0"/><!-- shield top highlight -->
+  <rect x="1" y="10" width="2" height="7" fill="#5070c0"/><!-- shield face -->
+  <rect x="1" y="13" width="2" height="1" fill="#e8d040"/><!-- shield emblem -->
+  <rect x="0" y="17" width="4" height="1" fill="#304890"/><!-- shield bottom -->
+</svg>`;
+  if (idx === 1) return `<svg viewBox="0 0 18 28" width="64" height="96" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+  <!-- Archer: Green ranger with feather hat -->
+  <!-- Feather in hat -->
+  <rect x="12" y="0" width="1" height="4" fill="#e0e840"/><rect x="11" y="1" width="1" height="3" fill="#c8d030"/>
+  <rect x="13" y="0" width="1" height="3" fill="#f0f060"/>
+  <!-- Hat -->
+  <rect x="4" y="3" width="10" height="2" fill="#284018"/><rect x="4" y="3" width="10" height="1" fill="#386028"/>
+  <rect x="5" y="1" width="8" height="3" fill="#1e3010"/>
+  <!-- Hair (brown) -->
+  <rect x="4" y="5" width="2" height="2" fill="#804020"/><rect x="12" y="5" width="2" height="2" fill="#804020"/>
+  <!-- Face -->
+  <rect x="5" y="5" width="8" height="5" fill="#dca070"/>
+  <rect x="5" y="5" width="8" height="1" fill="#c89060"/><!-- shadow -->
+  <!-- Eyes -->
+  <rect x="6" y="7" width="2" height="1" fill="#402010"/><rect x="10" y="7" width="2" height="1" fill="#402010"/>
+  <!-- Smile -->
+  <rect x="7" y="9" width="4" height="1" fill="#c08060"/>
+  <!-- Neck -->
+  <rect x="7" y="10" width="4" height="1" fill="#c8906a"/>
+  <!-- Shoulders / vest -->
+  <rect x="3" y="11" width="4" height="5" fill="#2a4018"/><rect x="11" y="11" width="4" height="5" fill="#2a4018"/>
+  <rect x="3" y="11" width="4" height="1" fill="#406030"/><rect x="11" y="11" width="4" height="1" fill="#406030"/>
+  <!-- Torso / vest -->
+  <rect x="6" y="11" width="6" height="8" fill="#385028"/>
+  <rect x="6" y="11" width="6" height="1" fill="#507040"/><!-- highlight -->
+  <!-- Leather straps -->
+  <rect x="7" y="13" width="4" height="1" fill="#a06030"/>
+  <rect x="8" y="12" width="2" height="5" fill="#804820"/>
+  <!-- Belt -->
+  <rect x="5" y="19" width="8" height="2" fill="#6a3818"/>
+  <rect x="8" y="19" width="2" height="2" fill="#c09040"/><!-- buckle -->
+  <!-- Legs (leather trousers) -->
+  <rect x="5" y="21" width="3" height="5" fill="#5c3820"/><rect x="10" y="21" width="3" height="5" fill="#5c3820"/>
+  <rect x="5" y="21" width="3" height="1" fill="#7a5030"/><rect x="10" y="21" width="3" height="1" fill="#7a5030"/>
+  <!-- Boots -->
+  <rect x="4" y="25" width="4" height="3" fill="#3c200c"/><rect x="10" y="25" width="4" height="3" fill="#3c200c"/>
+  <rect x="4" y="25" width="4" height="1" fill="#5a3018"/><rect x="10" y="25" width="4" height="1" fill="#5a3018"/>
+  <!-- Bow (right side) -->
+  <rect x="15" y="3" width="2" height="20" fill="#805020"/>
+  <rect x="15" y="3" width="2" height="1" fill="#a07040"/><!-- bow tip top -->
+  <rect x="15" y="22" width="2" height="1" fill="#a07040"/><!-- bow tip bottom -->
+  <!-- Bowstring -->
+  <rect x="16" y="3" width="1" height="20" fill="#d8c090" style="opacity:0.5"/>
+  <!-- Arrow nocked -->
+  <rect x="14" y="10" width="8" height="1" fill="#c0a040"/>
+  <rect x="20" y="9" width="1" height="3" fill="#e0c060"/><!-- arrowhead -->
+  <rect x="13" y="10" width="1" height="1" fill="#c84820"/><!-- fletching -->
+  <!-- Quiver (left side) -->
+  <rect x="1" y="11" width="3" height="10" fill="#5a3010"/><rect x="1" y="11" width="3" height="1" fill="#7a4818"/>
+  <rect x="2" y="9" width="1" height="3" fill="#d8c080"/><!-- arrow tip -->
+  <rect x="1" y="10" width="1" height="2" fill="#c0a840"/><!-- arrow tip 2 -->
+</svg>`;
+  return `<svg viewBox="0 0 18 30" width="64" height="102" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mage: Purple robed wizard -->
+  <!-- Wizard hat -->
+  <rect x="4" y="5" width="10" height="2" fill="#6020a0"/><rect x="4" y="5" width="10" height="1" fill="#8040c0"/><!-- hat brim -->
+  <rect x="7" y="2" width="4" height="4" fill="#5018900"/><rect x="8" y="0" width="2" height="3" fill="#401080"/>
+  <rect x="7" y="1" width="4" height="1" fill="#702ab0"/><!-- hat highlight -->
+  <!-- Hat star deco -->
+  <rect x="9" y="2" width="1" height="1" fill="#e0d040"/>
+  <!-- Face -->
+  <rect x="5" y="7" width="8" height="5" fill="#e0d0e8"/>
+  <rect x="5" y="7" width="8" height="1" fill="#d0c0d8"/>
+  <!-- Eyes (glowing purple) -->
+  <rect x="6" y="8" width="2" height="2" fill="#8020c0"/><rect x="10" y="8" width="2" height="2" fill="#8020c0"/>
+  <rect x="6" y="8" width="1" height="1" fill="#c060ff"/><rect x="10" y="8" width="1" height="1" fill="#c060ff"/>
+  <!-- Eyebrows -->
+  <rect x="6" y="7" width="2" height="1" fill="#806090"/><rect x="10" y="7" width="2" height="1" fill="#806090"/>
+  <!-- Robe collar -->
+  <rect x="5" y="12" width="8" height="2" fill="#501898"/>
+  <rect x="8" y="12" width="2" height="2" fill="#e0c040"/><!-- brooch -->
+  <!-- Robe body -->
+  <rect x="4" y="14" width="10" height="10" fill="#5018900"/>
+  <rect x="4" y="14" width="10" height="1" fill="#702ab0"/><!-- robe highlight -->
+  <!-- Robe runes/details -->
+  <rect x="5" y="17" width="2" height="1" fill="#e040ff"/><rect x="11" y="17" width="2" height="1" fill="#e040ff"/>
+  <rect x="6" y="20" width="6" height="1" fill="#c030e8"/>
+  <!-- Robe bottom (flare) -->
+  <rect x="3" y="24" width="12" height="4" fill="#401080"/>
+  <rect x="2" y="25" width="14" height="2" fill="#380e70"/>
+  <rect x="3" y="24" width="12" height="1" fill="#602098"/>
+  <!-- Boots (visible below robe) -->
+  <rect x="5" y="27" width="3" height="3" fill="#281060"/><rect x="10" y="27" width="3" height="3" fill="#281060"/>
+  <!-- Staff (left side) -->
+  <rect x="0" y="4" width="2" height="22" fill="#806040"/>
+  <rect x="0" y="4" width="2" height="1" fill="#a08060"/>
+  <!-- Staff orb -->
+  <rect x="0" y="1" width="4" height="4" fill="#c040f0"/>
+  <rect x="1" y="0" width="2" height="5" fill="#e060ff"/>
+  <rect x="0" y="1" width="4" height="1" fill="#f080ff"/><!-- orb highlight -->
+  <rect x="0" y="4" width="4" height="1" fill="#9020c0"/><!-- orb shadow -->
+  <!-- Orb inner glow -->
+  <rect x="1" y="1" width="2" height="2" fill="#f8c0ff"/>
+  <!-- Left hand holding staff -->
+  <rect x="1" y="18" width="3" height="2" fill="#d8b0c8"/>
+  <!-- Right hand (casting) -->
+  <rect x="14" y="15" width="3" height="2" fill="#d8b0c8"/>
+  <rect x="15" y="13" width="2" height="3" fill="#e0c0d8"/>
+  <!-- Magic sparkles from hand -->
+  <rect x="15" y="12" width="1" height="1" fill="#e040ff"/><rect x="16" y="11" width="1" height="1" fill="#c030d0"/>
+  <rect x="17" y="13" width="1" height="1" fill="#f060ff"/>
+</svg>`;
 }
 
 function getEnemyHTML(type) {
-  if (type === 'goblin') return `<div class="g-ear-l"></div><div class="g-ear-r"></div><div class="g-head"><div class="g-eye-l"></div><div class="g-eye-r"></div></div><div class="g-arm-r"></div><div class="g-club"></div><div class="g-arm-l"></div><div class="g-torso"></div><div class="g-legs"><div class="g-leg"></div><div class="g-leg"></div></div>`;
-  if (type === 'orc') return `<div class="o-head"><div class="o-tusk-l"></div><div class="o-tusk-r"></div><div class="o-eye-l"></div><div class="o-eye-r"></div></div><div class="o-arm-r"></div><div class="o-wep"></div><div class="o-arm-l"></div><div class="o-torso"></div><div class="o-armor"></div><div class="o-legs"><div class="o-leg"></div><div class="o-leg"></div></div>`;
-  if (type === 'dark_knight') return `<div class="dk-head"><div class="dk-visor"></div></div><div class="dk-arm-r"></div><div class="dk-sword"></div><div class="dk-arm-l"></div><div class="dk-torso"></div><div class="dk-rune"></div><div class="dk-legs"><div class="dk-leg"></div><div class="dk-leg"></div></div>`;
-  if (type === 'demon_king') return `<div class="bk-head"><div class="bk-crown"></div><div class="bk-horn-l"></div><div class="bk-horn-r"></div><div class="bk-eye-l"></div><div class="bk-eye-r"></div></div><div class="bk-arm-r"></div><div class="bk-scythe"></div><div class="bk-arm-l"></div><div class="bk-claw-r"></div><div class="bk-torso"></div><div class="bk-rune"></div><div class="bk-legs"><div class="bk-leg"></div><div class="bk-leg"></div></div>`;
+  if (type === 'goblin') return `<svg viewBox="0 0 16 22" width="56" height="77" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+  <!-- Goblin: Small sneaky green creature -->
+  <!-- Ears (large pointy) -->
+  <rect x="0" y="3" width="3" height="5" fill="#486030"/><rect x="0" y="3" width="2" height="4" fill="#588040"/>
+  <rect x="13" y="3" width="3" height="5" fill="#486030"/><rect x="14" y="3" width="2" height="4" fill="#588040"/>
+  <!-- Head -->
+  <rect x="3" y="2" width="10" height="8" fill="#60903a"/>
+  <rect x="3" y="2" width="10" height="1" fill="#70a848"/><!-- head highlight -->
+  <rect x="4" y="3" width="8" height="6" fill="#589038"/>
+  <!-- Eyes (menacing red) -->
+  <rect x="4" y="4" width="3" height="3" fill="#ff3010"/><rect x="9" y="4" width="3" height="3" fill="#ff3010"/>
+  <rect x="4" y="4" width="2" height="2" fill="#ff6030"/><rect x="9" y="4" width="2" height="2" fill="#ff6030"/>
+  <rect x="5" y="5" width="1" height="1" fill="#ff8050"/><rect x="10" y="5" width="1" height="1" fill="#ff8050"/><!-- pupils -->
+  <rect x="5" y="4" width="1" height="1" fill="#ffe0d0"/><rect x="10" y="4" width="1" height="1" fill="#ffe0d0"/><!-- eye glint -->
+  <!-- Nose -->
+  <rect x="7" y="7" width="2" height="1" fill="#3a6020"/>
+  <!-- Teeth (sharp) -->
+  <rect x="5" y="9" width="6" height="1" fill="#181208"/><!-- mouth line -->
+  <rect x="5" y="9" width="1" height="2" fill="#e0e0e0"/><rect x="7" y="9" width="1" height="2" fill="#e0e0e0"/>
+  <rect x="9" y="9" width="1" height="2" fill="#e0e0e0"/><rect x="10" y="9" width="1" height="1" fill="#e0e0e0"/>
+  <!-- Body (rags) -->
+  <rect x="4" y="11" width="8" height="6" fill="#3c2810"/>
+  <rect x="4" y="11" width="8" height="1" fill="#5a3a18"/>
+  <rect x="5" y="13" width="6" height="1" fill="#4a3010"/><!-- rag detail -->
+  <!-- Arms -->
+  <rect x="1" y="11" width="4" height="5" fill="#588038"/><rect x="11" y="11" width="4" height="5" fill="#588038"/>
+  <rect x="1" y="11" width="4" height="1" fill="#68a048"/>
+  <!-- Hands/claws -->
+  <rect x="0" y="15" width="3" height="2" fill="#487030"/>
+  <rect x="0" y="14" width="1" height="1" fill="#608040"/><rect x="0" y="16" width="1" height="1" fill="#608040"/>
+  <!-- Club (right hand) -->
+  <rect x="12" y="7" width="3" height="10" fill="#704820"/>
+  <rect x="11" y="5" width="5" height="4" fill="#906030"/><!-- club head -->
+  <rect x="11" y="5" width="5" height="1" fill="#b08048"/><!-- club highlight -->
+  <!-- Metal studs on club -->
+  <rect x="12" y="6" width="1" height="1" fill="#c0c0c0"/><rect x="14" y="7" width="1" height="1" fill="#c0c0c0"/>
+  <!-- Legs -->
+  <rect x="4" y="17" width="3" height="4" fill="#4a6028"/><rect x="9" y="17" width="3" height="4" fill="#4a6028"/>
+  <!-- Feet -->
+  <rect x="3" y="20" width="4" height="2" fill="#385020"/><rect x="9" y="20" width="4" height="2" fill="#385020"/>
+</svg>`;
+
+  if (type === 'orc') return `<svg viewBox="0 0 22 28" width="80" height="100" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+  <!-- Orc: Large brutal warrior -->
+  <!-- Helmet (iron) -->
+  <rect x="5" y="0" width="12" height="2" fill="#686868"/><rect x="4" y="1" width="14" height="5" fill="#505050"/>
+  <rect x="4" y="1" width="14" height="1" fill="#888888"/><!-- helmet highlight -->
+  <!-- Helmet horns -->
+  <rect x="2" y="0" width="3" height="4" fill="#c0a040"/><rect x="17" y="0" width="3" height="4" fill="#c0a040"/>
+  <rect x="2" y="0" width="3" height="1" fill="#e0c050"/>
+  <!-- Face (menacing orc) -->
+  <rect x="5" y="5" width="12" height="8" fill="#50783a"/>
+  <rect x="5" y="5" width="12" height="1" fill="#608848"/><!-- face highlight -->
+  <!-- Eyes (red, glowing) -->
+  <rect x="6" y="6" width="3" height="3" fill="#cc2010"/><rect x="13" y="6" width="3" height="3" fill="#cc2010"/>
+  <rect x="7" y="6" width="1" height="2" fill="#ff4020"/><rect x="14" y="6" width="1" height="2" fill="#ff4020"/>
+  <rect x="7" y="6" width="1" height="1" fill="#ff8050"/><rect x="14" y="6" width="1" height="1" fill="#ff8050"/>
+  <!-- Tusks -->
+  <rect x="7" y="11" width="2" height="4" fill="#e0d0a0"/><rect x="13" y="11" width="2" height="4" fill="#e0d0a0"/>
+  <rect x="8" y="11" width="1" height="3" fill="#f0e8b8"/>
+  <!-- Nose flat -->
+  <rect x="10" y="9" width="2" height="2" fill="#3a5820"/>
+  <!-- Mouth/snarl -->
+  <rect x="7" y="12" width="8" height="1" fill="#201408"/>
+  <!-- Massive shoulders -->
+  <rect x="0" y="12" width="6" height="7" fill="#404040"/><rect x="16" y="12" width="6" height="7" fill="#404040"/>
+  <rect x="0" y="12" width="6" height="1" fill="#686868"/><rect x="16" y="12" width="6" height="1" fill="#686868"/>
+  <!-- Chest armor (plate) -->
+  <rect x="5" y="12" width="12" height="9" fill="#484848"/>
+  <rect x="5" y="12" width="12" height="1" fill="#707070"/>
+  <rect x="7" y="14" width="8" height="2" fill="#585858"/><!-- chest detail -->
+  <!-- Belly (exposed green) -->
+  <rect x="7" y="21" width="8" height="3" fill="#508038"/>
+  <!-- Weapon: Heavy axe -->
+  <rect x="18" y="4" width="3" height="18" fill="#686868"/><!-- shaft -->
+  <rect x="17" y="2" width="5" height="7" fill="#808080"/><!-- axe head -->
+  <rect x="17" y="2" width="5" height="1" fill="#b0b0b0"/><!-- axe highlight -->
+  <rect x="18" y="3" width="4" height="5" fill="#909090"/>
+  <!-- Blood on axe -->
+  <rect x="17" y="5" width="1" height="2" fill="#c02020"/>
+  <!-- Arms (muscular) -->
+  <rect x="1" y="13" width="4" height="8" fill="#50783a"/><rect x="17" y="13" width="4" height="8" fill="#50783a"/>
+  <!-- Hands -->
+  <rect x="0" y="19" width="5" height="3" fill="#487030"/><rect x="17" y="19" width="5" height="3" fill="#487030"/>
+  <!-- Legs (armored) -->
+  <rect x="5" y="24" width="5" height="4" fill="#383838"/><rect x="12" y="24" width="5" height="4" fill="#383838"/>
+  <rect x="5" y="24" width="5" height="1" fill="#585858"/><rect x="12" y="24" width="5" height="1" fill="#585858"/>
+  <!-- Boots -->
+  <rect x="4" y="27" width="7" height="1" fill="#282010"/><rect x="11" y="27" width="7" height="1" fill="#282010"/>
+</svg>`;
+
+  if (type === 'dark_knight') return `<svg viewBox="0 0 22 32" width="82" height="115" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+  <!-- Dark Knight: Black armored death knight -->
+  <!-- Black helmet with red visor -->
+  <rect x="5" y="0" width="12" height="2" fill="#1a1a2a"/>
+  <rect x="4" y="1" width="14" height="6" fill="#141420"/>
+  <rect x="4" y="1" width="14" height="1" fill="#303050"/><!-- helmet edge -->
+  <!-- Helmet spikes -->
+  <rect x="8" y="0" width="2" height="2" fill="#c02020"/><rect x="12" y="0" width="2" height="2" fill="#c02020"/>
+  <!-- Skull face / Visor -->
+  <rect x="5" y="5" width="12" height="3" fill="#100010"/>
+  <rect x="5" y="5" width="5" height="2" fill="#cc0000"/><rect x="12" y="5" width="5" height="2" fill="#cc0000"/><!-- red eyes -->
+  <rect x="6" y="5" width="3" height="1" fill="#ff3030"/><rect x="13" y="5" width="3" height="1" fill="#ff3030"/>
+  <rect x="7" y="5" width="1" height="1" fill="#ff8080"/><rect x="14" y="5" width="1" height="1" fill="#ff8080"/><!-- eye glow -->
+  <!-- Neck armor -->
+  <rect x="7" y="8" width="8" height="3" fill="#181828"/>
+  <rect x="7" y="8" width="8" height="1" fill="#282840"/>
+  <!-- Massive spiked shoulders -->
+  <rect x="0" y="9" width="7" height="8" fill="#141420"/>
+  <rect x="0" y="9" width="7" height="1" fill="#282840"/>
+  <rect x="1" y="8" width="2" height="2" fill="#202035"/><!-- spikes -->
+  <rect x="3" y="7" width="2" height="3" fill="#202035"/>
+  <rect x="15" y="9" width="7" height="8" fill="#141420"/>
+  <rect x="15" y="9" width="7" height="1" fill="#282840"/>
+  <rect x="19" y="8" width="2" height="2" fill="#202035"/>
+  <rect x="17" y="7" width="2" height="3" fill="#202035"/>
+  <!-- Chest (black plate) -->
+  <rect x="6" y="11" width="10" height="10" fill="#101018"/>
+  <rect x="6" y="11" width="10" height="1" fill="#202030"/>
+  <!-- Blood/skull rune on chest -->
+  <rect x="9" y="13" width="4" height="4" fill="#800000"/>
+  <rect x="10" y="13" width="2" height="4" fill="#c00000"/>
+  <rect x="9" y="14" width="4" height="2" fill="#c00000"/>
+  <rect x="10" y="14" width="2" height="2" fill="#ff2020"/><!-- rune center -->
+  <!-- Dark cloak/cape -->
+  <rect x="3" y="14" width="3" height="12" fill="#0c0c18"/><rect x="16" y="14" width="3" height="12" fill="#0c0c18"/>
+  <!-- Belt with skull -->
+  <rect x="6" y="21" width="10" height="2" fill="#181020"/>
+  <rect x="9" y="20" width="4" height="4" fill="#3a0000"/><!-- skull buckle -->
+  <rect x="10" y="21" width="2" height="2" fill="#601010"/>
+  <!-- Legs (black plate) -->
+  <rect x="6" y="23" width="4" height="6" fill="#0e0e1a"/><rect x="12" y="23" width="4" height="6" fill="#0e0e1a"/>
+  <rect x="6" y="23" width="4" height="1" fill="#202030"/><rect x="12" y="23" width="4" height="1" fill="#202030"/>
+  <!-- Dark boots -->
+  <rect x="5" y="28" width="5" height="4" fill="#0a0a14"/><rect x="12" y="28" width="5" height="4" fill="#0a0a14"/>
+  <rect x="5" y="28" width="5" height="1" fill="#181828"/><rect x="12" y="28" width="5" height="1" fill="#181828"/>
+  <!-- Dark sword (massive) -->
+  <rect x="1" y="7" width="3" height="22" fill="#0a0a18"/>
+  <rect x="1" y="7" width="3" height="1" fill="#202030"/>
+  <rect x="2" y="7" width="1" height="18" fill="#c00000"/><!-- blood channel -->
+  <rect x="0" y="15" width="5" height="2" fill="#303050"/><!-- crossguard -->
+  <rect x="1" y="13" width="1" height="4" fill="#4040600"/><!-- guard detail -->
+  <!-- Dark aura particles -->
+  <rect x="4" y="3" width="1" height="1" fill="#400040"/><rect x="17" y="2" width="1" height="1" fill="#400040"/>
+  <rect x="3" y="20" width="1" height="1" fill="#600060"/><rect x="18" y="22" width="1" height="1" fill="#600060"/>
+</svg>`;
+
+  if (type === 'demon_king') return `<svg viewBox="0 0 36 44" width="126" height="154" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+  <!-- DEMON KING: Massive final boss -->
+  <!-- Wings (behind body) -->
+  <rect x="0" y="10" width="8" height="16" fill="#300010"/>
+  <rect x="1" y="8" width="6" height="18" fill="#480018"/>
+  <rect x="0" y="12" width="3" height="12" fill="#200010"/>
+  <rect x="28" y="10" width="8" height="16" fill="#300010"/>
+  <rect x="29" y="8" width="6" height="18" fill="#480018"/>
+  <rect x="33" y="12" width="3" height="12" fill="#200010"/>
+  <!-- Wing veins -->
+  <rect x="2" y="9" width="1" height="14" fill="#600020"/><rect x="4" y="11" width="1" height="12" fill="#600020"/>
+  <rect x="31" y="9" width="1" height="14" fill="#600020"/><rect x="33" y="11" width="1" height="12" fill="#600020"/>
+  <!-- Crown (gold) -->
+  <rect x="9" y="0" width="18" height="4" fill="#c09000"/>
+  <rect x="9" y="0" width="18" height="1" fill="#e8b820"/><!-- crown highlight -->
+  <rect x="10" y="4" width="16" height="2" fill="#d0a010"/>
+  <!-- Crown spikes -->
+  <rect x="9" y="0" width="3" height="5" fill="#c09000"/><rect x="11" y="0" width="2" height="6" fill="#d0a010"/>
+  <rect x="15" y="0" width="3" height="5" fill="#c09000"/><rect x="16" y="0" width="2" height="7" fill="#e0b820"/>
+  <rect x="20" y="0" width="3" height="5" fill="#c09000"/><rect x="22" y="0" width="2" height="6" fill="#d0a010"/>
+  <rect x="24" y="0" width="3" height="5" fill="#c09000"/>
+  <!-- Crown gems -->
+  <rect x="13" y="1" width="2" height="2" fill="#ff2020"/><rect x="18" y="0" width="2" height="2" fill="#2050ff"/>
+  <rect x="22" y="1" width="2" height="2" fill="#20c020"/>
+  <!-- Demon head -->
+  <rect x="8" y="4" width="20" height="16" fill="#500008"/>
+  <rect x="8" y="4" width="20" height="1" fill="#780010"/><!-- head highlight -->
+  <rect x="9" y="5" width="18" height="14" fill="#600010"/>
+  <!-- Horns (curved) -->
+  <rect x="6" y="2" width="4" height="8" fill="#880020"/>
+  <rect x="6" y="2" width="3" height="6" fill="#a00028"/>
+  <rect x="5" y="4" width="2" height="5" fill="#880020"/>
+  <rect x="26" y="2" width="4" height="8" fill="#880020"/>
+  <rect x="27" y="2" width="3" height="6" fill="#a00028"/>
+  <rect x="29" y="4" width="2" height="5" fill="#880020"/>
+  <!-- Eyes (massive glowing red) -->
+  <rect x="10" y="8" width="6" height="6" fill="#cc0000"/><rect x="20" y="8" width="6" height="6" fill="#cc0000"/>
+  <rect x="10" y="8" width="5" height="5" fill="#ff2020"/><rect x="20" y="8" width="5" height="5" fill="#ff2020"/>
+  <rect x="11" y="9" width="3" height="3" fill="#ff6040"/><rect x="21" y="9" width="3" height="3" fill="#ff6040"/>
+  <rect x="11" y="9" width="2" height="2" fill="#ff8060"/><rect x="21" y="9" width="2" height="2" fill="#ff8060"/>
+  <rect x="11" y="9" width="1" height="1" fill="#ffe0d0"/><rect x="21" y="9" width="1" height="1" fill="#ffe0d0"/><!-- eye highlight -->
+  <!-- Nose (demonic flat) -->
+  <rect x="16" y="13" width="4" height="2" fill="#3a0008"/><rect x="17" y="12" width="2" height="3" fill="#3a0008"/>
+  <!-- Mouth (fangs) -->
+  <rect x="11" y="17" width="14" height="2" fill="#200006"/>
+  <rect x="11" y="16" width="14" height="1" fill="#300010"/><!-- upper lip -->
+  <!-- Fangs -->
+  <rect x="12" y="17" width="2" height="4" fill="#e0d8c0"/><rect x="15" y="17" width="2" height="3" fill="#e0d8c0"/>
+  <rect x="19" y="17" width="2" height="3" fill="#e0d8c0"/><rect x="22" y="17" width="2" height="4" fill="#e0d8c0"/>
+  <!-- Massive body/torso -->
+  <rect x="7" y="20" width="22" height="14" fill="#500010"/>
+  <rect x="7" y="20" width="22" height="1" fill="#780018"/>
+  <!-- Chest armor plates -->
+  <rect x="9" y="21" width="18" height="8" fill="#380008"/>
+  <rect x="9" y="21" width="18" height="1" fill="#580012"/>
+  <rect x="10" y="23" width="16" height="2" fill="#300006"/><!-- chest recess -->
+  <!-- Dark rune on chest -->
+  <rect x="15" y="22" width="6" height="6" fill="#700000"/>
+  <rect x="16" y="22" width="4" height="6" fill="#900000"/>
+  <rect x="15" y="24" width="6" height="2" fill="#900000"/>
+  <rect x="17" y="23" width="2" height="4" fill="#c00000"/><!-- rune center -->
+  <!-- Massive arms -->
+  <rect x="2" y="19" width="6" height="14" fill="#580014"/>
+  <rect x="2" y="19" width="6" height="1" fill="#780020"/>
+  <rect x="28" y="19" width="6" height="14" fill="#580014"/>
+  <rect x="28" y="19" width="6" height="1" fill="#780020"/>
+  <!-- Claws -->
+  <rect x="1" y="31" width="4" height="3" fill="#680018"/><rect x="0" y="30" width="3" height="2" fill="#500010"/>
+  <rect x="30" y="31" width="4" height="3" fill="#680018"/><rect x="33" y="30" width="3" height="2" fill="#500010"/>
+  <!-- Claw fingers -->
+  <rect x="0" y="31" width="2" height="4" fill="#300008"/><rect x="2" y="30" width="2" height="5" fill="#300008"/>
+  <rect x="34" y="31" width="2" height="4" fill="#300008"/><rect x="32" y="30" width="2" height="5" fill="#300008"/>
+  <!-- Scythe (massive) -->
+  <rect x="30" y="2" width="4" height="30" fill="#383838"/><!-- shaft -->
+  <rect x="31" y="2" width="2" height="28" fill="#505050"/>
+  <rect x="24" y="2" width="10" height="14" fill="#404040"/><!-- scythe blade base -->
+  <rect x="22" y="0" width="12" height="12" fill="#606060"/><!-- blade -->
+  <rect x="22" y="0" width="12" height="1" fill="#909090"/><!-- blade highlight -->
+  <rect x="23" y="1" width="10" height="10" fill="#707070"/>
+  <rect x="23" y="1" width="10" height="2" fill="#909090"/><!-- blade shine -->
+  <!-- Blood on scythe -->
+  <rect x="22" y="6" width="4" height="3" fill="#cc0000"/>
+  <rect x="23" y="7" width="3" height="2" fill="#ff2020"/>
+  <!-- Legs -->
+  <rect x="9" y="34" width="7" height="8" fill="#480010"/><rect x="20" y="34" width="7" height="8" fill="#480010"/>
+  <rect x="9" y="34" width="7" height="1" fill="#680018"/><rect x="20" y="34" width="7" height="1" fill="#680018"/>
+  <!-- Armored boots/hooves -->
+  <rect x="8" y="40" width="9" height="4" fill="#300008"/><rect x="19" y="40" width="9" height="4" fill="#300008"/>
+  <rect x="8" y="40" width="9" height="1" fill="#500010"/><rect x="19" y="40" width="9" height="1" fill="#500010"/>
+  <!-- Cloven hooves -->
+  <rect x="8" y="42" width="4" height="2" fill="#200006"/><rect x="13" y="42" width="4" height="2" fill="#200006"/>
+  <rect x="19" y="42" width="4" height="2" fill="#200006"/><rect x="24" y="42" width="4" height="2" fill="#200006"/>
+  <!-- Ambient glow effects (dark aura) -->
+  <rect x="7" y="19" width="1" height="1" fill="#ff0000" style="opacity:0.6"/>
+  <rect x="28" y="19" width="1" height="1" fill="#ff0000" style="opacity:0.6"/>
+</svg>`;
+
   return '';
 }
 
@@ -1871,16 +2308,85 @@ function showDamage(target, dmg, isHero, isSkill=false) {
 function animateHeroAttack(heroIdx) {
   const el = document.getElementById(`heroChar_${heroIdx}`);
   if (!el) return;
-  el.style.transition = 'transform 0.3s';
-  el.style.transform = 'translateX(25px)';
-  setTimeout(() => { el.style.transform = 'translateX(0)'; }, 300);
+
+  // Lunge forward
+  el.classList.add('hero-attacking');
+  setTimeout(() => { el.classList.remove('hero-attacking'); }, 400);
+
+  // Find target enemy position
+  const firstEnemy = document.querySelector('#enemiesArea .character-container');
+  const heroEl = el.closest('.character-container');
+  if (!firstEnemy || !heroEl) return;
+
+  const battleArea = document.getElementById('battleArea');
+  const heroRect = heroEl.getBoundingClientRect();
+  const enemyRect = firstEnemy.getBoundingClientRect();
+  const areaRect = battleArea.getBoundingClientRect();
+
+  const startX = heroRect.right - areaRect.left;
+  const startY = heroRect.top + heroRect.height * 0.4 - areaRect.top;
+  const endX = enemyRect.left - areaRect.left;
+  const endY = enemyRect.top + enemyRect.height * 0.4 - areaRect.top;
+
+  // Spawn projectile by type
+  const proj = document.createElement('div');
+  proj.className = 'projectile';
+
+  if (heroIdx === 0) {
+    // Warrior: slash wave
+    proj.className += ' proj-slash';
+    proj.style.left = startX + 'px';
+    proj.style.top = startY + 'px';
+    const duration = 200;
+    battleArea.appendChild(proj);
+    const dx = endX - startX, dy = endY - startY;
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    proj.style.transform = `rotate(${angle}deg)`;
+    proj.style.transition = `left ${duration}ms linear, top ${duration}ms linear`;
+    setTimeout(() => { proj.style.left = endX + 'px'; proj.style.top = endY + 'px'; }, 10);
+    setTimeout(() => { spawnHitFx('hit-slash-fx', endX, endY, battleArea); proj.remove(); }, duration + 10);
+
+  } else if (heroIdx === 1) {
+    // Archer: arrow
+    proj.className += ' proj-arrow';
+    proj.style.left = startX + 'px';
+    proj.style.top = (startY - 2) + 'px';
+    const duration = 280;
+    battleArea.appendChild(proj);
+    const dx = endX - startX, dy = endY - startY;
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    proj.style.transform = `rotate(${angle}deg)`;
+    proj.style.transition = `left ${duration}ms linear, top ${duration}ms linear`;
+    setTimeout(() => { proj.style.left = endX + 'px'; proj.style.top = endY + 'px'; }, 10);
+    setTimeout(() => { spawnHitFx('hit-arrow-fx', endX, endY, battleArea); proj.remove(); }, duration + 10);
+
+  } else {
+    // Mage: fireball
+    proj.className += ' proj-fireball';
+    proj.style.left = startX + 'px';
+    proj.style.top = (startY - 10) + 'px';
+    const duration = 320;
+    battleArea.appendChild(proj);
+    proj.style.transition = `left ${duration}ms ease-in, top ${duration}ms ease-in`;
+    setTimeout(() => { proj.style.left = (endX - 10) + 'px'; proj.style.top = (endY - 10) + 'px'; }, 10);
+    setTimeout(() => { spawnHitFx('hit-fire-fx', endX - 20, endY - 20, battleArea); proj.remove(); }, duration + 10);
+  }
+}
+
+function spawnHitFx(className, x, y, container) {
+  const fx = document.createElement('div');
+  fx.className = `hit-effect ${className}`;
+  fx.style.left = (x - 20) + 'px';
+  fx.style.top = (y - 20) + 'px';
+  container.appendChild(fx);
+  setTimeout(() => fx.remove(), 350);
 }
 
 function shakeEnemy(enemyIdx) {
   const el = document.getElementById(`enemyChar_${enemyIdx}`);
   if (!el) return;
-  el.style.animation = 'shake 0.3s ease-out';
-  setTimeout(() => { el.style.animation = ''; }, 300);
+  el.classList.add('enemy-hit');
+  setTimeout(() => { el.classList.remove('enemy-hit'); }, 300);
 }
 
 function showMageSkillEffect() {
@@ -1946,19 +2452,144 @@ function renderStageGrid() {
   if (!player) return;
   const grid = document.getElementById('stageGrid');
   const maxUnlocked = player.isAdmin ? 9999 : (player.unlockedStage || 1);
-  grid.innerHTML = STAGES.map(s => {
+
+  // Island SVGs for each terrain type
+  const islandSVGs = {
+    forest: `<svg viewBox="0 0 26 18" width="52" height="36" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="13" rx="11" ry="6" fill="#2a7a18"/><ellipse cx="13" cy="13" rx="9" ry="5" fill="#38a020"/>
+      <rect x="8" y="10" width="4" height="6" fill="#c09040"/><rect x="9" y="10" width="2" height="5" fill="#d0a850"/>
+      <rect x="6" y="4" width="4" height="8" fill="#1a5010"/><rect x="7" y="2" width="2" height="6" fill="#2a7018"/>
+      <rect x="12" y="5" width="5" height="8" fill="#1a5010"/><rect x="13" y="3" width="3" height="6" fill="#2a7018"/>
+      <rect x="16" y="7" width="3" height="5" fill="#1a5010"/><rect x="17" y="5" width="1" height="5" fill="#2a7018"/>
+      <rect x="5" y="13" width="16" height="2" fill="#38a020"/>
+      <rect x="7" y="13" width="2" height="1" fill="#4ccc28"/><rect x="15" y="12" width="2" height="1" fill="#4ccc28"/>
+    </svg>`,
+    mountain: `<svg viewBox="0 0 26 18" width="52" height="36" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="14" rx="12" ry="5" fill="#2a7a18"/>
+      <rect x="8" y="4" width="10" height="12" fill="#808080"/><rect x="6" y="8" width="14" height="8" fill="#909090"/>
+      <rect x="10" y="2" width="6" height="6" fill="#a0a0a0"/>
+      <rect x="11" y="0" width="4" height="5" fill="#e0e8f0"/><!-- snow -->
+      <rect x="12" y="0" width="2" height="3" fill="#ffffff"/>
+      <rect x="8" y="4" width="4" height="4" fill="#989898"/><rect x="14" y="6" width="4" height="4" fill="#989898"/>
+      <rect x="4" y="13" width="18" height="2" fill="#38a020"/>
+    </svg>`,
+    castle: `<svg viewBox="0 0 26 20" width="52" height="40" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="16" rx="11" ry="5" fill="#2a7a18"/>
+      <rect x="9" y="6" width="8" height="10" fill="#787890"/><rect x="8" y="4" width="10" height="3" fill="#686880"/>
+      <rect x="8" y="3" width="2" height="3" fill="#585870"/><rect x="12" y="3" width="2" height="3" fill="#585870"/><rect x="16" y="3" width="2" height="3" fill="#585870"/>
+      <rect x="10" y="10" width="6" height="6" fill="#505060"/><!-- gate -->
+      <rect x="11" y="10" width="4" height="5" fill="#202028"/><!-- gate opening -->
+      <rect x="11" y="7" width="4" height="3" fill="#9090a8"/><!-- window -->
+      <rect x="12" y="7" width="2" height="2" fill="#4060ff"/><!-- window glow -->
+      <rect x="7" y="15" width="12" height="2" fill="#38a020"/>
+    </svg>`,
+    volcano: `<svg viewBox="0 0 26 20" width="52" height="40" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="16" rx="11" ry="5" fill="#5a2a10"/>
+      <rect x="8" y="6" width="10" height="12" fill="#603018"/><rect x="6" y="10" width="14" height="8" fill="#703818"/>
+      <rect x="10" y="2" width="6" height="8" fill="#7a4020"/>
+      <rect x="11" y="1" width="4" height="3" fill="#ff4010"/><!-- lava glow -->
+      <rect x="12" y="0" width="2" height="3" fill="#ff8020"/>
+      <rect x="10" y="3" width="1" height="2" fill="#ff6010"/><rect x="15" y="4" width="1" height="2" fill="#ff6010"/>
+      <rect x="4" y="14" width="18" height="3" fill="#803828"/>
+    </svg>`,
+    dungeon: `<svg viewBox="0 0 26 18" width="52" height="36" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="14" rx="11" ry="5" fill="#3a2a18"/>
+      <rect x="7" y="5" width="12" height="10" fill="#282018"/><rect x="8" y="4" width="10" height="2" fill="#302820"/>
+      <rect x="10" y="9" width="6" height="6" fill="#201810"/><!-- entrance -->
+      <rect x="11" y="9" width="4" height="5" fill="#080608"/>
+      <rect x="8" y="6" width="3" height="3" fill="#302820"/><rect x="15" y="6" width="3" height="3" fill="#302820"/>
+      <rect x="9" y="7" width="1" height="1" fill="#ff2020"/><rect x="16" y="7" width="1" height="1" fill="#ff2020"/><!-- skull eyes -->
+      <rect x="5" y="13" width="16" height="2" fill="#4a3828"/>
+    </svg>`,
+    sea: `<svg viewBox="0 0 26 18" width="52" height="36" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="14" rx="10" ry="5" fill="#2a6a18"/>
+      <rect x="8" y="10" width="3" height="6" fill="#a06030"/><rect x="9" y="10" width="1" height="5" fill="#c08040"/>
+      <rect x="9" y="5" width="2" height="6" fill="#e0e0e0"/><!-- sail -->
+      <rect x="9" y="5" width="5" height="4" fill="#f0f0d0"/><rect x="9" y="5" width="1" height="4" fill="#e0e0c0"/>
+      <rect x="14" y="10" width="3" height="5" fill="#1a5010"/><rect x="15" y="7" width="1" height="4" fill="#2a7018"/>
+      <rect x="14" y="7" width="3" height="3" fill="#4ccc28"/><!-- palm leaves -->
+      <rect x="4" y="13" width="18" height="2" fill="#38a020"/>
+    </svg>`,
+    boss: `<svg viewBox="0 0 26 20" width="52" height="40" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="13" cy="16" rx="11" ry="5" fill="#3a0808"/>
+      <rect x="8" y="3" width="10" height="13" fill="#200006"/><rect x="7" y="6" width="12" height="10" fill="#280008"/>
+      <rect x="11" y="0" width="4" height="5" fill="#300008"/><!-- dark tower -->
+      <rect x="11" y="0" width="1" height="2" fill="#440010"/><rect x="14" y="0" width="1" height="2" fill="#440010"/>
+      <rect x="10" y="9" width="6" height="5" fill="#180004"/><!-- gate -->
+      <rect x="11" y="9" width="4" height="4" fill="#ff0000" style="opacity:0.3"/><!-- red glow -->
+      <rect x="9" y="5" width="3" height="3" fill="#200006"/><rect x="14" y="5" width="3" height="3" fill="#200006"/>
+      <rect x="10" y="6" width="1" height="1" fill="#ff2020"/><rect x="15" y="6" width="1" height="1" fill="#ff2020"/>
+      <rect x="7" y="1" width="2" height="4" fill="#600018"/><rect x="17" y="1" width="2" height="4" fill="#600018"/>
+      <rect x="5" y="14" width="16" height="3" fill="#480010"/>
+    </svg>`
+  };
+
+  // Stage layout positions on the map (x%, y% of container)
+  const nodePositions = [
+    {id:1,  x:12, y:72, terrain:'forest'},
+    {id:2,  x:28, y:65, terrain:'forest'},
+    {id:3,  x:42, y:72, terrain:'forest'},
+    {id:4,  x:55, y:60, terrain:'mountain'},
+    {id:5,  x:68, y:68, terrain:'castle'},
+    {id:6,  x:80, y:58, terrain:'forest'},
+    {id:7,  x:88, y:40, terrain:'mountain'},
+    {id:8,  x:75, y:28, terrain:'boss'},   // boss
+    {id:9,  x:60, y:22, terrain:'dungeon'},
+    {id:10, x:45, y:30, terrain:'volcano'},
+    {id:11, x:30, y:25, terrain:'dungeon'},
+    {id:12, x:18, y:35, terrain:'castle'},
+    {id:13, x:10, y:50, terrain:'sea'},
+    {id:14, x:22, y:50, terrain:'forest'},
+    {id:15, x:38, y:48, terrain:'mountain'},
+    {id:16, x:52, y:44, terrain:'dungeon'},
+    {id:17, x:65, y:38, terrain:'volcano'},
+    {id:18, x:72, y:14, terrain:'dungeon'},
+    {id:19, x:55, y:10, terrain:'castle'},
+    {id:20, x:35, y:12, terrain:'boss'},   // final boss
+  ];
+
+  let html = '';
+
+  // Draw path lines between sequential stages
+  html += `<svg style="position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;" viewBox="0 0 100 100" preserveAspectRatio="none">`;
+  for (let i = 0; i < nodePositions.length - 1; i++) {
+    const a = nodePositions[i], b = nodePositions[i+1];
+    const unlocked = a.id <= maxUnlocked;
+    const color = unlocked ? '#c0a040' : '#404040';
+    const dash = unlocked ? '2,1.5' : '1,2';
+    html += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${color}" stroke-width="0.8" stroke-dasharray="${dash}" stroke-linecap="square"/>`;
+  }
+  html += `</svg>`;
+
+  // Draw stage nodes
+  for (const pos of nodePositions) {
+    const s = STAGES.find(st => st.id === pos.id);
+    if (!s) continue;
     const locked = !player.isAdmin && s.id > maxUnlocked;
     const cleared = s.id < maxUnlocked;
     const current = s.id === maxUnlocked;
+    const cls = `stage-node${locked?' locked':''}${current?' current':''}${cleared?' cleared':''}`;
     const stars = cleared ? '⭐⭐⭐' : current ? '⭐' : '';
-    return `<div class="stage-card${locked?' locked':''}${current?' current':''}${cleared?' cleared':''}" onclick="startBattle(${s.id})">
-      ${locked ? '<div class="stage-lock-icon">🔒</div>' : ''}
-      <div class="stage-num">${s.id}</div>
-      <div class="stage-name">${s.name}</div>
-      ${s.boss ? '<div style="font-size:0.6rem;color:#ff6060;">👹 보스</div>' : ''}
-      <div class="stage-stars">${stars}</div>
+    const terrain = (s.boss && pos.terrain !== 'forest') ? pos.terrain : pos.terrain;
+    const svg = islandSVGs[terrain] || islandSVGs['forest'];
+    const filterStyle = locked ? 'filter:grayscale(0.7) brightness(0.5);' : '';
+
+    html += `<div class="${cls}" style="left:${pos.x}%;top:${pos.y}%;${filterStyle}" onclick="${locked?'':'startBattle('+s.id+')'}">
+      <div class="stage-node-num">${locked ? '🔒' : s.id}</div>
+      <div class="stage-island">${svg}</div>
+      <div class="stage-node-label">${s.name.length > 6 ? s.name.substring(0,5)+'…' : s.name}</div>
+      ${stars ? `<div class="stage-node-stars">${stars}</div>` : ''}
+      ${s.boss ? `<div style="font-size:0.55rem;color:#ff8080;text-shadow:1px 1px 0 #000;">👹BOSS</div>` : ''}
     </div>`;
-  }).join('');
+  }
+
+  // Decorative sea elements
+  html += `<div style="position:absolute;top:5%;left:5%;font-size:1.2rem;opacity:0.4;transform:rotate(-10deg);">⛵</div>`;
+  html += `<div style="position:absolute;top:12%;right:8%;font-size:1rem;opacity:0.3;">🐋</div>`;
+  html += `<div style="position:absolute;top:20%;left:60%;font-size:0.8rem;opacity:0.25;">🌊</div>`;
+  html += `<div style="position:absolute;top:8%;left:40%;font-size:0.8rem;opacity:0.25;">🌊</div>`;
+
+  grid.innerHTML = html;
 }
 
 // ============================================================
@@ -2682,10 +3313,12 @@ function leaveParty() {
   renderPartyStatus();
 }
 
-function startPartyBattle() {
+function startPartyBattle(selectedStageId) {
   if (!myParty || myParty.leader !== player.username) { showNotif('❌ 파티장만 전투를 시작할 수 있습니다.'); return; }
   if (myParty.members.length < 2) { showNotif('❌ 파티원이 2명 이상이어야 합니다.'); return; }
-  const stageId = player.unlockedStage || 1;
+  const stageId = selectedStageId || player.unlockedStage || 1;
+  const maxUnlocked = player.isAdmin ? 9999 : (player.unlockedStage || 1);
+  if (!player.isAdmin && stageId > maxUnlocked) { showNotif('❌ 아직 해금되지 않은 스테이지입니다.'); return; }
   wsSend({ type:'party_start_battle', stageId });
   closePanel('partyPanel');
 }
@@ -2745,34 +3378,112 @@ function renderPartyStatus() {
   const memberList = document.getElementById('partyMemberList');
   const battleSection = document.getElementById('partyBattleSection');
   const memberSection = document.getElementById('partyMemberSection');
+  const createJoinSection = document.getElementById('partyCreateJoinSection');
 
   if (!myParty) {
     if (noMsg) noMsg.style.display = 'block';
     if (memberList) memberList.innerHTML = '';
     if (battleSection) battleSection.style.display = 'none';
     if (memberSection) memberSection.style.display = 'none';
+    if (createJoinSection) createJoinSection.style.display = 'block';
     return;
   }
   if (noMsg) noMsg.style.display = 'none';
+  if (createJoinSection) createJoinSection.style.display = 'none';
   const isLeader = myParty.leader === player.username;
   if (battleSection) battleSection.style.display = isLeader ? 'block' : 'none';
   if (memberSection) memberSection.style.display = isLeader ? 'none' : 'block';
 
-  const slotIcons = ['⚔️','🏹','🪄','🛡️'];
+  // 파티원 카드 (픽셀아트 캐릭터)
+  const heroIcons = [
+    `<svg viewBox="0 0 20 30" width="32" height="48" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="4" height="6" fill="#5068a8"/><rect x="12" y="9" width="4" height="6" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="2" fill="#3c2010"/><rect x="11" y="21" width="4" height="2" fill="#3c2010"/><rect x="16" y="4" width="2" height="14" fill="#c0cce0"/><rect x="14" y="10" width="6" height="2" fill="#b09040"/><rect x="1" y="5" width="3" height="7" fill="#4060b8"/><rect x="2" y="8" width="1" height="1" fill="#e8d040"/></svg>`,
+    `<svg viewBox="0 0 18 28" width="30" height="46" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="2" fill="#3c200c"/><rect x="10" y="18" width="4" height="2" fill="#3c200c"/><rect x="15" y="1" width="2" height="14" fill="#805020"/><rect x="14" y="6" width="6" height="1" fill="#d8c090"/></svg>`,
+    `<svg viewBox="0 0 18 30" width="30" height="48" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018900"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="2" fill="#281060"/><rect x="10" y="21" width="3" height="2" fill="#281060"/><rect x="0" y="2" width="2" height="14" fill="#806040"/><rect x="0" y="0" width="3" height="3" fill="#c040f0"/><rect x="1" y="0" width="1" height="2" fill="#f8c0ff"/></svg>`
+  ];
+
   if (memberList) {
     memberList.innerHTML = myParty.members.map((m, i) => `
-      <div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,255,255,0.04);border-radius:8px;">
-        <span style="font-size:1.2rem;">${slotIcons[i]||'👤'}</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
+        <div style="background:rgba(0,0,0,0.3);border-radius:6px;padding:2px 4px;image-rendering:pixelated;">${heroIcons[i % 3]}</div>
         <div style="flex:1;">
-          <div style="font-size:0.85rem;font-weight:700;">${m}${m===myParty.leader?' 👑':''}</div>
-          <div style="font-size:0.65rem;color:rgba(240,232,200,0.4);">${['전사','궁수','마법사','보조'][i]||'대기중'} 슬롯</div>
+          <div style="font-size:0.8rem;font-weight:700;color:#f0e8c8;">${m}${m===myParty.leader?' 👑':''}</div>
+          <div style="font-size:0.6rem;color:rgba(240,232,200,0.4);">${['전사','궁수','마법사'][i]||'대기중'}</div>
         </div>
-        <div style="width:8px;height:8px;border-radius:50%;background:${onlineUsers.includes(m)?'var(--green)':'#666'};"></div>
+        <div style="width:7px;height:7px;border-radius:50%;background:${onlineUsers.includes(m)?'#30c060':'#444'};box-shadow:${onlineUsers.includes(m)?'0 0 4px #30c060':'none'};"></div>
         ${isLeader && m !== player.username ? `<button class="mini-btn btn-sell" onclick="kickMember('${m}')">추방</button>` : ''}
       </div>
     `).join('');
   }
+
+  // 파티장이면 섬 지도 렌더
+  if (isLeader) {
+    renderPartyIslandMap();
+  }
 }
+
+function renderPartyIslandMap() {
+  const mapEl = document.getElementById('partyIslandMap');
+  if (!mapEl) return;
+  const maxUnlocked = player.isAdmin ? 9999 : (player.unlockedStage || 1);
+
+  const islandsSVG = {
+    forest: `<svg viewBox="0 0 20 14" width="40" height="28" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="10" rx="9" ry="5" fill="#38a020"/><rect x="7" y="7" width="3" height="5" fill="#c09040"/><rect x="5" y="2" width="3" height="8" fill="#1a5010"/><rect x="10" y="3" width="4" height="7" fill="#1a5010"/><rect x="6" y="1" width="1" height="4" fill="#2a7018"/><rect x="11" y="2" width="1" height="3" fill="#2a7018"/></svg>`,
+    mountain: `<svg viewBox="0 0 20 14" width="40" height="28" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="11" rx="9" ry="4" fill="#38a020"/><rect x="6" y="3" width="8" height="9" fill="#808080"/><rect x="8" y="1" width="4" height="5" fill="#a0a0a0"/><rect x="9" y="0" width="2" height="3" fill="#e8f0f8"/></svg>`,
+    castle: `<svg viewBox="0 0 20 16" width="40" height="32" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="13" rx="9" ry="4" fill="#38a020"/><rect x="7" y="4" width="6" height="9" fill="#787890"/><rect x="6" y="3" width="8" height="2" fill="#686880"/><rect x="6" y="2" width="2" height="2" fill="#585870"/><rect x="10" y="2" width="2" height="2" fill="#585870"/><rect x="14" y="2" width="2" height="2" fill="#585870"/><rect x="8" y="8" width="4" height="5" fill="#202028"/><rect x="9" y="5" width="2" height="2" fill="#4060ff"/></svg>`,
+    volcano: `<svg viewBox="0 0 20 16" width="40" height="32" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="13" rx="9" ry="4" fill="#603018"/><rect x="6" y="4" width="8" height="10" fill="#703818"/><rect x="8" y="2" width="4" height="6" fill="#7a4020"/><rect x="9" y="1" width="2" height="2" fill="#ff6010"/><rect x="8" y="2" width="1" height="1" fill="#ff4010"/><rect x="11" y="2" width="1" height="1" fill="#ff4010"/></svg>`,
+    dungeon: `<svg viewBox="0 0 20 14" width="40" height="28" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="11" rx="9" ry="4" fill="#3a2a18"/><rect x="6" y="3" width="8" height="9" fill="#282018"/><rect x="8" y="7" width="4" height="4" fill="#080608"/><rect x="6" y="4" width="2" height="2" fill="#302820"/><rect x="7" y="5" width="1" height="1" fill="#ff2020"/><rect x="12" y="5" width="1" height="1" fill="#ff2020"/></svg>`,
+    sea: `<svg viewBox="0 0 20 14" width="40" height="28" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="11" rx="9" ry="4" fill="#2a6a18"/><rect x="7" y="7" width="2" height="4" fill="#a06030"/><rect x="7" y="3" width="2" height="5" fill="#e0e0e0"/><rect x="7" y="3" width="4" height="3" fill="#f0f0d0"/><rect x="12" y="8" width="2" height="3" fill="#1a5010"/><rect x="12" y="5" width="3" height="3" fill="#4ccc28"/></svg>`,
+    boss: `<svg viewBox="0 0 20 16" width="40" height="32" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="13" rx="9" ry="4" fill="#3a0808"/><rect x="6" y="2" width="8" height="11" fill="#200006"/><rect x="5" y="4" width="10" height="9" fill="#280008"/><rect x="8" y="7" width="4" height="4" fill="#ff0000" style="opacity:0.3"/><rect x="7" y="3" width="2" height="2" fill="#600018"/><rect x="11" y="3" width="2" height="2" fill="#600018"/><rect x="7" y="4" width="1" height="1" fill="#ff2020"/><rect x="12" y="4" width="1" height="1" fill="#ff2020"/></svg>`
+  };
+
+  const nodes = [
+    {id:1,x:8,y:68,t:'forest'},{id:2,x:20,y:60,t:'forest'},{id:3,x:32,y:66,t:'forest'},
+    {id:4,x:44,y:56,t:'mountain'},{id:5,x:57,y:63,t:'castle'},{id:6,x:70,y:54,t:'forest'},
+    {id:7,x:80,y:36,t:'mountain'},{id:8,x:70,y:22,t:'boss'},{id:9,x:56,y:17,t:'dungeon'},
+    {id:10,x:42,y:24,t:'volcano'},{id:11,x:28,y:20,t:'dungeon'},{id:12,x:15,y:30,t:'castle'},
+    {id:13,x:8,y:45,t:'sea'},{id:14,x:20,y:44,t:'forest'},{id:15,x:34,y:42,t:'mountain'},
+    {id:16,x:48,y:38,t:'dungeon'},{id:17,x:62,y:34,t:'volcano'},{id:18,x:74,y:12,t:'dungeon'},
+    {id:19,x:58,y:8,t:'castle'},{id:20,x:38,y:10,t:'boss'}
+  ];
+
+  let html = `<div style="position:absolute;inset:0;background:linear-gradient(180deg,#0a3060 0%,#1a5a9a 35%,#1a6a1a 35%,#2a8a20 60%,#38a020 100%);"></div>`;
+
+  // SVG path lines
+  html += `<svg style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;" viewBox="0 0 100 100" preserveAspectRatio="none">`;
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const a = nodes[i], b = nodes[i+1];
+    const unlocked = a.id <= maxUnlocked;
+    html += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${unlocked?'#c0a040':'#303030'}" stroke-width="1.2" stroke-dasharray="${unlocked?'2,2':'1,3'}" stroke-linecap="square"/>`;
+  }
+  html += `</svg>`;
+
+  // Stage nodes
+  for (const n of nodes) {
+    const s = STAGES.find(st => st.id === n.id);
+    if (!s) continue;
+    const locked = !player.isAdmin && s.id > maxUnlocked;
+    const cleared = s.id < maxUnlocked;
+    const current = s.id === maxUnlocked;
+    const svg = islandsSVG[n.t] || islandsSVG['forest'];
+    const numBg = locked ? '#333' : cleared ? '#20a020' : current ? '#ff8020' : '#c09000';
+    const glow = current ? 'filter:drop-shadow(0 0 6px #f5c842);animation:btn-blink 0.8s steps(2) infinite;' : '';
+    html += `<div onclick="${locked?'':'startPartyBattle('+s.id+')'}" style="position:absolute;left:${n.x}%;top:${n.y}%;transform:translate(-50%,-50%);z-index:5;text-align:center;cursor:${locked?'not-allowed':'pointer'};${locked?'opacity:0.4;':''}${glow}">
+      <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:${numBg};color:${locked?'#888':'#fff'};font-size:0.45rem;font-weight:900;border-radius:2px;padding:1px 3px;white-space:nowrap;font-family:monospace;border:1px solid rgba(0,0,0,0.4);">${locked?'🔒':s.id}${s.boss?'👹':''}</div>
+      <div style="image-rendering:pixelated;">${svg}</div>
+    </div>`;
+  }
+
+  // Decorations
+  html += `<div style="position:absolute;top:8%;left:3%;font-size:0.9rem;opacity:0.35;transform:rotate(-8deg);">⛵</div>`;
+  html += `<div style="position:absolute;top:14%;right:5%;font-size:0.7rem;opacity:0.25;">🌊🌊</div>`;
+  html += `<div style="position:absolute;top:5%;left:45%;font-size:0.7rem;opacity:0.2;">🌊</div>`;
+  html += `<div style="position:absolute;top:18%;left:85%;font-size:0.65rem;opacity:0.3;">🐋</div>`;
+
+  mapEl.style.cssText = 'position:relative;width:100%;height:260px;border-radius:10px;overflow:hidden;border:2px solid rgba(245,200,66,0.3);image-rendering:pixelated;';
+  mapEl.innerHTML = html;
+}
+
+
 
 function kickMember(name) {
   wsSend({ type:'party_kick', target:name });
