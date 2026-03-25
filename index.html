@@ -1142,112 +1142,33 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 
   <!-- VILLAGE SCREEN -->
   <div id="villageScreen">
-    <!-- Sky -->
-    <div class="village-cloud" style="top:8%;left:-80px;animation-duration:28s;animation-delay:0s;">
-      <svg viewBox="0 0 40 18" width="120" height="54" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="8" width="32" height="8" fill="#fff"/><rect x="0" y="10" width="40" height="6" fill="#fff"/><rect x="8" y="4" width="16" height="8" fill="#fff"/><rect x="12" y="2" width="8" height="4" fill="#fff"/><rect x="24" y="6" width="10" height="4" fill="#f0f0f8"/></svg>
-    </div>
-    <div class="village-cloud" style="top:5%;left:-80px;animation-duration:18s;animation-delay:-8s;">
-      <svg viewBox="0 0 30 14" width="90" height="42" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="6" width="26" height="6" fill="#fff"/><rect x="0" y="8" width="30" height="4" fill="#fff"/><rect x="6" y="2" width="12" height="6" fill="#fff"/><rect x="8" y="0" width="6" height="4" fill="#fff"/></svg>
-    </div>
+    <!-- Village uses same top-down map system -->
+    <div class="bmap-bg" id="villageBg"></div>
+    <div id="villageDecos"></div>
 
-    <!-- Buildings -->
-    <!-- Inn (left) -->
-    <div class="village-building" style="left:4%;bottom:44%;">
-      <svg viewBox="0 0 48 52" width="96" height="104" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="18" width="48" height="34" fill="#c08040"/>
-        <rect x="0" y="18" width="48" height="2" fill="#d09050"/>
-        <rect x="4" y="0" width="40" height="20" fill="#b06828" style="clip-path:polygon(50% 0%,100% 100%,0% 100%)"/>
-        <rect x="14" y="0" width="20" height="18" fill="#a06020" style="clip-path:polygon(50% 0%,100% 100%,0% 100%)"/>
-        <rect x="6" y="28" width="10" height="12" fill="#a06030"/><rect x="32" y="28" width="10" height="12" fill="#a06030"/>
-        <rect x="7" y="29" width="8" height="5" fill="#60c0ff" style="opacity:0.6"/>
-        <rect x="18" y="26" width="12" height="26" fill="#803818"/>
-        <rect x="20" y="26" width="8" height="22" fill="#6a2e10"/>
-        <rect x="22" y="26" width="4" height="15" fill="#501e08"/>
-        <rect x="0" y="50" width="48" height="2" fill="#885530"/>
-        <text x="5" y="46" font-size="5" fill="#ffe080" font-weight="bold">여관</text>
-      </svg>
-    </div>
-    <!-- Blacksmith (right) -->
-    <div class="village-building" style="right:4%;bottom:44%;">
-      <svg viewBox="0 0 44 48" width="88" height="96" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="14" width="40" height="34" fill="#707070"/>
-        <rect x="2" y="14" width="40" height="2" fill="#909090"/>
-        <rect x="0" y="6" width="44" height="10" fill="#505050"/>
-        <rect x="6" y="0" width="32" height="8" fill="#404040"/>
-        <rect x="14" y="22" width="10" height="12" fill="#303030"/>
-        <rect x="15" y="23" width="8" height="6" fill="#ff6010" style="opacity:0.7"/>
-        <rect x="28" y="20" width="12" height="14" fill="#383838"/>
-        <rect x="6" y="20" width="8" height="10" fill="#383838"/>
-        <rect x="7" y="21" width="6" height="4" fill="#60b0d0" style="opacity:0.5"/>
-        <rect x="0" y="46" width="44" height="2" fill="#484848"/>
-        <text x="4" y="44" font-size="5" fill="#c0e0ff" font-weight="bold">대장간</text>
-      </svg>
-    </div>
-    <!-- Well (center) -->
-    <div class="village-building" style="left:50%;transform:translateX(-50%);bottom:44%;">
-      <svg viewBox="0 0 24 28" width="48" height="56" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="10" width="20" height="18" fill="#808880"/>
-        <rect x="2" y="10" width="20" height="2" fill="#a0a8a0"/>
-        <rect x="0" y="10" width="4" height="20" fill="#707870"/><rect x="20" y="10" width="4" height="20" fill="#707870"/>
-        <rect x="4" y="14" width="16" height="12" fill="#4080c0"/>
-        <rect x="4" y="14" width="16" height="2" fill="#60a0e0"/>
-        <rect x="0" y="8" width="24" height="4" fill="#a0a890"/>
-        <rect x="10" y="0" width="4" height="12" fill="#604020"/>
-        <rect x="8" y="2" width="8" height="2" fill="#806030"/>
-        <rect x="8" y="0" width="2" height="6" fill="#784820"/><rect x="14" y="0" width="2" height="6" fill="#784820"/>
-      </svg>
-    </div>
-    <!-- Trees -->
-    <div class="village-building" style="left:24%;bottom:44%;">
-      <svg viewBox="0 0 20 32" width="40" height="64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="18" width="4" height="14" fill="#704820"/>
-        <rect x="2" y="6" width="16" height="16" fill="#2a8020"/><rect x="4" y="2" width="12" height="10" fill="#38a028"/><rect x="6" y="0" width="8" height="6" fill="#48b030"/>
-        <rect x="2" y="6" width="16" height="2" fill="#48b030"/>
-      </svg>
-    </div>
-    <div class="village-building" style="right:22%;bottom:44%;">
-      <svg viewBox="0 0 20 32" width="40" height="64" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="18" width="4" height="14" fill="#704820"/>
-        <rect x="2" y="8" width="16" height="14" fill="#2a8020"/><rect x="4" y="4" width="12" height="10" fill="#38a028"/><rect x="6" y="0" width="8" height="8" fill="#48b030"/>
-      </svg>
-    </div>
+    <!-- Village buildings as positioned SVG objects -->
+    <div id="villageObjects"></div>
 
-    <!-- Ground -->
-    <div class="village-path"></div>
-    <div class="village-ground"></div>
+    <!-- Other village players -->
+    <div id="villageOtherPlayers"></div>
 
-    <!-- NPC Merchant (appears randomly) -->
-    <div id="villageNpc" class="village-npc" style="display:none;bottom:47%;left:45%;" onclick="openGemShop()">
+    <!-- NPC Merchant -->
+    <div id="villageNpc" class="village-npc" style="display:none;position:absolute;bottom:47%;left:45%;" onclick="openGemShop()">
       <div class="village-npc-bubble">✨ 희귀 상인!</div>
-      <svg viewBox="0 0 16 22" width="48" height="66" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <!-- Hat -->
+      <svg viewBox="0 0 16 22" width="52" height="70" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="3" y="0" width="10" height="2" fill="#8020c0"/><rect x="2" y="1" width="12" height="3" fill="#6010a0"/>
         <rect x="5" y="0" width="6" height="2" fill="#c040ff"/>
-        <!-- Face -->
         <rect x="4" y="3" width="8" height="6" fill="#e0c090"/>
-        <rect x="4" y="3" width="8" height="1" fill="#d0b080"/>
         <rect x="5" y="5" width="2" height="1" fill="#402010"/><rect x="9" y="5" width="2" height="1" fill="#402010"/>
-        <rect x="6" y="7" width="4" height="1" fill="#c09070"/>
-        <!-- Beard -->
-        <rect x="4" y="8" width="8" height="2" fill="#e0e0e0"/>
-        <rect x="5" y="9" width="6" height="3" fill="#e0e0e0"/>
-        <!-- Robe (purple merchant) -->
+        <rect x="4" y="8" width="8" height="2" fill="#e0e0e0"/><rect x="5" y="9" width="6" height="3" fill="#e0e0e0"/>
         <rect x="3" y="10" width="10" height="9" fill="#6010a0"/>
-        <rect x="3" y="10" width="10" height="1" fill="#8020c0"/>
         <rect x="4" y="12" width="8" height="1" fill="#e0c040"/>
-        <!-- Bag -->
         <rect x="0" y="11" width="4" height="6" fill="#a07030"/>
-        <rect x="0" y="11" width="4" height="1" fill="#c09040"/>
         <rect x="1" y="12" width="2" height="4" fill="#c08830"/>
-        <!-- Stars on robe -->
         <rect x="6" y="14" width="1" height="1" fill="#e0c040"/><rect x="9" y="13" width="1" height="1" fill="#e0c040"/>
-        <!-- Legs -->
         <rect x="4" y="19" width="3" height="3" fill="#401080"/><rect x="9" y="19" width="3" height="3" fill="#401080"/>
       </svg>
     </div>
-
-    <!-- Other village players container -->
-    <div id="villageOtherPlayers"></div>
 
     <!-- My character -->
     <div id="villageMyChar" class="village-char" style="bottom:46%;left:46%;">
@@ -2277,18 +2198,265 @@ let mapJoystickSetup = false;
 let pvpPendingChallenger = null;
 
 const BMAP_THEMES = {
-  forest:  { bg:'#2d5e1e', tile:'#38782a', path:'#a07840', deco:'🌲' },
-  mountain:{ bg:'#5a6050', tile:'#6a7060', path:'#908070', deco:'🪨' },
-  castle:  { bg:'#483848', tile:'#504050', path:'#807868', deco:'🏰' },
-  volcano: { bg:'#5a1a08', tile:'#702010', path:'#c04020', deco:'🔥' },
-  dungeon: { bg:'#18182a', tile:'#202038', path:'#504060', deco:'💀' },
-  boss:    { bg:'#100818', tile:'#1a0a28', path:'#600890', deco:'👁️' },
+  forest:  { sky:'#87ceeb', ground:'#3a7a28', tile:'#4a9a38', path:'#c8a060', accent:'#2a5a18', deco:'forest' },
+  mountain:{ sky:'#b0c8e0', ground:'#6a7858', tile:'#7a8868', path:'#a09080', accent:'#4a5838', deco:'mountain' },
+  castle:  { sky:'#5060a0', ground:'#504870', tile:'#5c5480', path:'#807868', accent:'#382840', deco:'castle' },
+  volcano: { sky:'#c04010', ground:'#6a2010', tile:'#7a3018', path:'#d05020', accent:'#401008', deco:'volcano' },
+  dungeon: { sky:'#101020', ground:'#181828', tile:'#202038', path:'#504060', accent:'#080810', deco:'dungeon' },
+  boss:    { sky:'#100010', ground:'#1a001a', tile:'#200020', path:'#800090', accent:'#080008', deco:'boss' },
 };
 
+const VILLAGE_THEME = { sky:'#5ba8e8', ground:'#3d8c2a', tile:'#4ea038', path:'#b89050', accent:'#2a5a18', deco:'village' };
+
 function getMapTheme(stageId) {
-  const t = ['forest','forest','mountain','mountain','volcano','dungeon','castle','boss','dungeon','mountain','castle','dungeon','boss','volcano','dungeon','castle','boss','dungeon','forest','boss'];
-  return BMAP_THEMES[t[(stageId-1) % t.length]] || BMAP_THEMES.forest;
+  const types = ['forest','forest','mountain','mountain','volcano','dungeon','castle','boss','dungeon','mountain','castle','dungeon','boss','volcano','dungeon','castle','boss','dungeon','forest','boss'];
+  return BMAP_THEMES[types[(stageId-1) % types.length]] || BMAP_THEMES.forest;
 }
+
+// ── Rich SVG tile background generator ──
+function buildMapBackground(theme, isVillage) {
+  const g = theme.ground, t = theme.tile, a = theme.accent, s = theme.sky;
+  // Sky gradient
+  const skyH = isVillage ? 38 : 32;
+
+  // Base SVG tile pattern (32x32)
+  const encode = (svg) => 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+
+  // Ground tile with variation
+  const groundTile = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+    <rect width='64' height='64' fill='${t}'/>
+    <rect x='0' y='0' width='32' height='32' fill='${g}' opacity='0.3'/>
+    <rect x='6' y='8' width='4' height='2' fill='${a}' opacity='0.4'/>
+    <rect x='20' y='20' width='3' height='2' fill='${a}' opacity='0.3'/>
+    <rect x='44' y='12' width='5' height='2' fill='${a}' opacity='0.35'/>
+    <rect x='38' y='44' width='4' height='2' fill='${a}' opacity='0.3'/>
+    <rect x='12' y='50' width='3' height='2' fill='${a}' opacity='0.25'/>
+  </svg>`;
+
+  return { groundTile: encode(groundTile), sky: s, skyH };
+}
+
+// ── SVG map decorations by theme ──
+function buildMapDecos(theme, isVillage) {
+  const decos = [];
+  const deco = theme.deco;
+  const g = theme.ground, t = theme.tile, a = theme.accent;
+
+  // Pixel art SVG objects
+  const svgTree = (x,y,c1,c2,c3) => `
+    <g transform="translate(${x},${y})">
+      <rect x='4' y='16' width='4' height='10' fill='#6a3c10'/>
+      <rect x='0' y='6' width='12' height='10' fill='${c1}'/>
+      <rect x='2' y='2' width='8' height='8' fill='${c2}'/>
+      <rect x='4' y='0' width='4' height='4' fill='${c3}'/>
+    </g>`;
+
+  const svgRock = (x,y,c) => `
+    <g transform="translate(${x},${y})">
+      <rect x='2' y='4' width='10' height='6' fill='${c}'/>
+      <rect x='0' y='6' width='14' height='4' fill='${c}'/>
+      <rect x='4' y='2' width='6' height='4' fill='${c}'/>
+      <rect x='2' y='4' width='10' height='1' fill='#fff' opacity='0.2'/>
+    </g>`;
+
+  const svgStump = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='2' y='2' width='8' height='6' fill='#6a3c10'/>
+      <rect x='0' y='4' width='12' height='4' fill='#5a2c08'/>
+      <rect x='2' y='2' width='8' height='1' fill='#8a5c30' opacity='0.6'/>
+    </g>`;
+
+  const svgBush = (x,y,c) => `
+    <g transform="translate(${x},${y})">
+      <rect x='0' y='4' width='12' height='6' fill='${c}'/>
+      <rect x='2' y='2' width='8' height='4' fill='${c}'/>
+      <rect x='4' y='0' width='4' height='4' fill='${c}'/>
+      <rect x='0' y='4' width='12' height='1' fill='#fff' opacity='0.15'/>
+    </g>`;
+
+  const svgFlower = (x,y,c) => `
+    <g transform="translate(${x},${y})">
+      <rect x='3' y='2' width='2' height='4' fill='#3a8020'/>
+      <rect x='2' y='0' width='4' height='2' fill='${c}'/>
+      <rect x='1' y='1' width='2' height='2' fill='${c}'/>
+      <rect x='5' y='1' width='2' height='2' fill='${c}'/>
+    </g>`;
+
+  const svgMushroom = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='3' y='4' width='2' height='4' fill='#d0b080'/>
+      <rect x='0' y='2' width='8' height='4' fill='#d03020'/>
+      <rect x='2' y='0' width='4' height='4' fill='#d03020'/>
+      <rect x='2' y='2' width='2' height='1' fill='#fff' opacity='0.5'/>
+      <rect x='5' y='3' width='1' height='1' fill='#fff' opacity='0.5'/>
+    </g>`;
+
+  const svgCrystal = (x,y,c) => `
+    <g transform="translate(${x},${y})">
+      <rect x='3' y='0' width='2' height='8' fill='${c}'/>
+      <rect x='1' y='2' width='6' height='4' fill='${c}'/>
+      <rect x='3' y='0' width='2' height='2' fill='#fff' opacity='0.4'/>
+    </g>`;
+
+  const svgBone = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='1' y='4' width='10' height='2' fill='#d0c8b0'/>
+      <rect x='0' y='3' width='3' height='4' fill='#d0c8b0'/>
+      <rect x='9' y='3' width='3' height='4' fill='#d0c8b0'/>
+    </g>`;
+
+  const svgLava = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='0' y='4' width='16' height='6' fill='#c03000'/>
+      <rect x='2' y='2' width='12' height='4' fill='#e05010'/>
+      <rect x='4' y='0' width='8' height='4' fill='#ff7020'/>
+      <rect x='6' y='1' width='4' height='2' fill='#ffa040' opacity='0.8'/>
+    </g>`;
+
+  const svgTorch = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='3' y='2' width='2' height='8' fill='#8a5020'/>
+      <rect x='2' y='0' width='4' height='4' fill='#ff8010'/>
+      <rect x='3' y='0' width='2' height='2' fill='#ffe040'/>
+    </g>`;
+
+  const svgPillar = (x,y,c) => `
+    <g transform="translate(${x},${y})">
+      <rect x='2' y='0' width='8' height='16' fill='${c}'/>
+      <rect x='0' y='0' width='12' height='3' fill='${c}'/>
+      <rect x='0' y='13' width='12' height='3' fill='${c}'/>
+      <rect x='2' y='0' width='2' height='16' fill='#fff' opacity='0.1'/>
+    </g>`;
+
+  const svgGrave = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='3' y='0' width='6' height='10' fill='#808090'/>
+      <rect x='1' y='2' width='10' height='6' fill='#808090'/>
+      <rect x='0' y='8' width='12' height='2' fill='#606070'/>
+      <rect x='4' y='3' width='4' height='1' fill='#404050'/>
+      <rect x='5' y='2' width='2' height='3' fill='#404050'/>
+    </g>`;
+
+  const svgPortal = (x,y) => `
+    <g transform="translate(${x},${y})">
+      <rect x='2' y='0' width='12' height='16' fill='#6000a0' opacity='0.7'/>
+      <rect x='0' y='2' width='16' height='12' fill='#8000d0' opacity='0.5'/>
+      <rect x='4' y='4' width='8' height='8' fill='#c040ff' opacity='0.6'/>
+      <rect x='6' y='6' width='4' height='4' fill='#fff' opacity='0.4'/>
+    </g>`;
+
+  // Generate SVG canvas for decorations
+  let svgContent = '';
+
+  if (deco === 'village') {
+    // Village: trees, flowers, bushes, fence posts
+    [[5,70],[8,55],[85,65],[90,72],[15,30],[80,25]].forEach(([x,y])=>{
+      svgContent += svgTree(x*5, y*4.5, '#2a8020','#38a028','#48b038');
+    });
+    [[30,75],[50,72],[70,68]].forEach(([x,y])=>{
+      svgContent += svgBush(x*5, y*4.5, '#258018');
+    });
+    [[20,82],[45,80],[65,83],[78,79]].forEach(([x,y])=>{
+      svgContent += svgFlower(x*5, y*4.5, '#f0c840');
+    });
+    [[25,68],[72,70]].forEach(([x,y])=>{
+      svgContent += svgFlower(x*5, y*4.5, '#ff6080');
+    });
+  } else if (deco === 'forest') {
+    [[5,20],[8,75],[12,40],[85,30],[90,65],[88,80],[3,60],[15,15],[80,78]].forEach(([x,y])=>{
+      svgContent += svgTree(x*5, y*4.5, '#2a7020','#387828','#48a030');
+    });
+    [[20,82],[45,78],[65,85],[78,75]].forEach(([x,y])=>{
+      svgContent += svgMushroom(x*5, y*4.5);
+    });
+    [[35,70],[55,72]].forEach(([x,y])=>{
+      svgContent += svgBush(x*5, y*4.5, '#1a6018');
+    });
+  } else if (deco === 'mountain') {
+    [[5,20],[88,25],[3,70],[90,72]].forEach(([x,y])=>{
+      svgContent += svgRock(x*5, y*4.5, '#7a7060');
+    });
+    [[15,15],[80,18],[10,75],[85,68]].forEach(([x,y])=>{
+      svgContent += svgRock(x*5, y*4.5, '#8a8070');
+    });
+    [[20,60],[70,65],[40,80],[60,78]].forEach(([x,y])=>{
+      svgContent += svgStump(x*5, y*4.5);
+    });
+  } else if (deco === 'volcano') {
+    [[10,15],[85,20],[5,70],[90,68]].forEach(([x,y])=>{
+      svgContent += svgLava(x*5, y*4.5);
+    });
+    [[20,75],[65,72],[40,82]].forEach(([x,y])=>{
+      svgContent += svgRock(x*5, y*4.5, '#601808');
+    });
+    [[15,55],[80,58]].forEach(([x,y])=>{
+      svgContent += svgTorch(x*5, y*4.5);
+    });
+  } else if (deco === 'dungeon') {
+    [[5,15],[88,18],[3,72],[90,70]].forEach(([x,y])=>{
+      svgContent += svgPillar(x*5, y*4.5, '#384048');
+    });
+    [[20,78],[65,75],[45,82]].forEach(([x,y])=>{
+      svgContent += svgBone(x*5, y*4.5);
+    });
+    [[15,60],[80,62]].forEach(([x,y])=>{
+      svgContent += svgTorch(x*5, y*4.5);
+    });
+    [[35,20],[60,18]].forEach(([x,y])=>{
+      svgContent += svgCrystal(x*5, y*4.5, '#4060a0');
+    });
+  } else if (deco === 'castle') {
+    [[5,20],[88,22],[3,72],[90,70]].forEach(([x,y])=>{
+      svgContent += svgPillar(x*5, y*4.5, '#605870');
+    });
+    [[20,75],[65,72]].forEach(([x,y])=>{
+      svgContent += svgGrave(x*5, y*4.5);
+    });
+    [[15,55],[80,58],[40,15],[60,18]].forEach(([x,y])=>{
+      svgContent += svgTorch(x*5, y*4.5);
+    });
+  } else if (deco === 'boss') {
+    [[10,15],[85,18],[5,70],[90,68]].forEach(([x,y])=>{
+      svgContent += svgPortal(x*5, y*4.5);
+    });
+    [[20,75],[65,72],[40,82]].forEach(([x,y])=>{
+      svgContent += svgGrave(x*5, y*4.5);
+    });
+    [[15,55],[80,58]].forEach(([x,y])=>{
+      svgContent += svgCrystal(x*5, y*4.5, '#8000d0');
+    });
+  }
+
+  return svgContent;
+}
+
+// ── Apply graphics to map screen ──
+function applyMapGraphics(screenId, theme, isVillage) {
+  const bg = document.getElementById('bmapBg') || document.getElementById('villageBg');
+  const decosEl = document.getElementById('bmapDecos') || document.getElementById('villageDecos');
+  if (!bg || !decosEl) return;
+
+  const { groundTile, sky, skyH } = buildMapBackground(theme, isVillage);
+  const W = window.innerWidth, H = window.innerHeight;
+  const groundTop = Math.floor(H * skyH / 100);
+
+  bg.innerHTML = `
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,${sky} 0%,${sky} ${skyH}%,${theme.ground} ${skyH}%,${theme.ground} 100%);"></div>
+    <div style="position:absolute;left:0;top:${skyH}%;right:0;bottom:0;background-image:${groundTile};background-size:64px 64px;opacity:0.6;"></div>`;
+
+  // Path (horizontal road across map)
+  const pathSvg = `<div style="position:absolute;left:0;top:44%;width:100%;height:16%;
+    background:repeating-linear-gradient(90deg,${theme.path} 0px,${theme.path} 28px,${theme.accent||theme.path} 28px,${theme.accent||theme.path} 32px);
+    opacity:0.45;"></div>`;
+
+  // Deco SVG
+  const svgDecoHtml = `<svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 500 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    ${buildMapDecos(theme, isVillage)}
+  </svg>`;
+
+  decosEl.innerHTML = pathSvg + svgDecoHtml;
+}
+
 
 function startBattle(stageId) {
   const stage = STAGES.find(s => s.id === stageId);
@@ -2340,22 +2508,8 @@ function enterBattleMap(stageId, stage) {
     battleState: null,
   };
 
-  // Setup background
-  const bg = document.getElementById('bmapBg');
-  bg.style.background = theme.bg;
-  bg.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='${theme.tile.replace('#','%23')}'/%3E%3Crect x='0' y='0' width='1' height='32' fill='${theme.bg.replace('#','%23')}'/%3E%3Crect x='0' y='0' width='32' height='1' fill='${theme.bg.replace('#','%23')}'/%3E%3C/svg%3E")`;
-
-  // Decorations
-  const decos = [];
-  for (let i = 0; i < 12; i++) {
-    const dx = 5 + Math.random()*90, dy = 5 + Math.random()*90;
-    // Avoid center path
-    if (dx > 12 && dx < 88 && dy > 25 && dy < 80) continue;
-    decos.push(`<div class="bmap-deco" style="left:${dx}%;top:${dy}%;font-size:${1.2+Math.random()}rem;opacity:0.7;">${theme.deco}</div>`);
-  }
-  // Path stripe
-  decos.push(`<div style="position:absolute;left:5%;top:45%;width:90%;height:14%;background:${theme.path};opacity:0.35;border-radius:8px;"></div>`);
-  document.getElementById('bmapDecos').innerHTML = decos.join('');
+  // Apply rich graphics
+  applyMapGraphics('battleMapScreen', theme, false);
 
   // Show screen
   document.getElementById('battleMapScreen').classList.add('active');
@@ -4185,11 +4339,14 @@ function getVillageCharSVG(heroClass, animClass) {
 function enterVillage(fromLogin) {
   villageActive = true;
   document.getElementById('villageScreen').classList.add('active');
-  // Flash transition
   const flash = document.createElement('div');
   flash.className = 'village-transition';
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 500);
+
+  // ★ Apply village top-down graphics
+  applyMapGraphics('villageScreen', VILLAGE_THEME, true);
+  renderVillageBuildings();
 
   // Set my character
   const heroClass = player ? (player.level % 3) : 0;
@@ -4197,25 +4354,129 @@ function enterVillage(fromLogin) {
   document.getElementById('villageMyLabel').innerHTML = `${player ? player.username : '나'} ${getRankBadge(player?.level||1)}`;
   updateVillageHUD();
 
-  // Reset position
   villagePos = { x: 46, y: 46 };
   updateVillageCharPos();
-
-  // Joystick setup
   setupJoystick();
-
-  // Start move loop
   if (villageMoveLoop) clearInterval(villageMoveLoop);
   villageMoveLoop = setInterval(villageMoveTick, 50);
-
-  // Tell server
   wsSend({ type: 'village_enter', x: villagePos.x, y: villagePos.y, heroClass });
-
-  // Schedule NPC merchant appearance
   scheduleNpc();
-
-  // Close all panels
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+}
+
+function renderVillageBuildings() {
+  const obj = document.getElementById('villageObjects');
+  if (!obj) return;
+  obj.innerHTML = `
+    <!-- Inn (left) -->
+    <div style="position:absolute;left:3%;bottom:52%;pointer-events:none;">
+      <svg viewBox="0 0 56 60" width="112" height="120" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <!-- Walls -->
+        <rect x="0" y="20" width="56" height="40" fill="#c08840"/>
+        <rect x="0" y="20" width="56" height="3" fill="#d09a50"/>
+        <!-- Roof -->
+        <rect x="4" y="2" width="48" height="20" fill="#903820"/>
+        <rect x="10" y="0" width="36" height="12" fill="#a04428"/>
+        <rect x="16" y="0" width="24" height="6" fill="#b05030"/>
+        <!-- Roof ridge -->
+        <rect x="24" y="0" width="8" height="3" fill="#c06038"/>
+        <!-- Windows -->
+        <rect x="4" y="28" width="14" height="12" fill="#5090d0" opacity="0.8"/>
+        <rect x="5" y="29" width="12" height="10" fill="#70b0f0" opacity="0.6"/>
+        <rect x="10" y="28" width="2" height="12" fill="#4070a0"/>
+        <rect x="4" y="34" width="14" height="2" fill="#4070a0"/>
+        <rect x="38" y="28" width="14" height="12" fill="#5090d0" opacity="0.8"/>
+        <rect x="39" y="29" width="12" height="10" fill="#70b0f0" opacity="0.6"/>
+        <rect x="44" y="28" width="2" height="12" fill="#4070a0"/>
+        <rect x="38" y="34" width="14" height="2" fill="#4070a0"/>
+        <!-- Door -->
+        <rect x="22" y="36" width="12" height="24" fill="#7a3010"/>
+        <rect x="23" y="37" width="10" height="22" fill="#6a2808"/>
+        <rect x="28" y="37" width="2" height="22" fill="#5a1e04"/>
+        <rect x="30" y="48" width="2" height="2" fill="#d0a040"/>
+        <!-- Sign -->
+        <rect x="20" y="22" width="16" height="6" fill="#c09040"/>
+        <rect x="21" y="23" width="14" height="4" fill="#b08030"/>
+        <text x="22" y="27" font-size="4" fill="#ffe080" font-weight="bold">여관</text>
+        <!-- Base shadow -->
+        <rect x="0" y="58" width="56" height="2" fill="#906030" opacity="0.5"/>
+      </svg>
+    </div>
+    <!-- Blacksmith (right) -->
+    <div style="position:absolute;right:3%;bottom:52%;pointer-events:none;">
+      <svg viewBox="0 0 52 56" width="104" height="112" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="16" width="48" height="40" fill="#686868"/>
+        <rect x="2" y="16" width="48" height="3" fill="#888888"/>
+        <rect x="0" y="8" width="52" height="10" fill="#4a4a4a"/>
+        <rect x="4" y="0" width="44" height="10" fill="#383838"/>
+        <!-- Chimney -->
+        <rect x="36" y="0" width="8" height="14" fill="#303030"/>
+        <rect x="35" y="0" width="10" height="3" fill="#282828"/>
+        <!-- Fire in chimney -->
+        <rect x="37" y="1" width="6" height="3" fill="#ff6010" opacity="0.8"/>
+        <!-- Windows -->
+        <rect x="4" y="24" width="10" height="10" fill="#3090b0" opacity="0.6"/>
+        <rect x="5" y="25" width="8" height="8" fill="#50b0d0" opacity="0.5"/>
+        <!-- Forge fire -->
+        <rect x="16" y="24" width="12" height="12" fill="#202020"/>
+        <rect x="17" y="25" width="10" height="10" fill="#ff5000" opacity="0.8"/>
+        <rect x="19" y="24" width="6" height="4" fill="#ff8020" opacity="0.9"/>
+        <rect x="21" y="23" width="2" height="2" fill="#ffc040"/>
+        <!-- Door -->
+        <rect x="20" y="38" width="12" height="18" fill="#252525"/>
+        <rect x="21" y="39" width="10" height="16" fill="#1a1a1a"/>
+        <rect x="29" y="46" width="2" height="2" fill="#808080"/>
+        <!-- Sign -->
+        <rect x="16" y="18" width="20" height="5" fill="#484848"/>
+        <text x="17" y="23" font-size="4" fill="#c0e0ff" font-weight="bold">대장간</text>
+        <rect x="2" y="54" width="48" height="2" fill="#404040" opacity="0.5"/>
+      </svg>
+    </div>
+    <!-- Market stall (center-left) -->
+    <div style="position:absolute;left:33%;bottom:52%;pointer-events:none;">
+      <svg viewBox="0 0 44 40" width="88" height="80" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="12" width="40" height="28" fill="#d0b060"/>
+        <rect x="0" y="8" width="44" height="8" fill="#e05020"/>
+        <rect x="0" y="8" width="44" height="3" fill="#f06030"/>
+        <!-- Awning stripes -->
+        <rect x="4" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
+        <rect x="12" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
+        <rect x="20" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
+        <rect x="28" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
+        <rect x="36" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
+        <!-- Pillars -->
+        <rect x="2" y="8" width="3" height="32" fill="#b09040"/>
+        <rect x="39" y="8" width="3" height="32" fill="#b09040"/>
+        <!-- Counter -->
+        <rect x="4" y="20" width="36" height="4" fill="#b08030"/>
+        <!-- Items on counter -->
+        <rect x="8" y="17" width="4" height="4" fill="#e04040"/>
+        <rect x="16" y="16" width="3" height="5" fill="#40c040"/>
+        <rect x="24" y="17" width="4" height="4" fill="#4040e0"/>
+        <rect x="32" y="17" width="3" height="4" fill="#e0c040"/>
+        <text x="10" y="36" font-size="4" fill="#604010" font-weight="bold">상점</text>
+      </svg>
+    </div>
+    <!-- Well (center-right) -->
+    <div style="position:absolute;left:58%;bottom:52%;pointer-events:none;">
+      <svg viewBox="0 0 32 36" width="64" height="72" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="14" width="24" height="22" fill="#909888"/>
+        <rect x="4" y="14" width="24" height="3" fill="#b0b8a8"/>
+        <rect x="2" y="14" width="4" height="24" fill="#808878"/><rect x="26" y="14" width="4" height="24" fill="#808878"/>
+        <rect x="6" y="18" width="20" height="16" fill="#3878b8"/>
+        <rect x="6" y="18" width="20" height="2" fill="#58a0e0"/>
+        <!-- Reflection -->
+        <rect x="10" y="22" width="6" height="2" fill="#80c0f0" opacity="0.5"/>
+        <rect x="0" y="12" width="32" height="4" fill="#a0a898"/>
+        <!-- Roof structure -->
+        <rect x="14" y="0" width="4" height="14" fill="#704820"/>
+        <rect x="10" y="2" width="12" height="3" fill="#906030"/>
+        <rect x="8" y="0" width="3" height="6" fill="#785028"/><rect x="21" y="0" width="3" height="6" fill="#785028"/>
+        <!-- Rope -->
+        <rect x="15" y="6" width="2" height="8" fill="#c0a060" opacity="0.7"/>
+      </svg>
+    </div>
+  `;
 }
 
 function leaveVillage() {
