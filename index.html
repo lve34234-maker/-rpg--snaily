@@ -1530,9 +1530,9 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
   </div>
   <div class="panel-body">
     <div class="admin-section">
-      <div class="admin-section-title">📷 카메라 몬스터 생성</div>
-      <p style="font-size:0.72rem;color:rgba(240,232,200,0.5);margin-bottom:10px;">카메라로 물체를 찍으면 AI가 픽셀아트 몬스터로 변환합니다!</p>
-      <button class="admin-btn" style="background:linear-gradient(135deg,#204080,#4080c0);" onclick="openCameraCapture()">📷 카메라로 몬스터 만들기</button>
+      <div class="admin-section-title">🎨 직접 그려서 몬스터 만들기</div>
+      <p style="font-size:0.72rem;color:rgba(240,232,200,0.5);margin-bottom:10px;">직접 그림을 그리면 몬스터로 변환됩니다!</p>
+      <button class="admin-btn" style="background:linear-gradient(135deg,#204080,#4080c0);" onclick="openDrawMonster()">🎨 그림으로 몬스터 만들기</button>
     </div>
     <div class="admin-section">
       <div class="admin-section-title">💾 세이브 백업</div>
@@ -1550,51 +1550,84 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
 </div>
 
 <!-- Camera Monster Modal -->
-<div id="cameraModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.95);flex-direction:column;align-items:center;justify-content:flex-start;padding:20px 16px;">
-  <div style="width:100%;max-width:400px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div style="font-size:1rem;font-weight:900;color:var(--gold);">📷 카메라 몬스터 생성</div>
-      <button onclick="closeCameraModal()" style="background:none;border:none;color:rgba(240,232,200,0.5);font-size:1.3rem;cursor:pointer;">✕</button>
+<!-- ====== DRAW MONSTER MODAL ====== -->
+<div id="drawMonsterModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.96);flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto;">
+  <div style="width:100%;max-width:420px;">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:1rem;font-weight:900;color:var(--gold);">🎨 직접 그려서 몬스터 만들기</div>
+      <button onclick="closeDrawMonster()" style="background:none;border:none;color:rgba(240,232,200,0.5);font-size:1.3rem;cursor:pointer;touch-action:manipulation;">✕</button>
     </div>
-    <!-- Step 1: Camera -->
-    <div id="cameraStep1">
-      <div style="font-size:0.75rem;color:rgba(240,232,200,0.5);margin-bottom:10px;">📸 찍고 싶은 물체를 카메라에 담아주세요</div>
-      <video id="cameraFeed" style="width:100%;border-radius:10px;border:2px solid rgba(245,200,66,0.3);background:#000;" autoplay playsinline muted></video>
-      <canvas id="cameraCanvas" style="display:none;"></canvas>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button onclick="capturePhoto()" style="flex:1;padding:12px;background:linear-gradient(135deg,#c08000,#f0c000);border:none;border-radius:8px;color:#1a0a00;font-weight:900;font-size:0.85rem;cursor:pointer;">📸 찍기</button>
-        <button onclick="uploadPhoto()" style="flex:1;padding:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:0.85rem;cursor:pointer;">🖼️ 갤러리</button>
-      </div>
-      <input type="file" id="photoUpload" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
-    </div>
-    <!-- Step 2: Preview & Generate -->
-    <div id="cameraStep2" style="display:none;">
-      <div style="font-size:0.75rem;color:rgba(240,232,200,0.5);margin-bottom:10px;">✅ 이 이미지로 몬스터를 만들까요?</div>
-      <img id="capturedPreview" style="width:100%;border-radius:10px;border:2px solid rgba(100,200,100,0.4);max-height:220px;object-fit:contain;background:#111;">
-      <div id="monsterNameInput" style="margin-top:10px;">
-        <input type="text" id="monsterNameField" class="admin-input" placeholder="몬스터 이름 (예: 책상 골렘)" style="margin-bottom:8px;">
-      </div>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button onclick="generateMonster()" id="generateBtn" style="flex:2;padding:12px;background:linear-gradient(135deg,#6020c0,#a040ff);border:none;border-radius:8px;color:#fff;font-weight:900;font-size:0.85rem;cursor:pointer;">✨ AI로 몬스터 만들기</button>
-        <button onclick="resetCamera()" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:0.8rem;cursor:pointer;">🔄 다시찍기</button>
-      </div>
-    </div>
-    <!-- Step 3: Result -->
-    <div id="cameraStep3" style="display:none;text-align:center;">
-      <div id="generatingMsg" style="font-size:0.85rem;color:#c080ff;margin-bottom:16px;animation:btn-blink 1s steps(2) infinite;">✨ AI가 몬스터를 만드는 중...</div>
-      <div id="monsterResult" style="display:none;">
-        <div style="font-size:0.75rem;color:rgba(240,232,200,0.5);margin-bottom:10px;">🎉 새 몬스터 등장!</div>
-        <div id="monsterPreviewSvg" style="margin:0 auto 12px;display:flex;justify-content:center;"></div>
-        <div id="monsterResultName" style="font-size:1rem;font-weight:900;color:var(--gold);margin-bottom:4px;"></div>
-        <div id="monsterResultStats" style="font-size:0.72rem;color:rgba(240,232,200,0.5);margin-bottom:14px;"></div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="addCustomMonster()" style="flex:2;padding:12px;background:linear-gradient(135deg,#206040,#40a060);border:none;border-radius:8px;color:#fff;font-weight:900;font-size:0.85rem;cursor:pointer;">⚔️ 게임에 추가!</button>
-          <button onclick="resetCamera()" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:0.8rem;cursor:pointer;">🔄 다시</button>
+
+    <!-- Step 1: Draw -->
+    <div id="drawStep1">
+      <!-- Tool bar -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <!-- Colors -->
+        <div id="drawColorPalette" style="display:flex;gap:4px;flex-wrap:wrap;flex:1;">
+          <!-- filled by JS -->
         </div>
+        <!-- Tools -->
+        <button id="drawToolPen" onclick="setDrawTool('pen')" style="padding:6px 10px;border-radius:6px;border:2px solid var(--gold);background:rgba(245,200,66,0.2);color:var(--gold);font-size:0.8rem;cursor:pointer;touch-action:manipulation;">✏️</button>
+        <button id="drawToolErase" onclick="setDrawTool('erase')" style="padding:6px 10px;border-radius:6px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:0.8rem;cursor:pointer;touch-action:manipulation;">⬜</button>
+        <button onclick="clearDrawCanvas()" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,100,100,0.4);background:rgba(255,50,50,0.1);color:#ff8080;font-size:0.7rem;cursor:pointer;touch-action:manipulation;">🗑️</button>
+      </div>
+      <!-- Brush size -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:0.65rem;color:rgba(240,232,200,0.5);">크기</span>
+        <input type="range" id="brushSizeSlider" min="2" max="24" value="8" style="flex:1;" oninput="updateBrushSize(this.value)">
+        <div id="brushPreview" style="width:16px;height:16px;border-radius:50%;background:var(--drawColor,#ff4040);border:1px solid rgba(255,255,255,0.3);flex-shrink:0;"></div>
+      </div>
+      <!-- Canvas -->
+      <div style="position:relative;border-radius:10px;overflow:hidden;border:2px solid rgba(245,200,66,0.3);touch-action:none;">
+        <canvas id="drawCanvas" width="320" height="320"
+          style="width:100%;display:block;background:#1a1a2e;cursor:crosshair;touch-action:none;image-rendering:pixelated;"></canvas>
+        <!-- Grid overlay toggle -->
+        <button onclick="toggleDrawGrid()" style="position:absolute;top:6px;right:6px;padding:3px 7px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:rgba(255,255,255,0.5);font-size:0.6rem;cursor:pointer;touch-action:manipulation;">격자</button>
+      </div>
+      <!-- Monster name -->
+      <input type="text" id="drawMonsterName" class="admin-input" placeholder="몬스터 이름 (비워도 됨)" style="margin-top:10px;margin-bottom:8px;">
+      <!-- Stats sliders -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:0.62rem;color:rgba(240,232,200,0.5);margin-bottom:3px;">❤️ HP</div>
+          <input type="range" id="drawHpSlider" min="100" max="5000" value="500" style="width:100%;">
+          <div style="font-size:0.6rem;color:var(--gold);text-align:center;" id="drawHpVal">500</div>
+        </div>
+        <div>
+          <div style="font-size:0.62rem;color:rgba(240,232,200,0.5);margin-bottom:3px;">⚔️ 공격력</div>
+          <input type="range" id="drawAtkSlider" min="10" max="300" value="50" style="width:100%;">
+          <div style="font-size:0.6rem;color:var(--gold);text-align:center;" id="drawAtkVal">50</div>
+        </div>
+        <div>
+          <div style="font-size:0.62rem;color:rgba(240,232,200,0.5);margin-bottom:3px;">🛡️ 방어력</div>
+          <input type="range" id="drawDefSlider" min="0" max="150" value="20" style="width:100%;">
+          <div style="font-size:0.6rem;color:var(--gold);text-align:center;" id="drawDefVal">20</div>
+        </div>
+        <div>
+          <div style="font-size:0.62rem;color:rgba(240,232,200,0.5);margin-bottom:3px;">⭐ EXP</div>
+          <input type="range" id="drawExpSlider" min="10" max="500" value="80" style="width:100%;">
+          <div style="font-size:0.6rem;color:var(--gold);text-align:center;" id="drawExpVal">80</div>
+        </div>
+      </div>
+      <button onclick="confirmDrawMonster()" style="width:100%;padding:13px;background:linear-gradient(135deg,#5010a0,#9030f0);border:none;border-radius:8px;color:#fff;font-weight:900;font-size:0.9rem;cursor:pointer;touch-action:manipulation;box-shadow:0 4px 16px rgba(120,40,240,0.4);">✨ 이 그림으로 몬스터 추가!</button>
+    </div>
+
+    <!-- Step 2: Preview -->
+    <div id="drawStep2" style="display:none;text-align:center;padding:10px 0;">
+      <div style="font-size:0.8rem;color:#c080ff;margin-bottom:16px;">✅ 몬스터 완성!</div>
+      <div id="drawMonsterPreview" style="display:flex;justify-content:center;margin-bottom:12px;"></div>
+      <div id="drawMonsterPreviewName" style="font-size:1rem;font-weight:900;color:var(--gold);margin-bottom:4px;"></div>
+      <div id="drawMonsterPreviewStats" style="font-size:0.72rem;color:rgba(240,232,200,0.5);margin-bottom:16px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="addDrawnMonster()" style="flex:2;padding:13px;background:linear-gradient(135deg,#206040,#40a060);border:none;border-radius:8px;color:#fff;font-weight:900;cursor:pointer;touch-action:manipulation;">⚔️ 게임에 추가!</button>
+        <button onclick="backToDrawing()" style="flex:1;padding:13px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;cursor:pointer;touch-action:manipulation;">🔄 다시</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- (카메라 모달 제거됨 - 그리기로 대체) -->
 <!-- Stage Panel -->
 <div id="stagePanel" class="panel">
   <div class="panel-header">
@@ -4337,201 +4370,143 @@ let cameraStream = null;
 let capturedImageBase64 = null;
 let generatedMonsterData = null;
 
-function openCameraCapture() {
-  document.getElementById('cameraModal').style.display = 'flex';
-  document.getElementById('cameraStep1').style.display = 'block';
-  document.getElementById('cameraStep2').style.display = 'none';
-  document.getElementById('cameraStep3').style.display = 'none';
-  startCamera();
-}
+// ============================================================
+// DRAW MONSTER SYSTEM
+// ============================================================
+let drawCtx = null, isDrawing = false, drawTool = 'pen', drawColor = '#ff4040';
+let brushSize = 8, drawGridOn = false, drawnMonsterData = null;
+const DRAW_PALETTE = ['#ff4040','#ff8020','#f0c840','#40c040','#2080ff','#a040ff','#ff80c0','#40e0ff','#ffffff','#c0a060','#304050','#000000'];
 
-function closeCameraModal() {
-  stopCamera();
-  document.getElementById('cameraModal').style.display = 'none';
+function openDrawMonster() {
+  document.getElementById('drawMonsterModal').style.display = 'flex';
+  document.getElementById('drawStep1').style.display = 'block';
+  document.getElementById('drawStep2').style.display = 'none';
+  initDrawCanvas(); renderDrawPalette();
+  ['drawHpSlider','drawAtkSlider','drawDefSlider','drawExpSlider'].forEach(id => {
+    const el = document.getElementById(id);
+    el.oninput = () => document.getElementById(id.replace('Slider','Val')).textContent = el.value;
+  });
 }
+function closeDrawMonster() { document.getElementById('drawMonsterModal').style.display = 'none'; }
 
-async function startCamera() {
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
-    });
-    const video = document.getElementById('cameraFeed');
-    video.srcObject = cameraStream;
-  } catch(e) {
-    showNotif('📷 카메라 접근 실패. 갤러리를 이용해 주세요.');
-    document.getElementById('cameraFeed').style.display = 'none';
+function renderDrawPalette() {
+  const pal = document.getElementById('drawColorPalette');
+  if (!pal) return;
+  pal.innerHTML = DRAW_PALETTE.map(c =>
+    `<div onclick="setDrawColor('${c}')" style="width:22px;height:22px;border-radius:4px;background:${c};cursor:pointer;border:2px solid ${c===drawColor?'#fff':'rgba(255,255,255,0.2)'};flex-shrink:0;touch-action:manipulation;"></div>`
+  ).join('');
+}
+function setDrawColor(c) {
+  drawColor = c; drawTool = 'pen';
+  const p = document.getElementById('brushPreview'); if(p) p.style.background = c;
+  document.getElementById('drawToolPen').style.cssText += ';border-color:var(--gold);background:rgba(245,200,66,0.2)';
+  document.getElementById('drawToolErase').style.cssText += ';border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.05)';
+  renderDrawPalette();
+}
+function setDrawTool(tool) {
+  drawTool = tool;
+  document.getElementById('drawToolPen').style.borderColor = tool==='pen'?'var(--gold)':'rgba(255,255,255,0.2)';
+  document.getElementById('drawToolPen').style.background = tool==='pen'?'rgba(245,200,66,0.2)':'rgba(255,255,255,0.05)';
+  document.getElementById('drawToolErase').style.borderColor = tool==='erase'?'#fff':'rgba(255,255,255,0.2)';
+  document.getElementById('drawToolErase').style.background = tool==='erase'?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.05)';
+  const p = document.getElementById('brushPreview'); if(p) p.style.background = tool==='erase'?'#1a1a2e':drawColor;
+}
+function updateBrushSize(val) {
+  brushSize = parseInt(val);
+  const p = document.getElementById('brushPreview'); if(!p) return;
+  const s = Math.min(28, Math.max(10, brushSize*2));
+  p.style.width=s+'px'; p.style.height=s+'px'; p.style.borderRadius=s/2+'px';
+}
+function toggleDrawGrid() {
+  drawGridOn = !drawGridOn;
+  if (drawGridOn && drawCtx) {
+    const cv = document.getElementById('drawCanvas');
+    drawCtx.save(); drawCtx.strokeStyle='rgba(255,255,255,0.08)'; drawCtx.lineWidth=0.5;
+    for(let x=0;x<=cv.width;x+=32){drawCtx.beginPath();drawCtx.moveTo(x,0);drawCtx.lineTo(x,cv.height);drawCtx.stroke();}
+    for(let y=0;y<=cv.height;y+=32){drawCtx.beginPath();drawCtx.moveTo(0,y);drawCtx.lineTo(cv.width,y);drawCtx.stroke();}
+    drawCtx.restore();
   }
 }
-
-function stopCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
-}
-
-function capturePhoto() {
-  const video = document.getElementById('cameraFeed');
-  const canvas = document.getElementById('cameraCanvas');
-  canvas.width = video.videoWidth || 320;
-  canvas.height = video.videoHeight || 240;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-  document.getElementById('capturedPreview').src = 'data:image/jpeg;base64,' + capturedImageBase64;
-  stopCamera();
-  document.getElementById('cameraStep1').style.display = 'none';
-  document.getElementById('cameraStep2').style.display = 'block';
-}
-
-function uploadPhoto() { document.getElementById('photoUpload').click(); }
-
-function handlePhotoUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const dataUrl = ev.target.result;
-    capturedImageBase64 = dataUrl.split(',')[1];
-    document.getElementById('capturedPreview').src = dataUrl;
-    stopCamera();
-    document.getElementById('cameraStep1').style.display = 'none';
-    document.getElementById('cameraStep2').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-}
-
-function resetCamera() {
-  capturedImageBase64 = null;
-  generatedMonsterData = null;
-  document.getElementById('cameraStep1').style.display = 'block';
-  document.getElementById('cameraStep2').style.display = 'none';
-  document.getElementById('cameraStep3').style.display = 'none';
-  document.getElementById('monsterResult').style.display = 'none';
-  document.getElementById('monsterNameField').value = '';
-  document.getElementById('cameraFeed').style.display = 'block';
-  startCamera();
-}
-
-async function generateMonster() {
-  if (!capturedImageBase64) return;
-  const customName = document.getElementById('monsterNameField').value.trim();
-  const btn = document.getElementById('generateBtn');
-  btn.disabled = true;
-  btn.textContent = '✨ AI 생성 중...';
-
-  document.getElementById('cameraStep2').style.display = 'none';
-  document.getElementById('cameraStep3').style.display = 'block';
-  document.getElementById('generatingMsg').style.display = 'block';
-  document.getElementById('monsterResult').style.display = 'none';
-
-  try {
-    // 1단계: 이미지 분석 + 스탯 + 실제 SVG 픽셀아트 한 번에 생성
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 3000,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: 'image/jpeg', data: capturedImageBase64 }
-            },
-            {
-              type: 'text',
-              text: `이 이미지를 분석해서 독창적인 판타지 RPG 픽셀아트 몬스터를 만들어줘.${customName ? ` 몬스터 이름: "${customName}"` : ''}
-
-이미지의 실제 모양, 색상, 특징을 최대한 반영해서 완전히 독특한 몬스터를 디자인해.
-
-반드시 아래 JSON 형식으로만 응답해. 다른 텍스트 없이 JSON만:
-{
-  "name": "이미지 특징을 반영한 창의적인 한국어 이름",
-  "description": "이미지 특징을 반영한 설명 한 문장",
-  "hp": 숫자(200~3000),
-  "atk": 숫자(15~250),
-  "def": 숫자(5~120),
-  "expReward": 숫자(30~400),
-  "goldReward": 숫자(20~250),
-  "svgInner": "32x36 픽셀아트 SVG 내부 rect 요소들만. viewBox 0 0 32 36 기준. shape-rendering crispEdges. rect 요소만 사용. 이미지의 실제 형태와 색상을 반영한 독창적인 디자인. 최소 30개 이상의 rect 요소로 상세하게. 눈, 입, 팔, 다리, 특이한 특징들 포함. glow effect는 넣지 마. 예시형식: <rect x=\\"10\\" y=\\"5\\" width=\\"12\\" height=\\"10\\" fill=\\"#ff4020\\"/>"
-}`
-            }
-          ]
-        }]
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || '{}';
-    const clean = text.replace(/```json|```/g, '').trim();
-
-    let monster;
-    try {
-      monster = JSON.parse(clean);
-    } catch(parseErr) {
-      // JSON 파싱 실패 시 svgInner만 따로 추출 시도
-      const nameM = clean.match(/"name"\s*:\s*"([^"]+)"/);
-      const hpM = clean.match(/"hp"\s*:\s*(\d+)/);
-      const atkM = clean.match(/"atk"\s*:\s*(\d+)/);
-      const defM = clean.match(/"def"\s*:\s*(\d+)/);
-      const expM = clean.match(/"expReward"\s*:\s*(\d+)/);
-      const goldM = clean.match(/"goldReward"\s*:\s*(\d+)/);
-      const descM = clean.match(/"description"\s*:\s*"([^"]+)"/);
-      // svgInner는 따로 정규식으로 추출 (이스케이프 문자 포함이라 복잡)
-      const svgM = clean.match(/"svgInner"\s*:\s*"([\s\S]*?)"\s*\}/);
-      monster = {
-        name: nameM?.[1] || customName || '신비한 몬스터',
-        description: descM?.[1] || '알 수 없는 힘으로 만들어진 몬스터',
-        hp: parseInt(hpM?.[1]) || 500,
-        atk: parseInt(atkM?.[1]) || 50,
-        def: parseInt(defM?.[1]) || 25,
-        expReward: parseInt(expM?.[1]) || 100,
-        goldReward: parseInt(goldM?.[1]) || 80,
-        svgInner: svgM?.[1]?.replace(/\\"/g, '"') || ''
-      };
-    }
-
-    // svgInner가 비어있으면 AI에게 SVG만 따로 요청
-    if (!monster.svgInner || monster.svgInner.length < 50) {
-      monster.svgInner = await requestSVGOnly(capturedImageBase64, monster);
-    }
-
-    generatedMonsterData = monster;
-    showGeneratedMonster(monster);
-  } catch(e) {
-    const fallback = makeFallbackMonster(customName);
-    generatedMonsterData = fallback;
-    showGeneratedMonster(fallback);
+function initDrawCanvas() {
+  const cv = document.getElementById('drawCanvas'); if(!cv) return;
+  drawCtx = cv.getContext('2d');
+  drawCtx.fillStyle = '#1a1a2e'; drawCtx.fillRect(0,0,cv.width,cv.height);
+  function getPos(e) {
+    const r=cv.getBoundingClientRect(), sx=cv.width/r.width, sy=cv.height/r.height;
+    const s=e.touches?e.touches[0]:e;
+    return {x:(s.clientX-r.left)*sx, y:(s.clientY-r.top)*sy};
   }
-  btn.disabled = false;
-  btn.textContent = '✨ AI로 몬스터 만들기';
-}
-
-// SVG만 별도 요청 (메인 파싱 실패 시 fallback)
-async function requestSVGOnly(imageBase64, monsterInfo) {
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-            { type: 'text', text: `이미지를 보고 "${monsterInfo.name}" 픽셀아트 몬스터의 SVG rect 요소들만 출력해줘.
-viewBox "0 0 32 36" 기준. shape-rendering="crispEdges". rect만 사용.
-이미지의 색상과 형태를 최대한 반영. 최소 25개 rect. 눈,입,몸,팔,다리 포함.
-<rect ...> 태그들만 출력. SVG 태그나 설명 없이.` }
-          ]
-        }]
-      })
-    });
-    const d = await r.json();
-    return d.content?.[0]?.text?.trim() || generateFallbackSVGInner(monsterInfo);
-  } catch(e) {
-    return generateFallbackSVGInner(monsterInfo);
+  function drawAt(pos) {
+    if(!drawCtx) return;
+    drawCtx.beginPath();
+    if(drawTool==='erase'){drawCtx.fillStyle='#1a1a2e';const s=brushSize*2;drawCtx.fillRect(pos.x-s/2,pos.y-s/2,s,s);}
+    else{drawCtx.fillStyle=drawColor;drawCtx.arc(pos.x,pos.y,brushSize/2,0,Math.PI*2);drawCtx.fill();}
   }
+  cv.onmousedown=(e)=>{isDrawing=true;drawAt(getPos(e));};
+  cv.onmousemove=(e)=>{if(isDrawing)drawAt(getPos(e));};
+  cv.onmouseup=cv.onmouseleave=()=>{isDrawing=false;};
+  cv.ontouchstart=(e)=>{e.preventDefault();isDrawing=true;drawAt(getPos(e));};
+  cv.ontouchmove=(e)=>{e.preventDefault();if(isDrawing)drawAt(getPos(e));};
+  cv.ontouchend=()=>{isDrawing=false;};
 }
+function clearDrawCanvas() {
+  if(!drawCtx)return;
+  const cv=document.getElementById('drawCanvas');
+  drawCtx.fillStyle='#1a1a2e';drawCtx.fillRect(0,0,cv.width,cv.height);
+}
+function confirmDrawMonster() {
+  const cv=document.getElementById('drawCanvas');
+  const name=document.getElementById('drawMonsterName').value.trim()||'그림 몬스터';
+  const hp=parseInt(document.getElementById('drawHpSlider').value);
+  const atk=parseInt(document.getElementById('drawAtkSlider').value);
+  const def=parseInt(document.getElementById('drawDefSlider').value);
+  const exp=parseInt(document.getElementById('drawExpSlider').value);
+  const gold=Math.max(10,Math.floor(exp*0.6));
+  const svgInner=canvasToPixelSVG(cv);
+  drawnMonsterData={name,hp,atk,def,expReward:exp,goldReward:gold,svgInner};
+  const svgHtml=`<svg viewBox="0 0 32 36" width="128" height="144" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">${svgInner}</svg>`;
+  document.getElementById('drawMonsterPreview').innerHTML=svgHtml;
+  document.getElementById('drawMonsterPreviewName').textContent=name;
+  document.getElementById('drawMonsterPreviewStats').textContent=`HP:${hp} ATK:${atk} DEF:${def} EXP:${exp} 💰${gold}`;
+  document.getElementById('drawStep1').style.display='none';
+  document.getElementById('drawStep2').style.display='block';
+}
+function canvasToPixelSVG(cv) {
+  const off=document.createElement('canvas');off.width=32;off.height=36;
+  const ctx=off.getContext('2d');ctx.drawImage(cv,0,0,32,36);
+  const data=ctx.getImageData(0,0,32,36).data;
+  const rects=[];
+  for(let y=0;y<36;y++){for(let x=0;x<32;x++){
+    const i=(y*32+x)*4, r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+    if(a<30||( r<32&&g<32&&b<50))continue;
+    const c='#'+r.toString(16).padStart(2,'0')+g.toString(16).padStart(2,'0')+b.toString(16).padStart(2,'0');
+    rects.push(`<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`);
+  }}
+  return rects.join('')||generateFallbackSVGInner({});
+}
+function addDrawnMonster() {
+  if(!drawnMonsterData||!player)return;
+  if(!player.customMonsters)player.customMonsters=[];
+  const m=drawnMonsterData;
+  const svgHtml=`<svg viewBox="0 0 32 36" width="128" height="144" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">${m.svgInner}</svg>`;
+  const cm={id:'cm_'+Date.now(),name:m.name,description:'직접 그린 몬스터',hp:m.hp,atk:m.atk,def:m.def,expReward:m.expReward,goldReward:m.goldReward,svgHtml};
+  player.customMonsters.push(cm);
+  ENEMY_STATS[cm.id]={maxHp:cm.hp,atk:cm.atk,def:cm.def,expReward:cm.expReward,goldReward:cm.goldReward};
+  customMonsterSVGs[cm.id]=cm.svgHtml;
+  saveGame(); showNotif(`🎉 "${cm.name}" 추가됨!`);
+  closeDrawMonster(); closePanel('settingsPanel');
+}
+function backToDrawing() {
+  document.getElementById('drawStep1').style.display='block';
+  document.getElementById('drawStep2').style.display='none';
+}
+// 구버전 카메라 stub
+function openCameraCapture(){openDrawMonster();}
+function closeCameraModal(){closeDrawMonster();}
+function resetCamera(){backToDrawing();}
+function capturePhoto(){}function uploadPhoto(){}function handlePhotoUpload(){}
+function startCamera(){}function stopCamera(){}
+
 
 function generateFallbackSVGInner(m) {
   // 기본값에서도 랜덤성 부여
