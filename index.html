@@ -9,89 +9,135 @@
 :root {
   --gold: #f5c842;
   --gold2: #e09c1a;
+  --gold-glow: rgba(245,200,66,0.35);
   --red: #e03030;
   --blue: #3080e0;
   --green: #30c060;
   --purple: #9040e0;
-  --dark: #0a0810;
-  --panel: rgba(10,8,20,0.92);
-  --border: rgba(245,200,66,0.4);
-  --text: #f0e8c8;
+  --dark: #07050f;
+  --dark2: #0d0a1a;
+  --panel: rgba(8,6,18,0.97);
+  --border: rgba(245,200,66,0.35);
+  --text: #ede5c8;
+  --text-dim: rgba(237,229,200,0.45);
   --sp: #4ad0ff;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-gold: 0 0 0 1px rgba(245,200,66,0.15), 0 8px 32px rgba(0,0,0,0.6);
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow:hidden; width:100vw; height:100vh; user-select:none; }
+body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow:hidden; width:100vw; height:100vh; user-select:none; }
 
 /* ====== LOGIN SCREEN ====== */
 #loginScreen {
-  position:fixed; inset:0; background:radial-gradient(ellipse at 50% 30%,#1a0d30 0%,#050308 70%);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:1000;
+  position:fixed; inset:0; z-index:1000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at 40% 20%, #1a0d35 0%, #0a0618 50%, #050308 100%);
+  overflow:hidden;
 }
+/* Animated star particles */
 #loginScreen::before {
-  content:''; position:absolute; inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f5c842' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.8) 0%, transparent 0%),
+    radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.6) 0%, transparent 0%),
+    radial-gradient(1.5px 1.5px at 55% 10%, rgba(255,255,255,0.7) 0%, transparent 0%),
+    radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(1.5px 1.5px at 85% 8%, rgba(255,255,255,0.8) 0%, transparent 0%),
+    radial-gradient(1px 1px at 40% 60%, rgba(255,255,255,0.4) 0%, transparent 0%),
+    radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.6) 0%, transparent 0%),
+    radial-gradient(1.5px 1.5px at 15% 70%, rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,0.4) 0%, transparent 0%),
+    radial-gradient(1px 1px at 30% 85%, rgba(255,255,255,0.6) 0%, transparent 0%);
+  animation:star-twinkle 4s ease-in-out infinite alternate;
+}
+#loginScreen::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%, rgba(120,40,255,0.08) 0%, transparent 70%);
+}
+@keyframes star-twinkle { 0%{opacity:0.6} 100%{opacity:1} }
+.login-logo {
+  font-family:'Black Han Sans',sans-serif; font-size:3rem; color:var(--gold);
+  text-shadow:0 0 20px rgba(245,200,66,0.9), 0 0 60px rgba(245,200,66,0.4);
+  margin-bottom:6px; position:relative; z-index:1;
+  animation:logo-pulse 3s ease-in-out infinite;
+}
+@keyframes logo-pulse { 0%,100%{text-shadow:0 0 20px rgba(245,200,66,0.9),0 0 60px rgba(245,200,66,0.4)} 50%{text-shadow:0 0 30px rgba(245,200,66,1),0 0 80px rgba(245,200,66,0.6),0 0 120px rgba(200,100,255,0.3)} }
+.login-logo span { color:#e8e0ff; }
+.login-sub { color:rgba(245,200,66,0.5); font-size:0.75rem; margin-bottom:36px; letter-spacing:4px; position:relative; z-index:1; }
+.login-box {
+  background:linear-gradient(160deg, rgba(20,14,40,0.98), rgba(10,6,22,0.99));
+  border:1px solid rgba(245,200,66,0.25); border-radius:20px;
+  padding:32px 36px; width:320px; position:relative; z-index:1;
+  box-shadow:0 0 80px rgba(100,40,220,0.25), 0 0 0 1px rgba(245,200,66,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
+}
+.login-box::before {
+  content:''; position:absolute; inset:0; border-radius:20px;
+  background:linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
   pointer-events:none;
 }
-.login-logo { font-family:'Black Han Sans',sans-serif; font-size:2.8rem; color:var(--gold); text-shadow:0 0 30px rgba(245,200,66,0.8); margin-bottom:8px; }
-.login-logo span { color:#fff; }
-.login-sub { color:rgba(245,200,66,0.6); font-size:0.8rem; margin-bottom:40px; letter-spacing:3px; }
-.login-box {
-  background:rgba(15,10,30,0.95); border:1px solid var(--border);
-  border-radius:16px; padding:32px 40px; width:320px;
-  box-shadow:0 0 60px rgba(100,50,200,0.3), 0 0 0 1px rgba(245,200,66,0.1);
-}
-.login-tabs { display:flex; gap:0; margin-bottom:24px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
-.login-tab { flex:1; padding:10px; text-align:center; cursor:pointer; font-size:0.85rem; background:transparent; color:rgba(240,232,200,0.5); border:none; font-family:inherit; transition:all 0.2s; }
-.login-tab.active { background:var(--gold); color:#1a0a00; font-weight:700; }
+.login-tabs { display:flex; margin-bottom:22px; border-radius:10px; overflow:hidden; border:1px solid rgba(245,200,66,0.2); background:rgba(0,0,0,0.3); }
+.login-tab { flex:1; padding:10px; text-align:center; cursor:pointer; font-size:0.85rem; background:transparent; color:rgba(240,232,200,0.4); border:none; font-family:inherit; transition:all 0.2s; font-weight:500; }
+.login-tab.active { background:linear-gradient(135deg,#b8880a,#f5c842); color:#1a0800; font-weight:800; }
 .login-input {
-  width:100%; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(245,200,66,0.2);
-  border-radius:8px; color:var(--text); font-family:inherit; font-size:0.95rem; margin-bottom:12px; outline:none;
-  transition:border-color 0.2s; touch-action:manipulation;
+  width:100%; padding:13px 16px; background:rgba(255,255,255,0.04);
+  border:1px solid rgba(245,200,66,0.18); border-radius:var(--radius-sm);
+  color:var(--text); font-family:inherit; font-size:0.95rem; margin-bottom:12px; outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s; touch-action:manipulation;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.3);
 }
-.login-input:focus { border-color:var(--gold); }
+.login-input:focus { border-color:rgba(245,200,66,0.6); box-shadow:inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 3px rgba(245,200,66,0.1); }
 .login-btn {
-  width:100%; padding:14px; background:linear-gradient(135deg,#c4981a,#f5c842); color:#1a0a00;
-  border:none; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit;
-  transition:transform 0.1s, box-shadow 0.2s;
-  box-shadow:0 4px 20px rgba(245,200,66,0.4);
+  width:100%; padding:15px; font-size:1rem; font-weight:800; cursor:pointer; font-family:inherit;
+  border:none; border-radius:var(--radius-sm); color:#0d0500;
+  background:linear-gradient(135deg, #c4981a 0%, #f5d050 50%, #e0a820 100%);
+  box-shadow:0 4px 16px rgba(245,200,66,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+  transition:transform 0.1s, box-shadow 0.15s;
   touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  letter-spacing:0.5px;
 }
-.login-btn:hover { transform:translateY(-2px); box-shadow:0 6px 28px rgba(245,200,66,0.6); }
-.login-btn:active { transform:translateY(0); }
-.login-err { color:#ff6060; font-size:0.8rem; margin-bottom:8px; text-align:center; min-height:20px; }
+.login-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(245,200,66,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
+.login-btn:active { transform:translateY(1px); box-shadow:0 2px 8px rgba(245,200,66,0.3); }
+.login-err { color:#ff7070; font-size:0.78rem; margin-bottom:10px; text-align:center; min-height:20px; font-weight:500; }
 
 /* ====== MAIN GAME ====== */
 #gameScreen { position:fixed; inset:0; display:none; flex-direction:column; }
 
 /* ====== TOP HUD ====== */
 #topHud {
-  position:absolute; top:0; left:0; right:0; height:80px; z-index:50;
-  background:linear-gradient(180deg,rgba(5,3,15,0.95) 0%,transparent 100%);
-  display:flex; align-items:flex-start; padding:8px 12px; gap:8px;
+  position:absolute; top:0; left:0; right:0; height:84px; z-index:50;
+  background:linear-gradient(180deg,rgba(5,3,14,0.98) 0%,rgba(5,3,14,0.5) 80%,transparent 100%);
+  display:flex; align-items:flex-start; padding:10px 12px 0; gap:6px;
 }
 .hero-hud {
-  display:flex; flex-direction:column; gap:3px;
-  background:rgba(10,8,20,0.8); border:1px solid rgba(245,200,66,0.25);
-  border-radius:8px; padding:6px 10px; min-width:130px;
+  display:flex; flex-direction:column; gap:4px;
+  background:linear-gradient(160deg,rgba(15,10,28,0.92),rgba(8,5,18,0.95));
+  border:1px solid rgba(245,200,66,0.2); border-radius:10px;
+  padding:7px 10px; min-width:126px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
 }
-.hero-hud-name { font-size:0.7rem; color:var(--gold); font-weight:700; }
-.bar-row { display:flex; align-items:center; gap:6px; }
-.bar-label { font-size:0.6rem; color:rgba(240,232,200,0.5); width:14px; }
-.bar-bg { flex:1; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
-.bar-fill { height:100%; border-radius:4px; transition:width 0.3s ease; }
-.hp-fill { background:linear-gradient(90deg,#e03030,#ff6060); }
-.sp-fill { background:linear-gradient(90deg,#1060d0,#4ad0ff); }
-.bar-val { font-size:0.6rem; color:rgba(240,232,200,0.6); width:40px; text-align:right; }
+.hero-hud-name { font-size:0.68rem; color:var(--gold); font-weight:800; letter-spacing:0.3px; }
+.bar-row { display:flex; align-items:center; gap:5px; }
+.bar-label { font-size:0.58rem; color:var(--text-dim); width:14px; font-weight:700; }
+.bar-bg { flex:1; height:7px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; transition:width 0.35s ease; }
+.hp-fill { background:linear-gradient(90deg,#c02020,#ff5050); box-shadow:0 0 4px rgba(255,80,80,0.4); }
+.sp-fill { background:linear-gradient(90deg,#1858d0,#4ad0ff); box-shadow:0 0 4px rgba(74,208,255,0.4); }
+.bar-val { font-size:0.56rem; color:var(--text-dim); width:38px; text-align:right; }
 
 /* Boss HP */
 #bossHud {
-  position:absolute; top:8px; right:12px; z-index:50;
-  background:rgba(10,8,20,0.9); border:1px solid rgba(220,50,50,0.5);
-  border-radius:8px; padding:8px 14px; min-width:160px; display:none;
+  position:absolute; top:10px; right:12px; z-index:50;
+  background:linear-gradient(160deg,rgba(20,5,5,0.95),rgba(10,3,3,0.97));
+  border:1px solid rgba(220,50,50,0.45); border-radius:10px;
+  padding:8px 14px; min-width:155px; display:none;
+  box-shadow:0 0 20px rgba(200,0,0,0.2), 0 4px 12px rgba(0,0,0,0.5);
 }
-.boss-name { font-size:0.75rem; color:#ff6060; font-weight:700; margin-bottom:4px; text-align:center; }
-.boss-bar-bg { height:12px; background:rgba(255,255,255,0.1); border-radius:6px; overflow:hidden; }
-.boss-bar-fill { height:100%; background:linear-gradient(90deg,#800000,#e03030,#ff8060); border-radius:6px; transition:width 0.3s ease; }
+.boss-name { font-size:0.72rem; color:#ff5050; font-weight:800; margin-bottom:5px; text-align:center; letter-spacing:0.5px; }
+.boss-bar-bg { height:10px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:hidden; }
+.boss-bar-fill { height:100%; background:linear-gradient(90deg,#700000,#d02020,#ff5040); border-radius:5px; transition:width 0.35s ease; box-shadow:0 0 6px rgba(255,50,50,0.4); }
+
 
 /* ====== BATTLE AREA - PIXEL ART ====== */
 #battleArea {
@@ -534,13 +580,16 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 }
 .joystick-base {
   position:absolute; inset:0; border-radius:50%;
-  background:rgba(0,0,0,0.25); border:3px solid rgba(255,255,255,0.3);
+  background:radial-gradient(circle at 40% 35%, rgba(255,255,255,0.12), rgba(0,0,0,0.5));
+  border:2px solid rgba(255,255,255,0.2);
+  box-shadow:0 4px 20px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.05), inset 0 -2px 6px rgba(0,0,0,0.4);
 }
 .joystick-knob {
-  position:absolute; width:40px; height:40px; border-radius:50%;
-  background:rgba(255,255,255,0.6); border:2px solid rgba(255,255,255,0.9);
+  position:absolute; width:42px; height:42px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.85), rgba(180,180,210,0.6));
+  border:2px solid rgba(255,255,255,0.9);
   top:50%; left:50%; transform:translate(-50%,-50%);
-  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+  box-shadow:0 4px 14px rgba(0,0,0,0.6), inset 0 -2px 6px rgba(0,0,0,0.2), 0 0 12px rgba(255,255,255,0.15);
 }
 
 /* Battle shortcut button */
@@ -603,21 +652,31 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 
 
 /* ====== MANUAL SKILL BUTTONS ====== */
-#skillBtns { position:absolute; bottom:100px; right:8px; z-index:60; display:none; flex-direction:column; gap:6px; }
+#skillBtns { position:absolute; bottom:100px; right:8px; z-index:60; display:none; flex-direction:column; gap:7px; }
+#mapSkillBtns { position:absolute; bottom:100px; right:8px; z-index:20; display:flex; flex-direction:column; gap:7px; }
 .skill-btn {
-  width:58px; height:58px; border-radius:12px;
-  background:rgba(10,8,20,0.92); border:2px solid rgba(245,200,66,0.35);
+  width:62px; height:62px; border-radius:14px;
+  background:linear-gradient(160deg,rgba(18,12,32,0.95),rgba(10,6,20,0.97));
+  border:2px solid rgba(245,200,66,0.22);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  cursor:pointer; gap:1px; position:relative; overflow:hidden;
+  cursor:pointer; gap:2px; position:relative; overflow:hidden;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-  transition:border-color 0.15s, box-shadow 0.15s;
+  transition:border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
 }
-.skill-btn.ready { border-color:var(--gold); box-shadow:0 0 14px rgba(245,200,66,0.7); animation:skill-glow 1s ease-in-out infinite; }
-.skill-btn.used  { border-color:rgba(255,255,255,0.1); opacity:0.5; }
-.skill-btn-label { font-size:0.5rem; color:rgba(240,232,200,0.7); font-weight:700; }
+.skill-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(160deg,rgba(255,255,255,0.04),transparent); pointer-events:none; }
+.skill-btn.ready {
+  border-color:var(--gold);
+  box-shadow:0 0 0 1px rgba(245,200,66,0.4), 0 0 16px rgba(245,200,66,0.5), 0 4px 12px rgba(0,0,0,0.4);
+  animation:skill-glow 1.2s ease-in-out infinite;
+}
+.skill-btn.used { border-color:rgba(255,255,255,0.08); opacity:0.45; }
+.skill-btn:active { transform:scale(0.92); }
+.skill-btn-label { font-size:0.5rem; color:var(--text-dim); font-weight:700; }
 .skill-btn-sp {
-  position:absolute; bottom:0; left:0; height:4px; background:linear-gradient(90deg,#4ad0ff,#60a8ff);
-  transition:width 0.2s; border-radius:0 0 0 10px;
+  position:absolute; bottom:0; left:0; height:3px;
+  background:linear-gradient(90deg,#2060ff,#60c0ff);
+  transition:width 0.25s; border-radius:0 0 0 12px;
 }
 
 /* ====== BOTTOM BUTTONS ====== */
@@ -645,26 +704,172 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 
 /* ====== PANELS ====== */
 .panel {
-  position:fixed; inset:0; z-index:100; background:rgba(5,3,15,0.97);
-  display:none; flex-direction:column; animation:slide-up 0.3s ease-out;
+  position:fixed; inset:0; z-index:100;
+  background:linear-gradient(160deg,rgba(8,6,18,0.99),rgba(5,3,12,0.99));
+  display:none; flex-direction:column; animation:slide-up 0.25s cubic-bezier(0.34,1.56,0.64,1);
 }
 .panel.open { display:flex; }
 .panel-header {
-  display:flex; align-items:center; padding:16px 20px;
-  border-bottom:1px solid rgba(245,200,66,0.2); gap:12px;
+  display:flex; align-items:center; padding:18px 20px 14px;
+  border-bottom:1px solid rgba(245,200,66,0.15); gap:12px;
+  background:linear-gradient(180deg,rgba(245,200,66,0.04) 0%,transparent 100%);
 }
-.panel-title { font-family:'Black Han Sans',sans-serif; font-size:1.2rem; color:var(--gold); flex:1; }
+.panel-title { font-family:'Black Han Sans',sans-serif; font-size:1.2rem; color:var(--gold); flex:1; letter-spacing:0.5px; }
 .panel-close {
-  width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1); cursor:pointer; font-size:1.2rem;
-  display:flex; align-items:center; justify-content:center; color:var(--text);
+  width:36px; height:36px; border-radius:50%;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+  cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+  color:var(--text-dim); transition:all 0.15s; touch-action:manipulation;
 }
+.panel-close:hover { background:rgba(255,100,100,0.15); border-color:rgba(255,100,100,0.3); color:#ff8080; }
 .panel-body { flex:1; overflow-y:auto; padding:16px; }
-.panel-body::-webkit-scrollbar { width:4px; }
+.panel-body::-webkit-scrollbar { width:3px; }
 .panel-body::-webkit-scrollbar-track { background:transparent; }
-.panel-body::-webkit-scrollbar-thumb { background:rgba(245,200,66,0.3); border-radius:2px; }
+.panel-body::-webkit-scrollbar-thumb { background:rgba(245,200,66,0.25); border-radius:2px; }
 
-/* Stage Select */
+/* ====== ITEM CARDS ====== */
+.item-list { display:flex; flex-direction:column; gap:8px; }
+.item-card {
+  display:flex; align-items:center; gap:12px; padding:13px 14px;
+  background:linear-gradient(135deg,rgba(18,12,35,0.9),rgba(12,8,24,0.95));
+  border:1px solid rgba(245,200,66,0.12); border-radius:var(--radius-sm);
+  transition:border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.item-card:hover { border-color:rgba(245,200,66,0.3); transform:translateX(2px); box-shadow:0 4px 16px rgba(0,0,0,0.4); }
+.item-card.equipped { border-color:rgba(245,200,66,0.5); background:linear-gradient(135deg,rgba(30,20,5,0.95),rgba(20,14,4,0.97)); box-shadow:0 0 0 1px rgba(245,200,66,0.2), 0 4px 16px rgba(245,200,66,0.1); }
+.item-icon { width:44px; height:44px; border-radius:var(--radius-sm); background:rgba(245,200,66,0.08); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; border:1px solid rgba(245,200,66,0.12); }
+.item-info { flex:1; min-width:0; }
+.item-name { font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:3px; }
+.item-stats { font-size:0.7rem; color:var(--text-dim); }
+.item-grade {
+  font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:4px;
+  background:rgba(245,200,66,0.12); color:var(--gold); border:1px solid rgba(245,200,66,0.2);
+}
+.item-grade.S { background:rgba(240,80,255,0.15); color:#f050ff; border-color:rgba(240,80,255,0.3); }
+.item-grade.A { background:rgba(255,140,40,0.15); color:#ff8c28; border-color:rgba(255,140,40,0.3); }
+.item-grade.B { background:rgba(120,80,255,0.15); color:#a060ff; border-color:rgba(120,80,255,0.3); }
+.item-grade.C { background:rgba(40,120,255,0.15); color:#4088ff; border-color:rgba(40,120,255,0.3); }
+.item-grade.D { background:rgba(40,200,80,0.12); color:#40c850; border-color:rgba(40,200,80,0.25); }
+.item-grade.F { background:rgba(120,120,120,0.12); color:#909090; border-color:rgba(120,120,120,0.2); }
+
+/* ====== BOTTOM NAV ====== */
+#bottomBar {
+  position:absolute; bottom:0; left:0; right:0; height:88px; z-index:50;
+  background:linear-gradient(0deg,rgba(5,3,14,0.99) 60%,transparent 100%);
+  display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px 14px;
+}
+.nav-btn {
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:8px 10px; border-radius:10px; cursor:pointer; min-width:46px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+  transition:all 0.15s; touch-action:manipulation;
+}
+.nav-btn:active { background:rgba(245,200,66,0.12); border-color:rgba(245,200,66,0.3); transform:scale(0.94); }
+.nb-icon { font-size:1.1rem; line-height:1; }
+.nb-label { font-size:0.52rem; color:var(--text-dim); font-weight:600; letter-spacing:0.3px; white-space:nowrap; }
+
+/* ====== NOTIFICATIONS ====== */
+#notifContainer { position:fixed; top:16px; right:12px; z-index:9998; display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+.notif {
+  background:linear-gradient(135deg,rgba(20,14,40,0.97),rgba(12,8,26,0.98));
+  border:1px solid rgba(245,200,66,0.3); border-radius:10px;
+  padding:10px 16px; font-size:0.8rem; color:var(--text); font-weight:600;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,200,66,0.08);
+  animation:notif-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  max-width:240px; backdrop-filter:blur(8px);
+}
+@keyframes notif-in { from{opacity:0;transform:translateX(24px) scale(0.9)} to{opacity:1;transform:translateX(0) scale(1)} }
+
+/* Status bar */
+#statusBar {
+  position:absolute; left:0; right:0; z-index:48;
+  display:flex; gap:6px; padding:6px 12px; flex-wrap:wrap;
+  pointer-events:none;
+}
+.stat-chip {
+  background:linear-gradient(135deg,rgba(15,10,28,0.92),rgba(10,6,20,0.95));
+  border:1px solid rgba(245,200,66,0.18); border-radius:8px;
+  padding:4px 10px; font-size:0.68rem; color:var(--text); font-weight:600;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3); white-space:nowrap;
+}
+
+/* Admin button */
+.admin-btn {
+  padding:11px 16px; border:none; border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,#b8880a,#f5c842); color:#0d0500;
+  font-weight:800; cursor:pointer; font-family:inherit; font-size:0.82rem;
+  width:100%; margin-top:8px; letter-spacing:0.3px;
+  box-shadow:0 4px 12px rgba(245,200,66,0.3), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition:transform 0.1s, box-shadow 0.15s; touch-action:manipulation;
+}
+.admin-btn:active { transform:scale(0.97); }
+
+/* Shop tabs */
+.shop-tabs { display:flex; gap:4px; margin-bottom:12px; }
+.shop-tab {
+  flex:1; padding:8px 6px; text-align:center; cursor:pointer; font-size:0.75rem;
+  border-radius:8px; background:rgba(255,255,255,0.04); color:var(--text-dim);
+  border:1px solid rgba(255,255,255,0.08); transition:all 0.15s; font-weight:600;
+  touch-action:manipulation;
+}
+.shop-tab.active { background:rgba(245,200,66,0.15); border-color:rgba(245,200,66,0.4); color:var(--gold); }
+
+/* Admin sections */
+.admin-section { margin-bottom:16px; }
+.admin-section-title { font-size:0.78rem; font-weight:800; color:var(--gold); margin-bottom:8px; letter-spacing:0.5px; }
+.admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.admin-field { display:flex; flex-direction:column; gap:3px; }
+.admin-label { font-size:0.68rem; color:var(--text-dim); font-weight:600; }
+.admin-input {
+  padding:9px 12px; background:rgba(255,255,255,0.05);
+  border:1px solid rgba(245,200,66,0.18); border-radius:var(--radius-sm);
+  color:var(--text); font-family:inherit; font-size:0.82rem; outline:none; width:100%;
+  transition:border-color 0.15s;
+}
+.admin-input:focus { border-color:rgba(245,200,66,0.5); }
+.admin-target-select {
+  width:100%; padding:9px 12px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(245,200,66,0.18);
+  border-radius:var(--radius-sm); color:var(--text); font-family:inherit; font-size:0.82rem;
+  outline:none; margin-bottom:8px;
+}
+
+/* Clear / GameOver banners */
+.clear-banner {
+  position:absolute; inset:0; background:rgba(5,3,14,0.88);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:30px; backdrop-filter:blur(6px);
+}
+.clear-banner h2 { font-family:'Black Han Sans',sans-serif; font-size:2rem; color:var(--gold); margin-bottom:12px; text-shadow:0 0 30px rgba(245,200,66,0.8); }
+.reward-line { font-size:0.95rem; color:#80ff80; margin-top:8px; font-weight:700; }
+
+/* Quit button */
+#quitBtn {
+  position:absolute; top:92px; left:50%; transform:translateX(-50%); z-index:60;
+  padding:6px 18px; background:linear-gradient(135deg,rgba(80,10,10,0.9),rgba(120,20,20,0.95));
+  border:1px solid rgba(200,50,50,0.45); border-radius:8px;
+  cursor:pointer; font-size:0.72rem; color:#ff8080; font-weight:700;
+  transition:all 0.15s; box-shadow:0 2px 8px rgba(200,0,0,0.25); touch-action:manipulation;
+}
+#quitBtn:hover { background:rgba(160,25,25,0.95); border-color:rgba(240,80,80,0.5); }
+
+/* Wave announce */
+.wave-announce {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-family:'Black Han Sans',sans-serif; font-size:2.2rem;
+  color:var(--gold); text-shadow:0 0 30px rgba(245,200,66,0.8), 0 0 60px rgba(245,200,66,0.4);
+  pointer-events:none; white-space:nowrap;
+  animation:wave-in 1.5s ease-out forwards;
+}
+@keyframes wave-in {
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.6)}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+  40%{transform:translate(-50%,-50%) scale(1)}
+  80%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-60%)}
+}
+
 /* World Map Stage Grid */
 .world-map-grid {
   position:relative; min-height:520px; width:100%;
@@ -1054,6 +1259,13 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   <div class="login-left">
     <div class="login-logo">📓 공책<span>RPG</span></div>
     <div class="login-sub">GONGSAEK RPG ONLINE</div>
+    <!-- Hero showcase -->
+    <div style="display:flex;gap:12px;margin-bottom:8px;justify-content:center;opacity:0.85;">
+      <svg viewBox="0 0 20 30" width="40" height="60" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(100,160,255,0.6))"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="3" height="5" fill="#5068a8"/><rect x="13" y="9" width="3" height="5" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="3" fill="#3c2010"/><rect x="11" y="21" width="4" height="3" fill="#3c2010"/><rect x="15" y="5" width="2" height="12" fill="#c0cce0"/><rect x="13" y="10" width="5" height="2" fill="#b09040"/></svg>
+      <svg viewBox="0 0 18 28" width="36" height="56" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(80,200,80,0.6));margin-top:4px;"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="3" fill="#3c200c"/><rect x="10" y="18" width="4" height="3" fill="#3c200c"/><rect x="14" y="1" width="2" height="13" fill="#805020"/></svg>
+      <svg viewBox="0 0 18 30" width="36" height="60" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 8px rgba(160,80,255,0.6))"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018a0"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="3" fill="#281060"/><rect x="10" y="21" width="3" height="3" fill="#281060"/><rect x="0" y="2" width="2" height="16" fill="#806040"/><rect x="0" y="0" width="4" height="3" fill="#c040f0"/></svg>
+    </div>
+    <div style="font-size:0.6rem;color:rgba(245,200,66,0.3);letter-spacing:2px;text-align:center;">전사 · 궁수 · 마법사</div>
   </div>
   <div class="login-box">
     <div class="login-tabs">
@@ -2646,19 +2858,26 @@ function renderBattleMap() {
 
   let html = '';
 
-  // Decorative path arrows (show direction)
-  // Other players first (behind player)
+  // Other players (behind player)
   Object.entries(otherPlayers).forEach(([uname, p]) => {
     const isParty = !!partyMembers[uname];
-    const rankBadge = getRankBadge(p.level||1);
-    const labelCls = isParty ? 'party-label' : '';
+    const rank = getRank(p.level||1);
+    const labelBg = isParty ? 'rgba(0,80,160,0.75)' : 'rgba(80,20,80,0.75)';
+    const labelBorder = isParty ? 'rgba(100,180,255,0.5)' : 'rgba(200,100,255,0.4)';
+    const glowClr = isParty ? '#60c0ff' : '#c070ff';
     html += `<div class="map-entity" style="left:${p.x}%;top:${p.y}%;z-index:${Math.floor(p.y)};" 
-      ${!isParty ? `onclick="sendPvPChallenge('${uname}')"` : ''}>
-      <div class="map-entity-label ${labelCls}">${isParty?'🤝':''}${uname} ${rankBadge}</div>
-      <div style="transform:scale(0.55) scaleX(${p.dir||1});transform-origin:bottom center;image-rendering:pixelated;filter:${isParty?'hue-rotate(120deg)':'hue-rotate(200deg)'}">
+      ${!isParty ? `onclick="sendPvPChallenge('${uname}')" title="${uname}에게 PvP 도전"` : ''}>
+      <div style="position:relative;margin-bottom:2px;">
+        <div style="background:${labelBg};border:1px solid ${labelBorder};border-radius:10px;padding:2px 7px;font-size:0.55rem;color:#fff;white-space:nowrap;text-shadow:0 1px 2px #000;display:flex;align-items:center;gap:3px;">
+          ${isParty?'<span style="color:#80d0ff;">🤝</span>':'<span style="color:#d080ff;cursor:pointer;">⚔️</span>'}
+          <span>${uname}</span>
+          <span class="rank-badge ${rank.cls}" style="font-size:0.42rem;padding:0 3px;">${rank.icon}</span>
+        </div>
+      </div>
+      <div style="transform:scale(0.65) scaleX(${p.dir||1});transform-origin:bottom center;filter:drop-shadow(0 0 4px ${glowClr}44);">
         ${getVillageCharSVG(p.heroClass||0,'idle')}
       </div>
-      <div class="map-entity-shadow"></div>
+      <div style="width:28px;height:5px;border-radius:50%;background:rgba(0,0,0,0.35);filter:blur(2px);margin:0 auto;"></div>
     </div>`;
   });
 
@@ -2667,38 +2886,44 @@ function renderBattleMap() {
     if (!m.alive) return;
     const mx = m.dx || m.x, my = m.dy || m.y;
     const isBoss = m.isBoss;
-    const scale = isBoss ? 0.85 : 0.52;
-    const stats = ENEMY_STATS[m.type] || ENEMY_STATS.goblin;
-    const hpPct = m.hp != null ? m.hp/m.maxHp*100 : 100;
+    const scale = isBoss ? 0.9 : 0.58;
+    const hpPct = m.hp != null ? Math.max(0,m.hp/m.maxHp*100) : 100;
+    const hpColor = hpPct > 60 ? '#40d040' : hpPct > 30 ? '#e0c020' : '#e03020';
+    const glowClr = isBoss ? '#ff40a0' : '#ff6060';
     html += `<div class="map-entity" style="left:${mx}%;top:${my}%;z-index:${Math.floor(my)};" onclick="startMapEncounter(mapState.monsters.find(mm=>mm.id==='${m.id}'))">
-      ${isBoss ? '<div class="map-entity-label boss-label">👑 BOSS</div>' : ''}
-      <div class="map-monster-hp"><div class="map-monster-hp-fill" style="width:${hpPct}%"></div></div>
-      <div style="transform:scale(${scale});transform-origin:bottom center;image-rendering:pixelated;">
+      ${isBoss ? `<div style="background:rgba(80,0,40,0.85);border:1px solid rgba(255,60,120,0.6);border-radius:10px;padding:2px 8px;font-size:0.55rem;color:#ff80c0;font-weight:900;white-space:nowrap;margin-bottom:2px;animation:btn-blink 1s steps(2) infinite;">👑 BOSS</div>` : ''}
+      <div style="width:36px;height:5px;background:rgba(0,0,0,0.3);border-radius:3px;margin-bottom:2px;overflow:hidden;">
+        <div style="height:100%;background:${hpColor};width:${hpPct}%;transition:width 0.3s;box-shadow:0 0 4px ${hpColor}88;"></div>
+      </div>
+      <div style="transform:scale(${scale});transform-origin:bottom center;filter:drop-shadow(0 0 ${isBoss?6:3}px ${glowClr}66);">
         ${getEnemyHTML(m.type)}
       </div>
-      <div class="map-entity-shadow"></div>
+      <div style="width:${isBoss?44:28}px;height:6px;border-radius:50%;background:rgba(0,0,0,0.4);filter:blur(2px);margin:0 auto;"></div>
     </div>`;
   });
 
-  // My player (on top, z highest)
+  // My player (on top)
   const walkCls = joystickActive ? (mapState.dir >= 0 ? 'walk-r' : 'walk-l') : 'idle';
+  const myRank = getRank(player?.level||1);
   html += `<div class="map-entity my-player" style="left:${px}%;top:${py}%;z-index:200;pointer-events:none;">
-    <div class="map-entity-label my-label">${player?.username||'나'} ${getRankBadge(player?.level||1)}</div>
-    <div style="transform:scale(0.62) scaleX(${dir});transform-origin:bottom center;image-rendering:pixelated;">
+    <div style="background:rgba(0,40,0,0.8);border:1px solid rgba(100,255,100,0.5);border-radius:10px;padding:2px 7px;font-size:0.55rem;color:#80ff80;white-space:nowrap;text-shadow:0 1px 3px #000;display:flex;align-items:center;gap:3px;margin-bottom:2px;">
+      <span>${player?.username||'나'}</span>
+      <span class="rank-badge ${myRank.cls}" style="font-size:0.42rem;padding:0 3px;">${myRank.icon}</span>
+    </div>
+    <div style="transform:scale(0.72) scaleX(${dir});transform-origin:bottom center;filter:drop-shadow(0 0 6px rgba(100,255,100,0.5));">
       ${getVillageCharSVG(hc, walkCls)}
     </div>
-    <div class="map-entity-shadow"></div>
+    <div style="width:32px;height:6px;border-radius:50%;background:rgba(100,255,100,0.25);filter:blur(3px);margin:0 auto;"></div>
   </div>`;
 
-  // SP bars in map (top-right skill buttons)
+  // SP bars
   [0,1,2].forEach(i => {
     const bar = document.getElementById('mapSpBar'+i);
     const btn = document.getElementById('mapSkillBtn'+i);
     if (!bar || !btn || !mapState.heroes) return;
-    const spPct = Math.min(100, (sp[i]||0)/maxSp[i]*100);
-    bar.style.width = spPct+'%';
-    const ready = (sp[i]||0) >= maxSp[i] && heroes[i].hp > 0;
-    btn.className = 'skill-btn' + (ready?' ready':(heroes[i].hp<=0?' used':''));
+    bar.style.width = Math.min(100,(sp[i]||0)/maxSp[i]*100)+'%';
+    const ready = (sp[i]||0)>=maxSp[i] && heroes[i].hp>0;
+    btn.className = 'skill-btn'+(ready?' ready':(heroes[i].hp<=0?' used':''));
   });
 
   document.getElementById('mapEntities').innerHTML = html;
@@ -2768,29 +2993,47 @@ function renderMapBattleOverlay(enemy) {
   const overlay = document.getElementById('mapBattleOverlay');
   if (!overlay || !mapState) return;
   const h = mapState.heroes;
+  const heroNames = ['⚔️ 전사','🏹 궁수','🪄 마법사'];
+  const heroColors = ['#6080ff','#60c060','#c060ff'];
   const hpBars = h.map((hero,i) => `
-    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
-      <div style="font-size:0.65rem;width:32px;color:rgba(240,232,200,0.7);">${['⚔️','🏹','🪄'][i]}</div>
-      <div style="flex:1;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;">
-        <div style="height:100%;background:#f04040;border-radius:4px;width:${Math.max(0,hero.hp/hero.maxHp*100)}%;transition:width 0.2s;"></div>
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-size:0.65rem;color:${heroColors[i]};font-weight:700;">${heroNames[i]}</span>
+        <span style="font-size:0.6rem;color:rgba(240,232,200,0.5);">${Math.max(0,Math.floor(hero.hp))}/${Math.floor(hero.maxHp)}</span>
       </div>
-      <div style="font-size:0.6rem;width:40px;text-align:right;color:rgba(240,232,200,0.5);">${Math.floor(hero.hp)}</div>
+      <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+        <div style="height:100%;border-radius:4px;width:${Math.max(0,hero.hp/hero.maxHp*100)}%;background:linear-gradient(90deg,${heroColors[i]}88,${heroColors[i]});box-shadow:0 0 6px ${heroColors[i]}66;transition:width 0.2s;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:3px;margin-top:3px;">
+        <span style="font-size:0.55rem;color:rgba(74,208,255,0.7);">SP</span>
+        <div style="flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;border-radius:2px;width:${Math.min(100,(mapState.sp[i]||0)/mapState.maxSp[i]*100)}%;background:linear-gradient(90deg,#2090c0,#4ad0ff);transition:width 0.2s;"></div>
+        </div>
+      </div>
     </div>`).join('');
   const enemyHpPct = Math.max(0, enemy.hp/enemy.maxHp*100);
+  const hpColor = enemyHpPct>60?'#ff4060':enemyHpPct>30?'#ff8020':'#ff2020';
+  const isBoss = enemy.isBoss;
   overlay.innerHTML = `
-    <div style="width:90%;max-width:340px;background:rgba(5,3,15,0.95);border:2px solid rgba(245,200,66,0.3);border-radius:14px;padding:16px;">
-      <div style="text-align:center;margin-bottom:12px;">
-        <div style="font-size:0.75rem;color:var(--gold);font-weight:900;margin-bottom:6px;">${enemy.name} ${enemy.isBoss?'👑':''}</div>
-        <div style="height:10px;background:rgba(255,0,0,0.2);border-radius:5px;margin:0 20px;">
-          <div style="height:100%;background:#f04040;border-radius:5px;width:${enemyHpPct}%;transition:width 0.3s;"></div>
+    <div style="width:92%;max-width:340px;background:linear-gradient(160deg,rgba(8,4,20,0.98),rgba(4,2,12,0.99));border:1px solid rgba(245,200,66,0.25);border-radius:16px;padding:16px;box-shadow:0 0 60px rgba(0,0,0,0.8),0 0 30px rgba(${isBoss?'255,40,120':'200,40,40'},0.15),inset 0 1px 0 rgba(255,255,255,0.05);">
+      <!-- Enemy section -->
+      <div style="text-align:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:${isBoss?'0.9':'0.78'}rem;font-weight:900;color:${isBoss?'#ff80c0':'#ffb0b0'};margin-bottom:8px;text-shadow:0 0 10px ${isBoss?'rgba(255,80,150,0.5)':'rgba(255,100,100,0.4)'};">
+          ${isBoss?'👑 ':'⚠️ '}${enemy.name}
         </div>
-        <div style="font-size:0.6rem;color:rgba(240,232,200,0.4);margin-top:4px;">${Math.floor(enemy.hp)}/${enemy.maxHp}</div>
-        <div style="transform:scale(0.65);transform-origin:center;height:80px;display:flex;align-items:center;justify-content:center;">
-          ${getEnemyHTML(enemy.type)}
+        <div style="height:10px;background:rgba(255,255,255,0.08);border-radius:5px;margin:0 8px 4px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+          <div style="height:100%;background:linear-gradient(90deg,${hpColor}aa,${hpColor});width:${enemyHpPct}%;transition:width 0.3s;box-shadow:0 0 8px ${hpColor}88;"></div>
+        </div>
+        <div style="font-size:0.6rem;color:rgba(240,232,200,0.35);">${Math.max(0,Math.floor(enemy.hp)).toLocaleString()} / ${enemy.maxHp.toLocaleString()}</div>
+        <div style="height:${isBoss?90:70}px;display:flex;align-items:center;justify-content:center;margin-top:6px;filter:drop-shadow(0 0 ${isBoss?12:6}px ${hpColor}88);">
+          <div style="transform:scale(${isBoss?0.8:0.6});transform-origin:center;">
+            ${getEnemyHTML(enemy.type)}
+          </div>
         </div>
       </div>
-      <div style="margin-bottom:10px;">${hpBars}</div>
-      <div style="text-align:center;font-size:0.65rem;color:rgba(240,232,200,0.3);">조이스틱 · 스킬 버튼으로 전투!</div>
+      <!-- Hero section -->
+      <div>${hpBars}</div>
+      <div style="text-align:center;font-size:0.6rem;color:rgba(240,232,200,0.2);margin-top:8px;letter-spacing:1px;">SP 100% → 스킬 버튼 탭!</div>
     </div>`;
 }
 
@@ -4560,10 +4803,156 @@ let villageMoveLoop = null;
 let npcVisible = false;
 let npcTimer = null;
 
-// Hero SVGs scaled small for village walking
+// Hero SVGs - 고품질 픽셀아트 캐릭터 (직업별로 뚜렷하게 구분)
 function getVillageCharSVG(heroClass, animClass) {
   const cls = `vc-body ${animClass || 'idle'}`;
-  if (heroClass === 0) return `<svg class="${cls}" viewBox="0 0 20 30" width="36" height="54" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="3" height="5" fill="#5068a8"/><rect x="13" y="9" width="3" height="5" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="3" fill="#3c2010"/><rect x="11" y="21" width="4" height="3" fill="#3c2010"/><rect x="15" y="5" width="2" height="12" fill="#c0cce0"/><rect x="13" y="10" width="5" height="2" fill="#b09040"/></svg>`;
+  // 전사 - 파란 갑옷, 금빛 검, 방패
+  if (heroClass === 0) return `<svg class="${cls}" viewBox="0 0 24 34" width="48" height="68" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+    <!-- 투구 -->
+    <rect x="8" y="0" width="8" height="2" fill="#707898"/>
+    <rect x="6" y="1" width="12" height="4" fill="#8898c8"/>
+    <rect x="6" y="1" width="12" height="1" fill="#a0b0e0"/>
+    <!-- 바이저 -->
+    <rect x="7" y="5" width="10" height="1" fill="#606888"/>
+    <!-- 얼굴 -->
+    <rect x="7" y="3" width="10" height="4" fill="#e0c090"/>
+    <rect x="8" y="5" width="2" height="1" fill="#3a2010"/>
+    <rect x="14" y="5" width="2" height="1" fill="#3a2010"/>
+    <rect x="10" y="6" width="4" height="1" fill="#c09070"/>
+    <!-- 어깨 -->
+    <rect x="3" y="8" width="5" height="3" fill="#607098"/>
+    <rect x="16" y="8" width="5" height="3" fill="#607098"/>
+    <rect x="3" y="8" width="5" height="1" fill="#8898b8"/>
+    <rect x="16" y="8" width="5" height="1" fill="#8898b8"/>
+    <!-- 갑옷 몸통 -->
+    <rect x="6" y="8" width="12" height="10" fill="#4860a0"/>
+    <rect x="6" y="8" width="12" height="1" fill="#6878b8"/>
+    <!-- 흉갑 디테일 -->
+    <rect x="9" y="10" width="6" height="4" fill="#3850a0"/>
+    <rect x="10" y="11" width="4" height="2" fill="#2840a0"/>
+    <rect x="11" y="13" width="2" height="1" fill="#f0c840"/>
+    <!-- 팔 -->
+    <rect x="4" y="11" width="3" height="6" fill="#4870b0"/>
+    <rect x="17" y="11" width="3" height="6" fill="#4870b0"/>
+    <!-- 장갑 -->
+    <rect x="4" y="17" width="3" height="2" fill="#384860"/>
+    <rect x="17" y="17" width="3" height="2" fill="#384860"/>
+    <!-- 허리띠 -->
+    <rect x="6" y="18" width="12" height="2" fill="#f0c840"/>
+    <rect x="6" y="18" width="12" height="1" fill="#ffe060"/>
+    <!-- 다리 -->
+    <rect x="7" y="20" width="4" height="8" fill="#3050a0"/>
+    <rect x="13" y="20" width="4" height="8" fill="#3050a0"/>
+    <!-- 정강이 갑옷 -->
+    <rect x="7" y="22" width="4" height="4" fill="#607098"/>
+    <rect x="13" y="22" width="4" height="4" fill="#607098"/>
+    <!-- 부츠 -->
+    <rect x="6" y="28" width="5" height="4" fill="#302008"/>
+    <rect x="13" y="28" width="5" height="4" fill="#302008"/>
+    <!-- 검 (오른쪽) -->
+    <rect x="20" y="5" width="2" height="16" fill="#d0d8e0"/>
+    <rect x="20" y="5" width="2" height="1" fill="#ffe060"/>
+    <rect x="18" y="11" width="6" height="2" fill="#b09040"/>
+    <!-- 방패 (왼쪽) -->
+    <rect x="1" y="9" width="4" height="6" fill="#3050c0"/>
+    <rect x="1" y="9" width="4" height="1" fill="#5070e0"/>
+    <rect x="2" y="10" width="2" height="4" fill="#2040b0"/>
+    <rect x="2" y="12" width="2" height="1" fill="#f0c840"/>
+  </svg>`;
+  // 궁수 - 초록 레인저, 활
+  if (heroClass === 1) return `<svg class="${cls}" viewBox="0 0 24 34" width="48" height="68" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+    <!-- 모자 (깃털) -->
+    <rect x="7" y="0" width="10" height="3" fill="#2a5018"/>
+    <rect x="7" y="0" width="10" height="1" fill="#3a7028"/>
+    <rect x="14" y="0" width="3" height="5" fill="#3a6020" transform="rotate(-15 14 0)"/>
+    <rect x="15" y="0" width="2" height="4" fill="#f0a040" opacity="0.7"/>
+    <!-- 머리 -->
+    <rect x="7" y="3" width="10" height="5" fill="#d0a070"/>
+    <rect x="8" y="5" width="2" height="1" fill="#3a2010"/>
+    <rect x="13" y="5" width="2" height="1" fill="#3a2010"/>
+    <rect x="10" y="7" width="4" height="1" fill="#b08060"/>
+    <!-- 스카프 -->
+    <rect x="7" y="7" width="10" height="2" fill="#a03020"/>
+    <!-- 조끼 몸통 -->
+    <rect x="7" y="9" width="10" height="9" fill="#2a5020"/>
+    <rect x="7" y="9" width="10" height="1" fill="#3a6030"/>
+    <!-- 가죽 조끼 디테일 -->
+    <rect x="9" y="10" width="2" height="6" fill="#205018"/>
+    <rect x="13" y="10" width="2" height="6" fill="#205018"/>
+    <rect x="11" y="10" width="2" height="1" fill="#c08030"/>
+    <!-- 퀴버 (화살통) -->
+    <rect x="17" y="9" width="3" height="8" fill="#8a4820"/>
+    <rect x="17" y="9" width="3" height="1" fill="#b06030"/>
+    <rect x="18" y="10" width="1" height="7" fill="#703818"/>
+    <!-- 화살 -->
+    <rect x="18" y="8" width="1" height="3" fill="#d0b060"/>
+    <rect x="18" y="7" width="1" height="1" fill="#d04020"/>
+    <!-- 팔 -->
+    <rect x="4" y="9" width="3" height="8" fill="#c09060"/>
+    <rect x="17" y="9" width="3" height="5" fill="#c09060"/>
+    <!-- 글러브 -->
+    <rect x="4" y="17" width="3" height="2" fill="#703818"/>
+    <rect x="17" y="17" width="3" height="2" fill="#703818"/>
+    <!-- 허리띠 -->
+    <rect x="6" y="18" width="12" height="2" fill="#8a4020"/>
+    <rect x="10" y="18" width="4" height="2" fill="#c06020"/>
+    <!-- 바지 -->
+    <rect x="7" y="20" width="4" height="9" fill="#1e3e18"/>
+    <rect x="13" y="20" width="4" height="9" fill="#1e3e18"/>
+    <!-- 부츠 -->
+    <rect x="6" y="28" width="5" height="4" fill="#4a2810"/>
+    <rect x="13" y="28" width="5" height="4" fill="#4a2810"/>
+    <!-- 활 (왼쪽) -->
+    <rect x="2" y="8" width="2" height="14" fill="#7a5020"/>
+    <rect x="1" y="9" width="2" height="12" fill="#6a4018"/>
+    <rect x="1" y="9" width="1" height="12" fill="#ffffff" opacity="0.2"/>
+    <!-- 시위 -->
+    <rect x="1" y="9" width="1" height="1" fill="#e0d0a0"/>
+    <rect x="1" y="20" width="1" height="1" fill="#e0d0a0"/>
+    <!-- 화살 조준 -->
+    <rect x="2" y="14" width="6" height="1" fill="#d0b060"/>
+    <rect x="7" y="13" width="1" height="1" fill="#d04020"/>
+  </svg>`;
+  // 마법사 - 보라 로브, 지팡이
+  return `<svg class="${cls}" viewBox="0 0 24 34" width="48" height="68" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+    <!-- 마법사 모자 -->
+    <rect x="6" y="0" width="12" height="2" fill="#501090"/>
+    <rect x="8" y="2" width="8" height="2" fill="#601090"/>
+    <rect x="9" y="4" width="6" height="2" fill="#6810a0"/>
+    <rect x="10" y="6" width="4" height="2" fill="#6810a0"/>
+    <rect x="6" y="0" width="12" height="1" fill="#8030c0"/>
+    <!-- 모자 별 -->
+    <rect x="10" y="2" width="1" height="1" fill="#f0e040"/>
+    <rect x="13" y="4" width="1" height="1" fill="#f0e040"/>
+    <!-- 얼굴 -->
+    <rect x="7" y="8" width="10" height="5" fill="#d8c0e8"/>
+    <rect x="8" y="10" width="2" height="1" fill="#4020a0"/>
+    <rect x="13" y="10" width="2" height="1" fill="#4020a0"/>
+    <rect x="10" y="12" width="4" height="1" fill="#c0a0d8"/>
+    <!-- 로브 -->
+    <rect x="5" y="13" width="14" height="13" fill="#5818a0"/>
+    <rect x="5" y="13" width="14" height="1" fill="#7828c0"/>
+    <!-- 로브 무늬 -->
+    <rect x="8" y="15" width="8" height="1" fill="#f0c840" opacity="0.6"/>
+    <rect x="9" y="18" width="6" height="1" fill="#f0c840" opacity="0.4"/>
+    <rect x="10" y="21" width="4" height="1" fill="#f0c840" opacity="0.3"/>
+    <!-- 로브 소매 -->
+    <rect x="3" y="13" width="3" height="8" fill="#4010a0"/>
+    <rect x="18" y="13" width="3" height="8" fill="#4010a0"/>
+    <!-- 손 -->
+    <rect x="3" y="21" width="3" height="2" fill="#d8c0e8"/>
+    <rect x="18" y="21" width="3" height="2" fill="#d8c0e8"/>
+    <!-- 로브 아래 -->
+    <rect x="5" y="26" width="14" height="6" fill="#4010a0"/>
+    <rect x="7" y="26" width="4" height="6" fill="#5020b0"/>
+    <rect x="13" y="26" width="4" height="6" fill="#5020b0"/>
+    <!-- 지팡이 -->
+    <rect x="20" y="9" width="2" height="18" fill="#805028"/>
+    <rect x="19" y="9" width="4" height="4" fill="#c040f0"/>
+    <rect x="20" y="8" width="2" height="2" fill="#ffffff" opacity="0.8"/>
+    <rect x="19" y="11" width="4" height="1" fill="#e060ff" opacity="0.6"/>
+  </svg>`;
+}
   if (heroClass === 1) return `<svg class="${cls}" viewBox="0 0 18 28" width="32" height="50" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="3" fill="#3c200c"/><rect x="10" y="18" width="4" height="3" fill="#3c200c"/><rect x="14" y="1" width="2" height="13" fill="#805020"/></svg>`;
   return `<svg class="${cls}" viewBox="0 0 18 30" width="32" height="52" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018a0"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="3" fill="#281060"/><rect x="10" y="21" width="3" height="3" fill="#281060"/><rect x="0" y="2" width="2" height="16" fill="#806040"/><rect x="0" y="0" width="4" height="3" fill="#c040f0"/></svg>`;
 }
