@@ -1197,7 +1197,55 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     </button>
   </div>
 
-  <!-- GEM SHOP MODAL -->
+  <!-- ====== INN MODAL (전직) ====== -->
+<div id="innModal" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(180deg,#2a1000,#1a0800);border:2px solid #c08040;border-radius:14px;width:88%;max-width:360px;max-height:88vh;overflow-y:auto;padding:18px;position:relative;">
+    <button onclick="closeInn()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#a07040;font-size:1.3rem;cursor:pointer;">✕</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:1.2rem;">🏨</div>
+      <div style="font-size:1rem;font-weight:900;color:#f0c840;margin:4px 0;">여관 - 전직</div>
+      <div style="font-size:0.7rem;color:rgba(240,200,120,0.5);">현재 직업: <span id="currentJobName" style="color:#f0c840;"></span></div>
+    </div>
+    <div id="jobClassList"></div>
+  </div>
+</div>
+
+<!-- ====== BLACKSMITH MODAL (강화) ====== -->
+<div id="blacksmithModal" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(180deg,#101820,#080c10);border:2px solid #6090c0;border-radius:14px;width:88%;max-width:360px;max-height:88vh;overflow-y:auto;padding:18px;position:relative;">
+    <button onclick="closeBlacksmith()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#6090c0;font-size:1.3rem;cursor:pointer;">✕</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:1.2rem;">⚒️</div>
+      <div style="font-size:1rem;font-weight:900;color:#80c0ff;margin:4px 0;">대장간 - 강화</div>
+      <div style="font-size:0.7rem;color:rgba(128,192,255,0.5);">골드로 무기/갑옷을 강화합니다</div>
+    </div>
+    <div class="shop-tabs" style="margin-bottom:12px;">
+      <div class="shop-tab active" onclick="switchBsTab('weapon',this)">⚔️ 무기</div>
+      <div class="shop-tab" onclick="switchBsTab('armor',this)">🛡️ 갑옷</div>
+    </div>
+    <div id="bsItemList"></div>
+  </div>
+</div>
+
+<!-- ====== VILLAGE SHOP MODAL (일반 상점) ====== -->
+<div id="villageShopModal" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(180deg,#0a1a08,#060e04);border:2px solid #50a040;border-radius:14px;width:88%;max-width:360px;max-height:88vh;overflow-y:auto;padding:18px;position:relative;">
+    <button onclick="closeVillageShop()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#50a040;font-size:1.3rem;cursor:pointer;">✕</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:1.2rem;">🏪</div>
+      <div style="font-size:1rem;font-weight:900;color:#80d060;margin:4px 0;">마을 상점</div>
+      <div style="font-size:0.7rem;color:rgba(128,208,96,0.5);">💰 <span id="vsGoldDisplay">0</span> 골드 보유</div>
+    </div>
+    <div class="shop-tabs" style="margin-bottom:12px;">
+      <div class="shop-tab active" onclick="switchVsTab('potion',this)">🧪 포션</div>
+      <div class="shop-tab" onclick="switchVsTab('weapon',this)">⚔️ 무기</div>
+      <div class="shop-tab" onclick="switchVsTab('armor',this)">🛡️ 갑옷</div>
+    </div>
+    <div id="vsItemList"></div>
+  </div>
+</div>
+
+<!-- GEM SHOP MODAL -->
   <div id="gemShopModal">
     <div class="gem-shop-box">
       <button class="gem-shop-close" onclick="closeGemShop()">✕</button>
@@ -4318,6 +4366,190 @@ function addCustomMonster() {
   closeCameraModal();
   closePanel('settingsPanel');
 }
+// ============================================================
+// VILLAGE BUILDINGS: INN / BLACKSMITH / SHOP
+// ============================================================
+
+const JOB_CLASSES = [
+  { id:'warrior',   name:'⚔️ 전사',   desc:'높은 HP와 방어. 물리 특화.',       req:1,   cost:0,
+    bonus:{maxHp:200,defense:20,attack:10}, color:'#e06040' },
+  { id:'archer',    name:'🏹 궁수',   desc:'빠른 공격속도, 높은 크리티컬.',    req:10,  cost:1000,
+    bonus:{attack:40,maxHp:50,defense:5}, color:'#60a040' },
+  { id:'mage',      name:'🪄 마법사', desc:'최강 공격력. 낮은 HP.',            req:20,  cost:3000,
+    bonus:{attack:80,maxHp:-50,defense:-10}, color:'#8040c0' },
+  { id:'paladin',   name:'🛡️ 성기사', desc:'강인한 방어와 회복.',               req:35,  cost:8000,
+    bonus:{maxHp:400,defense:50,attack:20}, color:'#d0b020' },
+  { id:'assassin',  name:'🗡️ 암살자', desc:'극단적 공격력. 한방 특화.',        req:50,  cost:20000,
+    bonus:{attack:150,maxHp:-100,defense:-20}, color:'#7040b0' },
+  { id:'berserker', name:'⚡ 광전사', desc:'공격·방어 모두 최강.',              req:70,  cost:50000,
+    bonus:{attack:100,maxHp:300,defense:30}, color:'#e04020' },
+  { id:'sage',      name:'✨ 현자',   desc:'균형 성장. 스킬 배율 최고.',        req:100, cost:200000,
+    bonus:{attack:120,maxHp:200,defense:40}, color:'#40c0e0' },
+];
+
+function openInn() {
+  document.getElementById('innModal').style.display = 'flex';
+  const cur = JOB_CLASSES.find(j => j.id === (player?.jobClass||'warrior'));
+  document.getElementById('currentJobName').textContent = cur?.name || '⚔️ 전사';
+  renderJobList();
+}
+function closeInn() { document.getElementById('innModal').style.display = 'none'; }
+
+function renderJobList() {
+  const cur = player?.jobClass || 'warrior';
+  const lv = player?.level || 1;
+  document.getElementById('jobClassList').innerHTML = JOB_CLASSES.map(j => {
+    const ok = lv >= j.req;
+    const isCur = j.id === cur;
+    const bText = Object.entries(j.bonus).map(([k,v])=>`${v>0?'+':''}${v} ${k==='maxHp'?'HP':k==='attack'?'ATK':'DEF'}`).join(', ');
+    return `<div style="background:rgba(255,255,255,0.05);border:2px solid ${isCur?j.color:'rgba(255,255,255,0.1)'};border-radius:10px;padding:12px;margin-bottom:8px;opacity:${ok?1:0.5};">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <b style="color:${j.color};font-size:0.9rem;">${j.name} ${isCur?'✅':''}</b>
+        <span style="font-size:0.65rem;color:rgba(240,232,200,0.4);">Lv.${j.req}+</span>
+      </div>
+      <div style="font-size:0.7rem;color:rgba(240,232,200,0.6);margin-bottom:4px;">${j.desc}</div>
+      <div style="font-size:0.65rem;color:#a0d080;margin-bottom:8px;">${bText}</div>
+      ${isCur ? `<div style="text-align:center;font-size:0.7rem;color:rgba(240,232,200,0.3);">현재 직업</div>` :
+        ok ? `<button ontouchend="changeJob('${j.id}')" onclick="changeJob('${j.id}')" style="width:100%;padding:8px;background:linear-gradient(135deg,${j.color}88,${j.color});border:none;border-radius:6px;color:#fff;font-weight:700;cursor:pointer;touch-action:manipulation;">${j.cost>0?`💰${j.cost.toLocaleString()} 골드로 전직`:'무료 전직'}</button>` :
+        `<div style="text-align:center;font-size:0.7rem;color:rgba(255,100,100,0.5);">Lv.${j.req} 필요</div>`}
+    </div>`;
+  }).join('');
+}
+
+function changeJob(jobId) {
+  const job = JOB_CLASSES.find(j=>j.id===jobId);
+  if (!job || !player) return;
+  if ((player.level||1) < job.req) { showNotif('⛔ 레벨 부족!'); return; }
+  if ((player.gold||0) < job.cost) { showNotif(`⛔ 골드 부족! (필요: ${job.cost.toLocaleString()})`); return; }
+  const old = JOB_CLASSES.find(j=>j.id===(player.jobClass||'warrior'));
+  if (old && player.jobClass) Object.entries(old.bonus).forEach(([k,v])=>{ player[k]=Math.max(1,(player[k]||0)-v); });
+  player.gold=(player.gold||0)-job.cost;
+  player.jobClass=jobId;
+  Object.entries(job.bonus).forEach(([k,v])=>{ player[k]=Math.max(1,(player[k]||0)+v); });
+  saveGame(); updateHUD();
+  showNotif(`✅ ${job.name}으로 전직 완료!`);
+  renderJobList();
+  document.getElementById('currentJobName').textContent = job.name;
+}
+
+// ── 대장간 ──
+let bsTab = 'weapon';
+function openBlacksmith() { document.getElementById('blacksmithModal').style.display='flex'; renderBsItems(); }
+function closeBlacksmith() { document.getElementById('blacksmithModal').style.display='none'; }
+function switchBsTab(tab, el) { bsTab=tab; document.querySelectorAll('#blacksmithModal .shop-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); renderBsItems(); }
+
+function renderBsItems() {
+  const items = bsTab==='weapon' ? (player?.weapons||[]) : (player?.armors||[]);
+  const list = document.getElementById('bsItemList');
+  if (!items.length) { list.innerHTML='<div style="text-align:center;color:rgba(240,232,200,0.3);font-size:0.75rem;padding:20px;">보유 아이템 없음</div>'; return; }
+  list.innerHTML = items.map((item,idx)=>{
+    const enh=item.enhance||0;
+    const maxE={S:10,A:8,B:6,C:5,D:4,F:3}[item.grade]||5;
+    const sk=bsTab==='weapon'?'atk':'def';
+    const sv=Math.floor(item[sk]*(1+enh*0.1));
+    const cost=Math.floor((enh+1)*item[sk]*50);
+    const rate=Math.max(20,95-enh*8);
+    return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(100,160,255,0.2);border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <b style="font-size:0.8rem;color:#c0d8ff;">${item.name} <span style="color:#f0c840;">+${enh}</span></b>
+        <span style="font-size:0.65rem;color:rgba(240,232,200,0.4);">[${item.grade}]</span>
+      </div>
+      <div style="font-size:0.65rem;color:#80c0ff;margin-bottom:4px;">${sk.toUpperCase()}: ${sv} | ${enh}/${maxE}</div>
+      <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-bottom:8px;">
+        <div style="height:100%;background:linear-gradient(90deg,#4080ff,#80c0ff);border-radius:2px;width:${Math.round(enh/maxE*100)}%;"></div>
+      </div>
+      ${enh>=maxE?`<div style="text-align:center;font-size:0.7rem;color:#f0c840;">✨ 최대 강화</div>`:
+       `<div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:0.62rem;color:rgba(240,232,200,0.4);">💰${cost.toLocaleString()} | 성공 ${rate}%</span>
+          <button ontouchend="enhanceItem('${bsTab}',${idx})" onclick="enhanceItem('${bsTab}',${idx})" style="padding:5px 12px;background:linear-gradient(135deg,#204080,#4080c0);border:none;border-radius:5px;color:#fff;font-size:0.7rem;cursor:pointer;touch-action:manipulation;">강화▶</button>
+        </div>`}
+    </div>`;
+  }).join('');
+}
+
+function enhanceItem(type, idx) {
+  const items = type==='weapon' ? player?.weapons : player?.armors;
+  const item = items?.[idx];
+  if (!item || !player) return;
+  const enh=item.enhance||0;
+  const maxE={S:10,A:8,B:6,C:5,D:4,F:3}[item.grade]||5;
+  if (enh>=maxE) { showNotif('✨ 이미 최대 강화됨!'); return; }
+  const sk=type==='weapon'?'atk':'def';
+  const cost=Math.floor((enh+1)*item[sk]*50);
+  if ((player.gold||0)<cost) { showNotif(`⛔ 골드 부족! (필요: ${cost.toLocaleString()})`); return; }
+  player.gold-=cost;
+  const rate=Math.max(20,95-enh*8);
+  if (Math.random()*100<rate) {
+    item.enhance=enh+1;
+    showNotif(`✅ ${item.name} +${item.enhance} 강화 성공! 🎉`);
+  } else {
+    if (['S','A'].includes(item.grade)) { item.enhance=Math.max(0,enh-1); showNotif(`💔 강화 실패! +${item.enhance}으로 감소`); }
+    else showNotif('💔 강화 실패! 유지됨');
+  }
+  saveGame(); updateHUD(); renderBsItems();
+}
+
+// ── 마을 상점 ──
+const VS_POTIONS = [
+  { id:'hp_s',   name:'HP 포션 (소)', icon:'🧪', desc:'HP +500',   cost:100,  type:'heal',      val:500 },
+  { id:'hp_m',   name:'HP 포션 (중)', icon:'🧪', desc:'HP +2000',  cost:400,  type:'heal',      val:2000 },
+  { id:'hp_l',   name:'HP 포션 (대)', icon:'🧪', desc:'HP +8000',  cost:1200, type:'heal',      val:8000 },
+  { id:'hp_max', name:'엘릭서',       icon:'💉', desc:'HP 완전회복',cost:5000, type:'heal_full' },
+  { id:'exp_p',  name:'경험치 포션',  icon:'⭐', desc:'EXP +500',  cost:800,  type:'exp',       val:500 },
+  { id:'gold_p', name:'행운의 주머니',icon:'💰', desc:'골드 +2000',cost:1500, type:'gold',      val:2000 },
+];
+let vsTab = 'potion';
+
+function openVillageShop() {
+  document.getElementById('villageShopModal').style.display='flex';
+  document.getElementById('vsGoldDisplay').textContent=Math.floor(player?.gold||0).toLocaleString();
+  renderVsItems();
+}
+function closeVillageShop() { document.getElementById('villageShopModal').style.display='none'; }
+function switchVsTab(tab, el) { vsTab=tab; document.querySelectorAll('#villageShopModal .shop-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); renderVsItems(); }
+
+function renderVsItems() {
+  const gc={S:'#f0c840',A:'#f08040',B:'#a040f0',C:'#4080f0',D:'#40a040',F:'#808080'};
+  let items = [];
+  if (vsTab==='potion') items = VS_POTIONS;
+  else if (vsTab==='weapon') items = (typeof ALL_WEAPONS!=='undefined') ? ALL_WEAPONS.filter(w=>['F','D'].includes(w.grade)) : [];
+  else items = (typeof ALL_ARMORS!=='undefined') ? ALL_ARMORS.filter(a=>['F','D'].includes(a.grade)) : [];
+  const list = document.getElementById('vsItemList');
+  if (!items.length) { list.innerHTML='<div style="text-align:center;color:rgba(200,255,200,0.3);font-size:0.75rem;padding:20px;">재고 없음</div>'; return; }
+  list.innerHTML = items.map((item,idx)=>{
+    const cost=item.price||item.cost||0;
+    const stat=item.atk?`ATK:${item.atk}`:item.def?`DEF:${item.def}`:item.desc||'';
+    return `<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(80,160,80,0.2);border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div style="font-size:1.4rem;width:32px;text-align:center;">${item.icon||'📦'}</div>
+      <div style="flex:1;">
+        <div style="font-size:0.8rem;font-weight:700;color:${item.grade?gc[item.grade]:'#80d060'};">${item.name}${item.grade?' ['+item.grade+']':''}</div>
+        <div style="font-size:0.62rem;color:rgba(200,240,180,0.5);">${stat}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.75rem;color:#f0c840;font-weight:700;margin-bottom:4px;">💰${cost.toLocaleString()}</div>
+        <button ontouchend="buyVsItem(${idx})" onclick="buyVsItem(${idx})" style="padding:5px 10px;background:linear-gradient(135deg,#205030,#40a050);border:none;border-radius:5px;color:#fff;font-size:0.65rem;cursor:pointer;touch-action:manipulation;">구매</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buyVsItem(idx) {
+  const items = vsTab==='potion'?VS_POTIONS:vsTab==='weapon'?(typeof ALL_WEAPONS!=='undefined'?ALL_WEAPONS.filter(w=>['F','D'].includes(w.grade)):[]):(typeof ALL_ARMORS!=='undefined'?ALL_ARMORS.filter(a=>['F','D'].includes(a.grade)):[]);
+  const item=items[idx];
+  if (!item||!player) return;
+  const cost=item.price||item.cost||0;
+  if ((player.gold||0)<cost) { showNotif('⛔ 골드 부족!'); return; }
+  player.gold-=cost;
+  if (item.type==='heal') { player.hp=Math.min(player.maxHp||100,(player.hp||0)+item.val); showNotif(`💊 HP +${item.val} 회복!`); }
+  else if (item.type==='heal_full') { player.hp=player.maxHp||100; showNotif('💉 HP 완전 회복!'); }
+  else if (item.type==='exp') { addExp(item.val); showNotif(`⭐ 경험치 +${item.val}!`); }
+  else if (item.type==='gold') { player.gold+=item.val; showNotif(`💰 골드 +${item.val}!`); }
+  else if (item.atk!==undefined) { if(!player.weapons)player.weapons=[]; player.weapons.push({...item,enhance:0}); showNotif(`✅ ${item.name} 구매!`); }
+  else if (item.def!==undefined) { if(!player.armors)player.armors=[]; player.armors.push({...item,enhance:0}); showNotif(`✅ ${item.name} 구매!`); }
+  document.getElementById('vsGoldDisplay').textContent=Math.floor(player.gold).toLocaleString();
+  saveGame(); updateHUD(); renderVsItems();
+}
+
 let villageActive = false;
 let villagePos = { x: 46, y: 43 }; // % positions
 let villageOtherPlayers = {}; // username -> {x,y,el}
@@ -4369,7 +4601,8 @@ function renderVillageBuildings() {
   if (!obj) return;
   obj.innerHTML = `
     <!-- Inn (left) -->
-    <div style="position:absolute;left:3%;bottom:52%;pointer-events:none;">
+    <div style="position:absolute;left:3%;bottom:52%;pointer-events:auto;cursor:pointer;" onclick="openInn()" title="여관 - 전직">
+      <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#ffe080;font-size:0.6rem;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid rgba(255,224,128,0.3);">🏨 여관 (전직)</div>
       <svg viewBox="0 0 56 60" width="112" height="120" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <!-- Walls -->
         <rect x="0" y="20" width="56" height="40" fill="#c08840"/>
@@ -4403,7 +4636,8 @@ function renderVillageBuildings() {
       </svg>
     </div>
     <!-- Blacksmith (right) -->
-    <div style="position:absolute;right:3%;bottom:52%;pointer-events:none;">
+    <div style="position:absolute;right:3%;bottom:52%;pointer-events:auto;cursor:pointer;" onclick="openBlacksmith()" title="대장간 - 강화">
+      <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#c0e0ff;font-size:0.6rem;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid rgba(192,224,255,0.3);">⚒️ 대장간 (강화)</div>
       <svg viewBox="0 0 52 56" width="104" height="112" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="16" width="48" height="40" fill="#686868"/>
         <rect x="2" y="16" width="48" height="3" fill="#888888"/>
@@ -4433,7 +4667,8 @@ function renderVillageBuildings() {
       </svg>
     </div>
     <!-- Market stall (center-left) -->
-    <div style="position:absolute;left:33%;bottom:52%;pointer-events:none;">
+    <div style="position:absolute;left:33%;bottom:52%;pointer-events:auto;cursor:pointer;" onclick="openVillageShop()" title="상점">
+      <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#a0e0a0;font-size:0.6rem;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid rgba(160,224,160,0.3);">🏪 상점</div>
       <svg viewBox="0 0 44 40" width="88" height="80" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="2" y="12" width="40" height="28" fill="#d0b060"/>
         <rect x="0" y="8" width="44" height="8" fill="#e05020"/>
@@ -4615,9 +4850,12 @@ function villageMoveTick() {
 // NPC Merchant system
 function scheduleNpc() {
   if (npcTimer) clearTimeout(npcTimer);
-  // 첫 등장: 10~30초 후 랜덤
-  const delay = (10 + Math.random() * 20) * 1000;
-  npcTimer = setTimeout(() => showNpc(), delay);
+  // 희귀 상인: 90~240초 후 랜덤 (매우 드묾)
+  const delay = (90 + Math.random() * 150) * 1000;
+  npcTimer = setTimeout(() => {
+    if (Math.random() < 0.35) showNpc(); // 35% 추가 확률
+    else scheduleNpc();
+  }, delay);
 }
 
 function showNpc() {
@@ -5957,6 +6195,9 @@ function saveGame() {
     equippedWeapon: player.equippedWeapon, equippedArmor: player.equippedArmor,
     unlockedStage: player.unlockedStage, friends: player.friends,
     friendRequests: player.friendRequests,
+    customMonsters: player.customMonsters || [],
+    jobClass: player.jobClass || 'warrior',
+    inventory: player.inventory || [],
   }});
 }
 
