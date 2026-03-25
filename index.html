@@ -46,7 +46,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 .login-input {
   width:100%; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(245,200,66,0.2);
   border-radius:8px; color:var(--text); font-family:inherit; font-size:0.95rem; margin-bottom:12px; outline:none;
-  transition:border-color 0.2s;
+  transition:border-color 0.2s; touch-action:manipulation;
 }
 .login-input:focus { border-color:var(--gold); }
 .login-btn {
@@ -54,6 +54,7 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
   border:none; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit;
   transition:transform 0.1s, box-shadow 0.2s;
   box-shadow:0 4px 20px rgba(245,200,66,0.4);
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
 }
 .login-btn:hover { transform:translateY(-2px); box-shadow:0 6px 28px rgba(245,200,66,0.6); }
 .login-btn:active { transform:translateY(0); }
@@ -986,9 +987,9 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
       <button class="login-tab" onclick="switchAuthTab('register')">회원가입</button>
     </div>
     <div id="loginErr" class="login-err"></div>
-    <input type="text" id="loginId" class="login-input" placeholder="아이디" autocomplete="off">
-    <input type="password" id="loginPw" class="login-input" placeholder="비밀번호" autocomplete="off">
-    <button class="login-btn" onclick="doLogin()">▶ 게임 시작</button>
+    <input type="text" id="loginId" class="login-input" placeholder="아이디" autocomplete="off" style="touch-action:manipulation;">
+    <input type="password" id="loginPw" class="login-input" placeholder="비밀번호" autocomplete="off" style="touch-action:manipulation;">
+    <button class="login-btn" onclick="doLogin()" ontouchend="event.preventDefault();doLogin();">▶ 게임 시작</button>
   </div>
 </div>
 
