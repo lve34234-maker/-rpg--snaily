@@ -349,7 +349,81 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 @keyframes fadeOut { from{opacity:1} to{opacity:0} }
 @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
-/* ====== WALK ANIMATION ====== */
+/* ====== BATTLE MAP (TOP-DOWN) ====== */
+#battleMapScreen {
+  position:absolute; inset:0; display:none; overflow:hidden; z-index:6;
+  image-rendering:pixelated;
+}
+#battleMapScreen.active { display:block; }
+.bmap-bg {
+  position:absolute; inset:0;
+  background-size:32px 32px;
+}
+.bmap-deco { position:absolute; image-rendering:pixelated; pointer-events:none; }
+
+/* Map entities (monsters, players) */
+#mapEntities { position:absolute; inset:0; }
+.map-entity {
+  position:absolute; transform:translateX(-50%);
+  cursor:pointer; display:flex; flex-direction:column; align-items:center;
+  transition:left 0.08s linear, top 0.08s linear;
+}
+.map-entity-shadow {
+  width:24px; height:6px; border-radius:50%;
+  background:rgba(0,0,0,0.35); margin-top:-4px;
+}
+.map-entity-label {
+  font-size:0.5rem; color:#fff; white-space:nowrap;
+  text-shadow:1px 1px 0 #000,-1px 1px 0 #000;
+  background:rgba(0,0,0,0.5); padding:1px 4px; border-radius:2px;
+  margin-bottom:2px; pointer-events:none;
+}
+.map-entity-label.boss-label { color:#f5c842; font-weight:900; }
+.map-entity-label.my-label { color:#80ff80; }
+.map-entity-label.party-label { color:#80d0ff; }
+
+/* Monster HP bar on map */
+.map-monster-hp {
+  width:32px; height:4px; background:rgba(255,0,0,0.3); border-radius:2px; margin-bottom:1px;
+}
+.map-monster-hp-fill { height:100%; background:#f04040; border-radius:2px; transition:width 0.3s; }
+
+/* Encounter flash */
+.encounter-flash {
+  position:fixed; inset:0; background:rgba(255,200,0,0.15); z-index:200;
+  pointer-events:none; animation:fadeOut 0.4s ease-out forwards;
+}
+
+/* PvP Challenge Popup */
+#pvpChallengePopup {
+  display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  z-index:100; background:linear-gradient(180deg,#1a0a30,#0a0518);
+  border:2px solid #c090f0; border-radius:12px; padding:20px 24px;
+  text-align:center; min-width:220px;
+}
+#pvpChallengePopup.open { display:block; }
+.pvp-popup-title { font-size:1rem; font-weight:900; color:#e0a0ff; margin-bottom:8px; }
+.pvp-popup-sub { font-size:0.75rem; color:rgba(220,170,255,0.6); margin-bottom:14px; }
+.pvp-btn-row { display:flex; gap:8px; }
+.pvp-btn-accept { flex:1; padding:10px; background:linear-gradient(135deg,#206040,#40a060); border:none; border-radius:8px; color:#fff; font-weight:900; cursor:pointer; }
+.pvp-btn-decline { flex:1; padding:10px; background:linear-gradient(135deg,#601020,#a02040); border:none; border-radius:8px; color:#fff; cursor:pointer; }
+
+/* Map HUD */
+#mapHud {
+  position:absolute; top:8px; left:8px; z-index:15;
+  display:flex; gap:6px; pointer-events:none;
+}
+.map-stat { background:rgba(0,0,0,0.6); border-radius:6px; padding:3px 8px; font-size:0.65rem; color:#fff; border:1px solid rgba(255,255,255,0.15); }
+#mapMonsterCount { position:absolute; top:8px; right:8px; z-index:15; background:rgba(0,0,0,0.6); border-radius:6px; padding:4px 10px; font-size:0.7rem; color:#f5c842; border:1px solid rgba(245,200,66,0.3); }
+
+/* Map quit button */
+#mapQuitBtn {
+  position:absolute; top:50px; right:8px; z-index:20;
+  padding:6px 12px; background:rgba(80,20,20,0.85); border:1px solid rgba(200,60,60,0.4);
+  color:#ff8080; border-radius:6px; font-size:0.65rem; cursor:pointer;
+}
+
+/* ====== BATTLE MAP CSS END ====== */
 @keyframes char-walk-r {
   0%,100%{ transform:translateY(0) scaleX(1); }
   25%,75%{ transform:translateY(-5px) scaleX(1); }
@@ -1022,6 +1096,50 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
     </div>
   </div>
 
+  <!-- BATTLE MAP SCREEN (TOP-DOWN) -->
+  <div id="battleMapScreen">
+    <div class="bmap-bg" id="bmapBg"></div>
+    <!-- Decorations (trees, rocks etc.) -->
+    <div id="bmapDecos"></div>
+    <!-- All entities: monsters + players -->
+    <div id="mapEntities"></div>
+
+    <!-- HUD top-left -->
+    <div id="mapHud">
+      <div class="map-stat">🗺️ <span id="mapStageName"></span></div>
+      <div class="map-stat">💰 <span id="mapGold">0</span></div>
+      <div class="map-stat"><span id="mapRankBadge"></span></div>
+    </div>
+    <!-- Monster count top-right -->
+    <div id="mapMonsterCount">👹 <span id="mapAliveCount">0</span>마리 남음</div>
+
+    <!-- Quit button -->
+    <button id="mapQuitBtn" onclick="quitBattleMap()">🚪 나가기</button>
+
+    <!-- Joystick (reuse same element structure) -->
+    <div id="mapJoystick" style="position:absolute;bottom:90px;left:20px;z-index:20;width:100px;height:100px;pointer-events:none;">
+      <div class="joystick-base"></div>
+      <div class="joystick-knob" id="mapJoystickKnob"></div>
+    </div>
+
+    <!-- Skill buttons (right side) -->
+    <div id="mapSkillBtns" style="position:absolute;bottom:100px;right:8px;z-index:20;display:flex;flex-direction:column;gap:6px;">
+      <button class="skill-btn" id="mapSkillBtn0" ontouchstart="handleMapSkillTap(0)" onclick="handleMapSkillTap(0)" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;"><div style="font-size:1.1rem;">⚔️</div><div class="skill-btn-label">전사</div><div class="skill-btn-sp" id="mapSpBar0"></div></button>
+      <button class="skill-btn" id="mapSkillBtn1" ontouchstart="handleMapSkillTap(1)" onclick="handleMapSkillTap(1)" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;"><div style="font-size:1.1rem;">🏹</div><div class="skill-btn-label">궁수</div><div class="skill-btn-sp" id="mapSpBar1"></div></button>
+      <button class="skill-btn" id="mapSkillBtn2" ontouchstart="handleMapSkillTap(2)" onclick="handleMapSkillTap(2)" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;"><div style="font-size:1.1rem;">🪄</div><div class="skill-btn-label">마법사</div><div class="skill-btn-sp" id="mapSpBar2"></div></button>
+    </div>
+
+    <!-- PvP Challenge Popup -->
+    <div id="pvpChallengePopup">
+      <div class="pvp-popup-title">⚔️ PvP 도전!</div>
+      <div class="pvp-popup-sub" id="pvpChallengerName"></div>
+      <div class="pvp-btn-row">
+        <button class="pvp-btn-accept" ontouchend="acceptPvP()" onclick="acceptPvP()">수락</button>
+        <button class="pvp-btn-decline" ontouchend="declinePvP()" onclick="declinePvP()">거절</button>
+      </div>
+    </div>
+  </div>
+
   <!-- VILLAGE SCREEN -->
   <div id="villageScreen">
     <!-- Sky -->
@@ -1512,9 +1630,57 @@ body { background:#0a0810; color:var(--text); font-family:'Noto Sans KR',sans-se
 
     <!-- 스테이지 편집 탭 -->
     <div id="adminTab_stage" style="display:none;">
+      <!-- 스테이지 추가 -->
+      <div class="admin-section" style="border:1px solid rgba(100,220,100,0.25);border-radius:8px;padding:12px;margin-bottom:8px;">
+        <div class="admin-section-title" style="color:#60d060;">➕ 새 스테이지 추가</div>
+        <div class="admin-grid">
+          <div class="admin-field" style="grid-column:span 2">
+            <div class="admin-label">스테이지 이름</div>
+            <input type="text" id="newStageName" class="admin-input" placeholder="예: 용암 동굴">
+          </div>
+          <div class="admin-field"><div class="admin-label">웨이브 수</div><input type="number" id="newStageWaves" class="admin-input" value="3" min="1" max="20"></div>
+          <div class="admin-field"><div class="admin-label">골드 보상</div><input type="number" id="newStageGold" class="admin-input" value="500"></div>
+          <div class="admin-field"><div class="admin-label">경험치 보상</div><input type="number" id="newStageExp" class="admin-input" value="300"></div>
+          <div class="admin-field">
+            <div class="admin-label">보스</div>
+            <select id="newStageBoss" class="admin-input" style="padding:8px;">
+              <option value="">없음</option>
+              <option value="demon_king">대마왕</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-section-title" style="margin-top:8px;">👹 몬스터 구성</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+          <select id="newStageMonster0" class="admin-input" style="padding:6px;flex:1;min-width:90px;">
+            <option value="">없음</option>
+            <option value="goblin" selected>고블린</option>
+            <option value="orc">오크</option>
+            <option value="dark_knight">어둠기사</option>
+          </select>
+          <select id="newStageMonster1" class="admin-input" style="padding:6px;flex:1;min-width:90px;">
+            <option value="" selected>없음</option>
+            <option value="goblin">고블린</option>
+            <option value="orc">오크</option>
+            <option value="dark_knight">어둠기사</option>
+          </select>
+          <select id="newStageMonster2" class="admin-input" style="padding:6px;flex:1;min-width:90px;">
+            <option value="" selected>없음</option>
+            <option value="goblin">고블린</option>
+            <option value="orc">오크</option>
+            <option value="dark_knight">어둠기사</option>
+          </select>
+        </div>
+        <div id="newStageResult" style="font-size:0.8rem;min-height:18px;text-align:center;"></div>
+        <button class="admin-btn" style="background:linear-gradient(135deg,#206040,#40a060);" onclick="addNewStage()">➕ 스테이지 추가</button>
+      </div>
+
+      <!-- 기존 스테이지 편집 -->
       <div class="admin-section">
-        <div class="admin-section-title">🗺️ 스테이지 선택</div>
-        <select id="stageEditSelect" class="admin-target-select" onchange="loadStageEdit()" style="margin-bottom:10px;"></select>
+        <div class="admin-section-title">🗺️ 스테이지 선택 / 편집 / 삭제</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">
+          <select id="stageEditSelect" class="admin-target-select" onchange="loadStageEdit()" style="flex:1;margin-bottom:0;"></select>
+          <button onclick="deleteStage()" style="padding:6px 10px;background:linear-gradient(135deg,#801010,#c02020);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;white-space:nowrap;">🗑️ 삭제</button>
+        </div>
       </div>
       <div class="admin-section">
         <div class="admin-section-title">⚙️ 스테이지 설정</div>
@@ -1909,12 +2075,24 @@ function initGame() {
 
 function applyGameConfig(cfg) {
   if (!cfg) return;
-  // 스테이지 오버라이드
+  // 스테이지 오버라이드 (기존 스테이지 수정)
   if (cfg.stageOverrides) {
-    Object.entries(cfg.stageOverrides).forEach(([id, override]) => {
-      const stage = STAGES.find(s => s.id === parseInt(id));
-      if (stage) Object.assign(stage, override);
+    Object.entries(cfg.stageOverrides).forEach(([key, override]) => {
+      if (key.startsWith('new_')) {
+        // 새로 추가된 스테이지 - 없으면 추가
+        const newId = override.id;
+        if (!STAGES.find(s => s.id === newId)) {
+          STAGES.push({ ...override, isCustom: true });
+        }
+      } else {
+        // 기존 스테이지 수정
+        const id = parseInt(key);
+        const stage = STAGES.find(s => s.id === id);
+        if (stage) Object.assign(stage, override);
+      }
     });
+    // ID 순 정렬
+    STAGES.sort((a, b) => a.id - b.id);
   }
   // 몬스터 스탯 오버라이드
   if (cfg.monsterStatOverrides) {
@@ -2052,23 +2230,33 @@ function handleWSMessage(msg) {
   // ====== 같은 스테이지 유저 ======
   if (msg.type === 'stage_users') {
     stageOtherUsers = {};
-    msg.users.forEach(u => { stageOtherUsers[u] = true; });
+    (msg.users||[]).forEach(u => { stageOtherUsers[u] = true; });
+    // Map players
+    if (mapState && msg.players) {
+      msg.players.forEach(p => {
+        if (p.username !== player?.username) {
+          mapState.otherPlayers[p.username] = { x:p.x||5, y:p.y||50, heroClass:p.heroClass||0, level:p.level||1, dir:1 };
+        }
+      });
+    }
     renderOtherUsers();
   }
   if (msg.type === 'stage_user_joined') {
-    if (msg.username !== player.username) {
+    if (msg.username !== player?.username) {
       stageOtherUsers[msg.username] = true;
-      showNotif(`⚔️ ${msg.username}님이 이 스테이지에 입장했습니다!`);
+      if (mapState) mapState.otherPlayers[msg.username] = { x:msg.x||5, y:msg.y||50, heroClass:msg.heroClass||0, level:msg.level||1, dir:1 };
+      showNotif(`⚔️ ${msg.username}님이 입장했습니다!`);
       renderOtherUsers();
     }
   }
   if (msg.type === 'stage_user_left') {
     delete stageOtherUsers[msg.username];
+    if (mapState) delete mapState.otherPlayers[msg.username];
     renderOtherUsers();
   }
-  if (msg.type === 'config_update') {
-    applyGameConfig(msg.config);
-  }
+  if (msg.type === 'config_update') { applyGameConfig(msg.config); }
+  // Map & PvP messages
+  handleMapWsMsg(msg);
   // Village messages
   handleVillageWsMsg(msg);
 }
@@ -2080,6 +2268,28 @@ function wsSend(data) {
 // ============================================================
 // BATTLE SYSTEM
 // ============================================================
+// ============================================================
+// BATTLE MAP SYSTEM (Top-Down)
+// ============================================================
+let mapState = null;
+let mapLoop = null;
+let mapJoystickSetup = false;
+let pvpPendingChallenger = null;
+
+const BMAP_THEMES = {
+  forest:  { bg:'#2d5e1e', tile:'#38782a', path:'#a07840', deco:'🌲' },
+  mountain:{ bg:'#5a6050', tile:'#6a7060', path:'#908070', deco:'🪨' },
+  castle:  { bg:'#483848', tile:'#504050', path:'#807868', deco:'🏰' },
+  volcano: { bg:'#5a1a08', tile:'#702010', path:'#c04020', deco:'🔥' },
+  dungeon: { bg:'#18182a', tile:'#202038', path:'#504060', deco:'💀' },
+  boss:    { bg:'#100818', tile:'#1a0a28', path:'#600890', deco:'👁️' },
+};
+
+function getMapTheme(stageId) {
+  const t = ['forest','forest','mountain','mountain','volcano','dungeon','castle','boss','dungeon','mountain','castle','dungeon','boss','volcano','dungeon','castle','boss','dungeon','forest','boss'];
+  return BMAP_THEMES[t[(stageId-1) % t.length]] || BMAP_THEMES.forest;
+}
+
 function startBattle(stageId) {
   const stage = STAGES.find(s => s.id === stageId);
   if (!stage) return;
@@ -2087,37 +2297,563 @@ function startBattle(stageId) {
     showNotif('⛔ 잠긴 스테이지입니다!'); return;
   }
   closePanel('stagePanel');
-  leaveVillage(); // ★ 전투 시작 시 마을 나가기
-  // 이전 스테이지에서 나가고 새 스테이지 입장 알림
+  leaveVillage();
   wsSend({ type: 'stage_leave' });
   stageOtherUsers = {};
-  battleState = {
-    stageId,
-    stage,
-    wave: 1,
-    totalWaves: stage.waves,
-    heroes: createHeroes(),
-    enemies: [],
-    sp: [0, 0, 0],
-    maxSp: [100, 100, 100],
-    attackTimer: [0, 0, 0],
-    attackInterval: [1200, 1400, 1600],
-    gameOver: false,
-    cleared: false,
-    autoTimer: null,
-  };
-  document.getElementById('clearBanner').style.display = 'none';
-  document.getElementById('gameoverBanner').style.display = 'none';
-  document.getElementById('quitBtn').style.display = 'block';
-  showSkillBtns(true);
-  wsSend({ type: 'stage_enter', stageId });
-  lastTick = Date.now(); // ★ 스테이지 시작 시 lastTick 리셋
-  spawnWave();
-  renderBattle();
-  if (battleState.autoTimer) clearInterval(battleState.autoTimer);
-  battleState.autoTimer = setInterval(battleTick, 200);
-  showWaveAnnounce(`스테이지 ${stageId}: ${stage.name}`);
+  enterBattleMap(stageId, stage);
 }
+
+function enterBattleMap(stageId, stage) {
+  const theme = getMapTheme(stageId);
+  const heroClass = ((player?.level||1) % 3);
+
+  // Build monsters for the map
+  const monsters = [];
+  stage.monsters.forEach((type, mi) => {
+    for (let w = 0; w < stage.waves; w++) {
+      const spread = 70 / stage.waves;
+      monsters.push({
+        id: `m${w}_${mi}`,
+        type: (w === stage.waves-1 && mi === 0 && stage.boss) ? stage.boss : type,
+        isBoss: w === stage.waves-1 && mi === 0 && !!stage.boss,
+        x: 18 + w * spread + (Math.random()*8 - 4),
+        y: 28 + mi * 20 + (Math.random()*8 - 4),
+        alive: true,
+        angle: Math.random() * Math.PI * 2,
+        patrolR: 2.5 + Math.random()*1.5,
+        patrolSpeed: 0.018 + Math.random()*0.012,
+        wave: w,
+      });
+    }
+  });
+
+  mapState = {
+    stageId, stage, theme, heroClass,
+    px: 5, py: 50, // player position %
+    dir: 1,
+    monsters,
+    otherPlayers: {}, // username -> {x,y,heroClass,level}
+    partyMembers: {}, // username -> {x,y,heroClass}
+    inBattle: false,
+    battleMonsterId: null,
+    pvpOpponent: null,
+    battleState: null,
+  };
+
+  // Setup background
+  const bg = document.getElementById('bmapBg');
+  bg.style.background = theme.bg;
+  bg.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='${theme.tile.replace('#','%23')}'/%3E%3Crect x='0' y='0' width='1' height='32' fill='${theme.bg.replace('#','%23')}'/%3E%3Crect x='0' y='0' width='32' height='1' fill='${theme.bg.replace('#','%23')}'/%3E%3C/svg%3E")`;
+
+  // Decorations
+  const decos = [];
+  for (let i = 0; i < 12; i++) {
+    const dx = 5 + Math.random()*90, dy = 5 + Math.random()*90;
+    // Avoid center path
+    if (dx > 12 && dx < 88 && dy > 25 && dy < 80) continue;
+    decos.push(`<div class="bmap-deco" style="left:${dx}%;top:${dy}%;font-size:${1.2+Math.random()}rem;opacity:0.7;">${theme.deco}</div>`);
+  }
+  // Path stripe
+  decos.push(`<div style="position:absolute;left:5%;top:45%;width:90%;height:14%;background:${theme.path};opacity:0.35;border-radius:8px;"></div>`);
+  document.getElementById('bmapDecos').innerHTML = decos.join('');
+
+  // Show screen
+  document.getElementById('battleMapScreen').classList.add('active');
+  document.getElementById('mapStageName').textContent = `${stageId}: ${stage.name}`;
+  document.getElementById('mapGold').textContent = Math.floor(player?.gold||0).toLocaleString();
+  document.getElementById('mapRankBadge').innerHTML = getRankBadge(player?.level||1);
+
+  // Init battle state for in-map encounters
+  mapState.heroes = createHeroes();
+  mapState.sp = [0, 0, 0];
+  mapState.maxSp = [100, 100, 100];
+
+  wsSend({ type: 'stage_enter', stageId, x: mapState.px, y: mapState.py, heroClass });
+
+  setupMapJoystick();
+  renderBattleMap();
+  updateMapMonsterCount();
+
+  if (mapLoop) clearInterval(mapLoop);
+  mapLoop = setInterval(mapTick, 50);
+
+  lastTick = Date.now();
+  if (mapState.autoTimer) clearInterval(mapState.autoTimer);
+  mapState.autoTimer = setInterval(mapBattleTick, 200);
+
+  showWaveAnnounce(`⚔️ ${stage.name} 입장!`);
+}
+
+function quitBattleMap() {
+  stopBattleMap();
+  enterVillage();
+}
+
+function stopBattleMap() {
+  if (mapLoop) { clearInterval(mapLoop); mapLoop = null; }
+  if (mapState?.autoTimer) { clearInterval(mapState.autoTimer); mapState.autoTimer = null; }
+  wsSend({ type: 'stage_leave' });
+  stageOtherUsers = {};
+  mapState = null;
+  document.getElementById('battleMapScreen').classList.remove('active');
+  document.getElementById('pvpChallengePopup').classList.remove('open');
+}
+
+// ── Map tick (movement + rendering) ──
+function mapTick() {
+  if (!mapState || mapState.inBattle) return;
+  const { joystickDir: jd, joystickActive: ja } = { joystickDir, joystickActive };
+  const moving = ja && (Math.abs(jd.x) > 0.08 || Math.abs(jd.y) > 0.08);
+
+  if (moving) {
+    const speed = 0.38;
+    mapState.px = Math.max(2, Math.min(93, mapState.px + jd.x * speed));
+    mapState.py = Math.max(12, Math.min(85, mapState.py + jd.y * speed));
+    if (Math.abs(jd.x) > 0.05) mapState.dir = jd.x > 0 ? 1 : -1;
+    // Throttle server position broadcast
+    if (!mapState._lastSend || Date.now() - mapState._lastSend > 80) {
+      mapState._lastSend = Date.now();
+      wsSend({ type: 'stage_map_move', x: mapState.px, y: mapState.py });
+    }
+  }
+
+  // Patrol monsters
+  mapState.monsters.forEach(m => {
+    if (!m.alive) return;
+    m.angle += m.patrolSpeed;
+    m.dx = m.x + Math.cos(m.angle) * m.patrolR;
+    m.dy = m.y + Math.sin(m.angle * 0.6) * (m.patrolR * 0.5);
+  });
+
+  // Check encounter proximity (8% distance)
+  if (!mapState.inBattle) {
+    for (const m of mapState.monsters) {
+      if (!m.alive) continue;
+      const dist = Math.hypot(mapState.px-(m.dx||m.x), mapState.py-(m.dy||m.y));
+      if (dist < 8) { startMapEncounter(m); break; }
+    }
+  }
+
+  renderBattleMap();
+}
+
+function renderBattleMap() {
+  if (!mapState) return;
+  const { px, py, dir, monsters, otherPlayers, partyMembers, heroes, sp, maxSp } = mapState;
+  const hc = mapState.heroClass;
+
+  let html = '';
+
+  // Decorative path arrows (show direction)
+  // Other players first (behind player)
+  Object.entries(otherPlayers).forEach(([uname, p]) => {
+    const isParty = !!partyMembers[uname];
+    const rankBadge = getRankBadge(p.level||1);
+    const labelCls = isParty ? 'party-label' : '';
+    html += `<div class="map-entity" style="left:${p.x}%;top:${p.y}%;z-index:${Math.floor(p.y)};" 
+      ${!isParty ? `onclick="sendPvPChallenge('${uname}')"` : ''}>
+      <div class="map-entity-label ${labelCls}">${isParty?'🤝':''}${uname} ${rankBadge}</div>
+      <div style="transform:scale(0.55) scaleX(${p.dir||1});transform-origin:bottom center;image-rendering:pixelated;filter:${isParty?'hue-rotate(120deg)':'hue-rotate(200deg)'}">
+        ${getVillageCharSVG(p.heroClass||0,'idle')}
+      </div>
+      <div class="map-entity-shadow"></div>
+    </div>`;
+  });
+
+  // Monsters
+  monsters.forEach(m => {
+    if (!m.alive) return;
+    const mx = m.dx || m.x, my = m.dy || m.y;
+    const isBoss = m.isBoss;
+    const scale = isBoss ? 0.85 : 0.52;
+    const stats = ENEMY_STATS[m.type] || ENEMY_STATS.goblin;
+    const hpPct = m.hp != null ? m.hp/m.maxHp*100 : 100;
+    html += `<div class="map-entity" style="left:${mx}%;top:${my}%;z-index:${Math.floor(my)};" onclick="startMapEncounter(mapState.monsters.find(mm=>mm.id==='${m.id}'))">
+      ${isBoss ? '<div class="map-entity-label boss-label">👑 BOSS</div>' : ''}
+      <div class="map-monster-hp"><div class="map-monster-hp-fill" style="width:${hpPct}%"></div></div>
+      <div style="transform:scale(${scale});transform-origin:bottom center;image-rendering:pixelated;">
+        ${getEnemyHTML(m.type)}
+      </div>
+      <div class="map-entity-shadow"></div>
+    </div>`;
+  });
+
+  // My player (on top, z highest)
+  const walkCls = joystickActive ? (mapState.dir >= 0 ? 'walk-r' : 'walk-l') : 'idle';
+  html += `<div class="map-entity my-player" style="left:${px}%;top:${py}%;z-index:200;pointer-events:none;">
+    <div class="map-entity-label my-label">${player?.username||'나'} ${getRankBadge(player?.level||1)}</div>
+    <div style="transform:scale(0.62) scaleX(${dir});transform-origin:bottom center;image-rendering:pixelated;">
+      ${getVillageCharSVG(hc, walkCls)}
+    </div>
+    <div class="map-entity-shadow"></div>
+  </div>`;
+
+  // SP bars in map (top-right skill buttons)
+  [0,1,2].forEach(i => {
+    const bar = document.getElementById('mapSpBar'+i);
+    const btn = document.getElementById('mapSkillBtn'+i);
+    if (!bar || !btn || !mapState.heroes) return;
+    const spPct = Math.min(100, (sp[i]||0)/maxSp[i]*100);
+    bar.style.width = spPct+'%';
+    const ready = (sp[i]||0) >= maxSp[i] && heroes[i].hp > 0;
+    btn.className = 'skill-btn' + (ready?' ready':(heroes[i].hp<=0?' used':''));
+  });
+
+  document.getElementById('mapEntities').innerHTML = html;
+}
+
+function updateMapMonsterCount() {
+  if (!mapState) return;
+  const alive = mapState.monsters.filter(m => m.alive).length;
+  document.getElementById('mapAliveCount').textContent = alive;
+}
+
+// ── Encounter system ──
+function startMapEncounter(m) {
+  if (!mapState || mapState.inBattle || !m || !m.alive) return;
+  mapState.inBattle = true;
+  mapState.battleMonsterId = m.id;
+
+  // Flash effect
+  const flash = document.createElement('div');
+  flash.className = 'encounter-flash';
+  document.getElementById('battleMapScreen').appendChild(flash);
+  setTimeout(() => flash.remove(), 400);
+
+  // Init enemies for this encounter
+  const scaleMult = 1 + (mapState.stageId-1)*0.3 + m.wave*0.15;
+  const stats = ENEMY_STATS[m.type] || ENEMY_STATS.goblin;
+  const cm = player?.customMonsters?.find(c => c.id === m.type);
+  const enemy = {
+    type: m.type,
+    name: cm ? cm.name : (m.type==='goblin'?'고블린':m.type==='orc'?'오크':m.type==='dark_knight'?'어둠기사':m.isBoss?'😱 대마왕':'몬스터'),
+    hp: Math.floor(stats.maxHp * scaleMult),
+    maxHp: Math.floor(stats.maxHp * scaleMult),
+    atk: Math.floor(stats.atk * scaleMult),
+    def: Math.floor(stats.def * scaleMult),
+    expReward: stats.expReward,
+    goldReward: stats.goldReward,
+    isBoss: m.isBoss,
+    attackTimerVal: 0,
+    attackInterval: m.isBoss ? 1800 : 2000+Math.random()*500,
+  };
+  // Store hp on map monster for HP bar
+  m.hp = enemy.hp; m.maxHp = enemy.maxHp;
+
+  mapState.currentEnemy = enemy;
+  mapState.heroes = createHeroes(); // refresh heroes HP
+  mapState.sp = [0,0,0];
+  mapState.skillFiredThisTick = false;
+
+  // Show battle overlay on top of map
+  showMapBattleOverlay(enemy);
+  lastTick = Date.now();
+}
+
+function showMapBattleOverlay(enemy) {
+  let overlay = document.getElementById('mapBattleOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'mapBattleOverlay';
+    overlay.style.cssText = 'position:absolute;inset:0;z-index:50;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;';
+    document.getElementById('battleMapScreen').appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  renderMapBattleOverlay(enemy);
+}
+
+function renderMapBattleOverlay(enemy) {
+  const overlay = document.getElementById('mapBattleOverlay');
+  if (!overlay || !mapState) return;
+  const h = mapState.heroes;
+  const hpBars = h.map((hero,i) => `
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+      <div style="font-size:0.65rem;width:32px;color:rgba(240,232,200,0.7);">${['⚔️','🏹','🪄'][i]}</div>
+      <div style="flex:1;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;">
+        <div style="height:100%;background:#f04040;border-radius:4px;width:${Math.max(0,hero.hp/hero.maxHp*100)}%;transition:width 0.2s;"></div>
+      </div>
+      <div style="font-size:0.6rem;width:40px;text-align:right;color:rgba(240,232,200,0.5);">${Math.floor(hero.hp)}</div>
+    </div>`).join('');
+  const enemyHpPct = Math.max(0, enemy.hp/enemy.maxHp*100);
+  overlay.innerHTML = `
+    <div style="width:90%;max-width:340px;background:rgba(5,3,15,0.95);border:2px solid rgba(245,200,66,0.3);border-radius:14px;padding:16px;">
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:0.75rem;color:var(--gold);font-weight:900;margin-bottom:6px;">${enemy.name} ${enemy.isBoss?'👑':''}</div>
+        <div style="height:10px;background:rgba(255,0,0,0.2);border-radius:5px;margin:0 20px;">
+          <div style="height:100%;background:#f04040;border-radius:5px;width:${enemyHpPct}%;transition:width 0.3s;"></div>
+        </div>
+        <div style="font-size:0.6rem;color:rgba(240,232,200,0.4);margin-top:4px;">${Math.floor(enemy.hp)}/${enemy.maxHp}</div>
+        <div style="transform:scale(0.65);transform-origin:center;height:80px;display:flex;align-items:center;justify-content:center;">
+          ${getEnemyHTML(enemy.type)}
+        </div>
+      </div>
+      <div style="margin-bottom:10px;">${hpBars}</div>
+      <div style="text-align:center;font-size:0.65rem;color:rgba(240,232,200,0.3);">조이스틱 · 스킬 버튼으로 전투!</div>
+    </div>`;
+}
+
+// ── Map battle tick ──
+function mapBattleTick() {
+  if (!mapState || !mapState.inBattle || !mapState.currentEnemy) return;
+  const now = Date.now();
+  const dt = Math.min(now - lastTick, 500);
+  lastTick = now;
+  mapState.skillFiredThisTick = false;
+
+  const enemy = mapState.currentEnemy;
+  const heroes = mapState.heroes;
+  const sp = mapState.sp;
+
+  // Heroes attack enemy
+  heroes.forEach((hero, i) => {
+    if (hero.hp <= 0) return;
+    hero.attackTimerVal = (hero.attackTimerVal||0) + dt;
+    const interval = Math.max(1200 - ((player?.level||1)*10), 600);
+    if (hero.attackTimerVal >= interval) {
+      hero.attackTimerVal = 0;
+      const dmg = Math.max(1, Math.floor(hero.atk*(0.9+Math.random()*0.2) - enemy.def*0.5));
+      enemy.hp = Math.max(0, enemy.hp - dmg);
+      sp[i] = Math.min(mapState.maxSp[i], sp[i]+15);
+      // Update map monster HP
+      const mm = mapState.monsters.find(m => m.id === mapState.battleMonsterId);
+      if (mm) mm.hp = enemy.hp;
+    }
+  });
+
+  // Enemy attacks heroes
+  enemy.attackTimerVal = (enemy.attackTimerVal||0) + dt;
+  if (enemy.attackTimerVal >= enemy.attackInterval) {
+    enemy.attackTimerVal = 0;
+    const aliveHeroes = heroes.filter(h => h.hp > 0);
+    if (aliveHeroes.length) {
+      const target = aliveHeroes[Math.floor(Math.random()*aliveHeroes.length)];
+      const rawDmg = enemy.atk * (0.85+Math.random()*0.3);
+      const dmg = Math.max(1, Math.floor(rawDmg - Math.min(target.def, enemy.atk*0.95)*0.3));
+      target.hp = Math.max(0, target.hp - dmg);
+    }
+  }
+
+  // SP regen
+  mapState.sp = sp.map((s,i) => Math.min(mapState.maxSp[i], s + dt*0.02));
+
+  // Check result
+  const allHeroesDead = heroes.every(h => h.hp <= 0);
+  const enemyDead = enemy.hp <= 0;
+
+  if (allHeroesDead) {
+    endMapEncounter(false);
+  } else if (enemyDead) {
+    endMapEncounter(true);
+  } else {
+    renderMapBattleOverlay(enemy);
+  }
+}
+
+function handleMapSkillTap(i) {
+  if (!mapState?.inBattle) return;
+  if ((mapState.sp[i]||0) < mapState.maxSp[i]) return;
+  if (mapState.heroes[i].hp <= 0) return;
+  mapState.sp[i] = 0;
+  const hero = mapState.heroes[i];
+  const enemy = mapState.currentEnemy;
+  if (!enemy) return;
+  const mult = [3.0,2.5,2.8][i]||2.5;
+  const dmg = Math.floor(hero.atk * mult * (0.9+Math.random()*0.2));
+  enemy.hp = Math.max(0, enemy.hp - dmg);
+  const mm = mapState.monsters.find(m => m.id === mapState.battleMonsterId);
+  if (mm) mm.hp = enemy.hp;
+  if (enemy.hp <= 0) endMapEncounter(true);
+  else renderMapBattleOverlay(enemy);
+}
+
+function endMapEncounter(won) {
+  if (!mapState) return;
+  mapState.inBattle = false;
+  const overlay = document.getElementById('mapBattleOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  const mm = mapState.monsters.find(m => m.id === mapState.battleMonsterId);
+
+  if (won) {
+    // Give rewards
+    if (mm) {
+      const e = mapState.currentEnemy;
+      player.gold = (player.gold||0) + e.goldReward;
+      addExp(e.expReward);
+      mm.alive = false;
+      showNotif(`✅ 처치! +${e.goldReward}💰 +${e.expReward}EXP`);
+    }
+    document.getElementById('mapGold').textContent = Math.floor(player?.gold||0).toLocaleString();
+    updateMapMonsterCount();
+    saveGame();
+    updateHUD();
+    // All dead?
+    if (mapState.monsters.every(m => !m.alive)) {
+      setTimeout(() => mapStageClear(), 600);
+    }
+  } else {
+    // Defeat - respawn at start
+    showNotif('💀 전투 실패! 시작 지점으로...');
+    mapState.px = 5; mapState.py = 50;
+    mapState.heroes = createHeroes();
+    mapState.sp = [0,0,0];
+  }
+  mapState.battleMonsterId = null;
+  mapState.currentEnemy = null;
+}
+
+function mapStageClear() {
+  if (!mapState) return;
+  const stageId = mapState.stageId;
+  const stage = mapState.stage;
+  // Stage rewards
+  player.gold = (player.gold||0) + stage.goldReward;
+  addExp(stage.expReward);
+  if (!player.isAdmin && stageId >= (player.unlockedStage||1)) {
+    player.unlockedStage = stageId + 1;
+  }
+  // Weapon drop
+  if (Math.random() < 0.4) {
+    const grade = getDropGrade(stageId);
+    const available = ALL_WEAPONS.filter(w => w.grade === grade);
+    if (available.length) {
+      const drop = {...available[Math.floor(Math.random()*available.length)], enhance:0};
+      if (!player.weapons) player.weapons = [];
+      player.weapons.push(drop);
+      showNotif(`🎁 무기 획득: [${drop.name}]`);
+    }
+  }
+  saveGame(); updateHUD();
+  showWaveAnnounce(`🎉 스테이지 ${stageId} 클리어!`);
+  setTimeout(() => {
+    stopBattleMap();
+    renderStageGrid();
+    openPanel('stagePanel');
+  }, 2000);
+}
+
+// ── Map joystick (extends village joystick) ──
+function setupMapJoystick() {
+  if (mapJoystickSetup) return;
+  mapJoystickSetup = true;
+  const knob = document.getElementById('mapJoystickKnob');
+  const jEl = document.getElementById('mapJoystick');
+
+  function startJoy(cx, cy) { joystickActive = true; joystickOrigin = {x:cx, y:cy}; jEl.style.opacity='1'; }
+  function moveJoy(cx, cy) {
+    if (!joystickActive) return;
+    const dx=cx-joystickOrigin.x, dy=cy-joystickOrigin.y;
+    const dist=Math.sqrt(dx*dx+dy*dy), maxR=30;
+    const cd=Math.min(dist,maxR), angle=Math.atan2(dy,dx);
+    knob.style.transform=`translate(calc(-50% + ${Math.cos(angle)*cd}px), calc(-50% + ${Math.sin(angle)*cd}px))`;
+    joystickDir={x:dx/Math.max(dist,1), y:dy/Math.max(dist,1)};
+  }
+  function endJoy() { joystickActive=false; knob.style.transform='translate(-50%,-50%)'; joystickDir={x:0,y:0}; jEl.style.opacity='0.7'; }
+
+  const vs = document.getElementById('battleMapScreen');
+  vs.addEventListener('touchstart', e => {
+    if (e.target.closest('#mapQuitBtn')||e.target.closest('.skill-btn')||e.target.closest('.map-entity')||e.target.closest('#pvpChallengePopup')) return;
+    startJoy(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault();
+  }, {passive:false});
+  vs.addEventListener('touchmove', e => { if(!joystickActive)return; moveJoy(e.touches[0].clientX,e.touches[0].clientY); e.preventDefault(); }, {passive:false});
+  vs.addEventListener('touchend', () => endJoy(), {passive:false});
+  vs.addEventListener('mousedown', e => { if(e.target.closest('#mapQuitBtn')||e.target.closest('.skill-btn')||e.target.closest('.map-entity')||e.target.closest('#pvpChallengePopup'))return; startJoy(e.clientX,e.clientY); });
+  vs.addEventListener('mousemove', e => moveJoy(e.clientX,e.clientY));
+  vs.addEventListener('mouseup', endJoy);
+  vs.addEventListener('mouseleave', endJoy);
+}
+
+// ── PvP System ──
+function sendPvPChallenge(targetUsername) {
+  if (!mapState) return;
+  const p = mapState.otherPlayers[targetUsername];
+  if (!p) return;
+  // Can't challenge party members
+  if (mapState.partyMembers[targetUsername]) { showNotif('⛔ 파티원과는 PvP 불가!'); return; }
+  wsSend({ type: 'pvp_challenge', target: targetUsername });
+  showNotif(`⚔️ ${targetUsername}에게 PvP 도전장을 보냈어!`);
+}
+
+function handlePvPChallengeReceived(msg) {
+  pvpPendingChallenger = msg.from;
+  const popup = document.getElementById('pvpChallengePopup');
+  document.getElementById('pvpChallengerName').textContent = `⚔️ ${msg.from} (Lv.${msg.fromLevel||1})님이 PvP를 신청했습니다!`;
+  popup.classList.add('open');
+  // Auto decline after 15s
+  setTimeout(() => { if (pvpPendingChallenger === msg.from) declinePvP(); }, 15000);
+}
+
+function acceptPvP() {
+  if (!pvpPendingChallenger) return;
+  document.getElementById('pvpChallengePopup').classList.remove('open');
+  wsSend({ type: 'pvp_accept', challenger: pvpPendingChallenger });
+  pvpPendingChallenger = null;
+}
+
+function declinePvP() {
+  if (!pvpPendingChallenger) return;
+  wsSend({ type: 'pvp_decline', challenger: pvpPendingChallenger });
+  pvpPendingChallenger = null;
+  document.getElementById('pvpChallengePopup').classList.remove('open');
+}
+
+function startPvPBattle(opponentStats) {
+  if (!mapState) return;
+  mapState.inBattle = true;
+  mapState.pvpOpponent = opponentStats;
+
+  const oppAtk = Math.min(opponentStats.attack||10, 1e12);
+  const oppDef = Math.min(opponentStats.defense||5, 1e12);
+  const oppHp = Math.min(opponentStats.maxHp||100, 1e12);
+  const weaponBonus = opponentStats.equippedWeapon ? opponentStats.equippedWeapon.atk*(1+(opponentStats.equippedWeapon.enhance||0)*0.1) : 0;
+  const armorBonus = opponentStats.equippedArmor ? opponentStats.equippedArmor.def*(1+(opponentStats.equippedArmor.enhance||0)*0.1) : 0;
+
+  const pvpEnemy = {
+    type: 'pvp', name: `⚔️ ${opponentStats.username}`,
+    hp: Math.floor(oppHp + armorBonus*2),
+    maxHp: Math.floor(oppHp + armorBonus*2),
+    atk: Math.floor(oppAtk + weaponBonus),
+    def: Math.floor(oppDef + armorBonus),
+    expReward: 50, goldReward: 30,
+    isBoss: false, attackTimerVal: 0, attackInterval: 1500,
+  };
+  mapState.currentEnemy = pvpEnemy;
+  mapState.heroes = createHeroes();
+  mapState.sp = [0,0,0];
+  showMapBattleOverlay(pvpEnemy);
+  showNotif(`⚔️ ${opponentStats.username}와 PvP 시작!`);
+  lastTick = Date.now();
+}
+
+// Handle map WS messages
+function handleMapWsMsg(msg) {
+  if (!mapState) return;
+  if (msg.type === 'stage_player_move') {
+    if (mapState.otherPlayers[msg.username]) {
+      mapState.otherPlayers[msg.username].x = msg.x;
+      mapState.otherPlayers[msg.username].y = msg.y;
+    }
+  }
+  if (msg.type === 'stage_user_joined') {
+    mapState.otherPlayers[msg.username] = { x: msg.x||5, y: msg.y||50, heroClass: msg.heroClass||0, level: msg.level||1, dir:1 };
+    stageOtherUsers[msg.username] = true;
+  }
+  if (msg.type === 'stage_user_left') {
+    delete mapState.otherPlayers[msg.username];
+    delete stageOtherUsers[msg.username];
+  }
+  if (msg.type === 'pvp_challenge') { handlePvPChallengeReceived(msg); }
+  if (msg.type === 'pvp_start') {
+    showNotif(`⚔️ PvP 시작!`);
+    startPvPBattle(msg.opponentStats);
+  }
+  if (msg.type === 'pvp_declined') { showNotif(`❌ ${msg.from}이 PvP를 거절했어.`); }
+  if (msg.type === 'pvp_lost') {
+    showNotif(`😔 ${msg.winner}에게 PvP 패배!`);
+    endMapEncounter(false);
+  }
+}
+
 
 function createHeroes() {
   const MAX_STAT = 1e12; // 1조 이상은 cap
@@ -3086,6 +3822,7 @@ function returnToLobby() {
   document.getElementById('quitBtn').style.display = 'none';
   showSkillBtns(false);
   if (battleState?.autoTimer) clearInterval(battleState.autoTimer);
+  if (mapState) stopBattleMap();
   wsSend({ type: 'stage_leave' });
   stageOtherUsers = {};
   battleState = null;
@@ -3094,7 +3831,6 @@ function returnToLobby() {
   document.getElementById('bossHud').style.display = 'none';
   document.getElementById('heroesArea').innerHTML = '';
   document.getElementById('enemiesArea').innerHTML = '';
-  // ★ 전투 끝나면 마을로 순간이동
   enterVillage();
 }
 
@@ -4307,6 +5043,15 @@ function initStageEditor() {
   loadStageEdit();
 }
 
+function getMonsterOptions(selected) {
+  const base = ['goblin','orc','dark_knight'];
+  const baseNames = {goblin:'고블린', orc:'오크', dark_knight:'어둠기사'};
+  const customs = player?.customMonsters || [];
+  return `<option value="">없음</option>` +
+    base.map(t => `<option value="${t}" ${selected===t?'selected':''}>${baseNames[t]}</option>`).join('') +
+    customs.map(c => `<option value="${c.id}" ${selected===c.id?'selected':''}>[📷] ${c.name}</option>`).join('');
+}
+
 function loadStageEdit() {
   const id = parseInt(document.getElementById('stageEditSelect').value);
   const s = STAGES.find(st => st.id === id);
@@ -4316,15 +5061,106 @@ function loadStageEdit() {
   document.getElementById('stageEditGold').value = s.goldReward;
   document.getElementById('stageEditExp').value = s.expReward;
   document.getElementById('stageEditBoss').value = s.boss || '';
-  // 몬스터 슬롯
+  // 몬스터 슬롯 (커스텀 몬스터 포함)
   const slots = document.getElementById('stageMonsterSlots');
-  const monsterTypes = ['goblin','orc','dark_knight'];
   const currentMonsters = [...s.monsters, '', ''].slice(0, 3);
   slots.innerHTML = currentMonsters.map((m, i) => `
     <select id="stageMonster${i}" class="admin-input" style="padding:6px;flex:1;min-width:90px;">
-      <option value="">없음</option>
-      ${monsterTypes.map(t => `<option value="${t}" ${m===t?'selected':''}>${t==='goblin'?'고블린':t==='orc'?'오크':'어둠기사'}</option>`).join('')}
+      ${getMonsterOptions(m)}
     </select>`).join('');
+}
+
+async function addNewStage() {
+  const name = document.getElementById('newStageName').value.trim();
+  if (!name) { 
+    const r = document.getElementById('newStageResult');
+    r.textContent = '❌ 스테이지 이름을 입력하세요.'; r.style.color='#f08080'; return;
+  }
+  const monsters = [0,1,2].map(i => document.getElementById('newStageMonster'+i)?.value).filter(Boolean);
+  if (!monsters.length) monsters.push('goblin');
+
+  // 새 ID는 현재 최대 ID + 1
+  const newId = Math.max(...STAGES.map(s => s.id)) + 1;
+  const newStage = {
+    id: newId,
+    name,
+    waves: parseInt(document.getElementById('newStageWaves').value) || 3,
+    monsters,
+    boss: document.getElementById('newStageBoss').value || null,
+    goldReward: parseInt(document.getElementById('newStageGold').value) || 500,
+    expReward: parseInt(document.getElementById('newStageExp').value) || 300,
+    isCustom: true
+  };
+
+  // 로컬 STAGES에 추가
+  STAGES.push(newStage);
+
+  // 서버에 저장 (stageOverrides에 new_ 접두사로 저장)
+  const stageOverrides = {};
+  try {
+    const r = await fetch(SERVER_URL+'/api/config');
+    const d = await r.json();
+    Object.assign(stageOverrides, d.config?.stageOverrides || {});
+  } catch(e) {}
+  stageOverrides['new_'+newId] = newStage;
+
+  const res = await fetch(SERVER_URL+'/api/admin/save-config', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ adminUser: player.username, adminPass: player.password, type:'stage', data: stageOverrides })
+  });
+  const data = await res.json();
+  const r = document.getElementById('newStageResult');
+  if (data.ok) {
+    r.textContent = `✅ 스테이지 ${newId}: "${name}" 추가됨!`;
+    r.style.color = '#60d060';
+    // 입력 초기화
+    document.getElementById('newStageName').value = '';
+    // 선택 드롭다운 갱신
+    initStageEditor();
+    // 월드맵 갱신
+    renderStageGrid();
+    showNotif(`🗺️ 새 스테이지 "${name}" 추가됨!`);
+  } else {
+    r.textContent = '❌ ' + (data.msg || '저장 실패');
+    r.style.color = '#f08080';
+  }
+}
+
+async function deleteStage() {
+  const id = parseInt(document.getElementById('stageEditSelect').value);
+  const stage = STAGES.find(s => s.id === id);
+  if (!stage) return;
+  // 기본 20개 스테이지는 삭제 불가
+  if (id <= 20 && !stage.isCustom) {
+    showNotif('⛔ 기본 스테이지(1~20)는 삭제할 수 없습니다.');
+    return;
+  }
+  if (!confirm(`스테이지 ${id}: "${stage.name}"을 삭제합니까?`)) return;
+
+  // 로컬에서 제거
+  const idx = STAGES.findIndex(s => s.id === id);
+  if (idx !== -1) STAGES.splice(idx, 1);
+
+  // 서버에서 제거
+  const stageOverrides = {};
+  try {
+    const r = await fetch(SERVER_URL+'/api/config');
+    const d = await r.json();
+    Object.assign(stageOverrides, d.config?.stageOverrides || {});
+  } catch(e) {}
+  delete stageOverrides[id];
+  delete stageOverrides['new_'+id];
+
+  const res = await fetch(SERVER_URL+'/api/admin/save-config', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ adminUser: player.username, adminPass: player.password, type:'stage', data: stageOverrides })
+  });
+  const data = await res.json();
+  if (data.ok) {
+    showNotif(`🗑️ 스테이지 "${stage.name}" 삭제됨`);
+    initStageEditor();
+    renderStageGrid();
+  }
 }
 
 async function saveStageEdit() {
