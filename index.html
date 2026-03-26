@@ -102,49 +102,276 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
 .login-err { color:#ff7070; font-size:0.78rem; margin-bottom:10px; text-align:center; min-height:20px; font-weight:500; }
 
 /* ====== MAIN GAME ====== */
-#gameScreen { position:fixed; inset:0; display:none; flex-direction:column; }
+#gameScreen { position:fixed; inset:0; display:none; }
 
-/* ====== TOP HUD ====== */
-#topHud {
-  position:absolute; top:0; left:0; right:0; height:84px; z-index:50;
-  background:linear-gradient(180deg,rgba(5,3,14,0.98) 0%,rgba(5,3,14,0.5) 80%,transparent 100%);
-  display:flex; align-items:flex-start; padding:10px 12px 0; gap:6px;
+/* =====================================================
+   GENSHIN-STYLE HUD (전체 화면 오버레이)
+   ===================================================== */
+#gameHud {
+  position:fixed; inset:0; z-index:50; pointer-events:none;
+  display:none;
 }
-.hero-hud {
-  display:flex; flex-direction:column; gap:4px;
-  background:linear-gradient(160deg,rgba(15,10,28,0.92),rgba(8,5,18,0.95));
-  border:1px solid rgba(245,200,66,0.2); border-radius:10px;
-  padding:7px 10px; min-width:126px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+#gameHud.active { display:block; }
+
+/* 좌상단: 캐릭터 포트레이트 + 스탯 */
+#hudTopLeft {
+  position:absolute; top:14px; left:14px;
+  display:flex; align-items:center; gap:10px; pointer-events:auto;
 }
-.hero-hud-name { font-size:0.68rem; color:var(--gold); font-weight:800; letter-spacing:0.3px; }
-.bar-row { display:flex; align-items:center; gap:5px; }
-.bar-label { font-size:0.58rem; color:var(--text-dim); width:14px; font-weight:700; }
-.bar-bg { flex:1; height:7px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; }
-.bar-fill { height:100%; border-radius:4px; transition:width 0.35s ease; }
-.hp-fill { background:linear-gradient(90deg,#c02020,#ff5050); box-shadow:0 0 4px rgba(255,80,80,0.4); }
-.sp-fill { background:linear-gradient(90deg,#1858d0,#4ad0ff); box-shadow:0 0 4px rgba(74,208,255,0.4); }
-.bar-val { font-size:0.56rem; color:var(--text-dim); width:38px; text-align:right; }
-
-/* Boss HP */
-#bossHud {
-  position:absolute; top:10px; right:12px; z-index:50;
-  background:linear-gradient(160deg,rgba(20,5,5,0.95),rgba(10,3,3,0.97));
-  border:1px solid rgba(220,50,50,0.45); border-radius:10px;
-  padding:8px 14px; min-width:155px; display:none;
-  box-shadow:0 0 20px rgba(200,0,0,0.2), 0 4px 12px rgba(0,0,0,0.5);
+#hudPortrait {
+  width:52px; height:52px; border-radius:50%;
+  background:linear-gradient(135deg,#1a0e38,#2a1858);
+  border:2px solid var(--gold); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+  box-shadow:0 0 0 2px rgba(0,0,0,0.5), 0 0 16px rgba(245,200,66,0.3);
+  cursor:pointer; overflow:hidden;
 }
-.boss-name { font-size:0.72rem; color:#ff5050; font-weight:800; margin-bottom:5px; text-align:center; letter-spacing:0.5px; }
-.boss-bar-bg { height:10px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:hidden; }
-.boss-bar-fill { height:100%; background:linear-gradient(90deg,#700000,#d02020,#ff5040); border-radius:5px; transition:width 0.35s ease; box-shadow:0 0 6px rgba(255,50,50,0.4); }
+#hudPortraitSvg { width:100%; height:100%; }
+#hudBars {
+  display:flex; flex-direction:column; gap:5px; min-width:120px;
+}
+#hudPlayerName {
+  font-size:0.72rem; font-weight:800; color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  display:flex; align-items:center; gap:5px;
+}
+.hud-bar-wrap { display:flex; align-items:center; gap:5px; }
+.hud-bar-icon { font-size:0.62rem; width:12px; text-align:center; }
+.hud-bar-bg {
+  flex:1; height:6px; border-radius:3px;
+  background:rgba(0,0,0,0.5); overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08);
+}
+.hud-bar-fill { height:100%; border-radius:3px; transition:width 0.3s; }
+#hudHpFill { background:linear-gradient(90deg,#c81818,#ff4848); box-shadow:0 0 4px rgba(255,80,80,0.5); }
+#hudMpFill { background:linear-gradient(90deg,#1848c8,#40a0ff); box-shadow:0 0 4px rgba(64,160,255,0.5); }
+#hudExpFill { background:linear-gradient(90deg,#a86000,#f0c840); box-shadow:0 0 4px rgba(240,200,64,0.4); }
+.hud-bar-val { font-size:0.55rem; color:rgba(255,255,255,0.7); min-width:34px; text-align:right; font-weight:600; }
 
+/* 우상단: 미니맵 + 메뉴버튼 */
+#hudTopRight {
+  position:absolute; top:14px; right:14px;
+  display:flex; flex-direction:column; align-items:flex-end; gap:8px; pointer-events:auto;
+}
+#hudMinimap {
+  width:90px; height:90px; border-radius:50%;
+  background:rgba(10,8,20,0.85);
+  border:2px solid rgba(255,255,255,0.2);
+  box-shadow:0 0 0 1px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.5);
+  overflow:hidden; position:relative; cursor:pointer;
+}
+#hudMinimapCanvas { width:100%; height:100%; }
+#hudMinimapPlayer {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:8px; height:8px; border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 0 6px var(--gold);
+  z-index:2;
+  transition:transform 0.1s;
+}
+#hudMinimapLabel {
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  font-size:0.48rem; color:rgba(255,255,255,0.6); white-space:nowrap; z-index:3;
+}
+#hudMenuBtn {
+  width:36px; height:36px; border-radius:50%;
+  background:rgba(10,8,20,0.85); border:1px solid rgba(255,255,255,0.2);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1rem;
+  box-shadow:0 2px 8px rgba(0,0,0,0.5);
+  transition:all 0.15s;
+}
+#hudMenuBtn:active { transform:scale(0.9); }
 
-/* ====== BATTLE AREA - PIXEL ART ====== */
+/* 우하단: 스킬 버튼 (Genshin arc layout) */
+#hudSkills {
+  position:absolute; bottom:20px; right:16px;
+  pointer-events:auto;
+  width:160px; height:160px;
+}
+.hskill {
+  position:absolute; border-radius:50%; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  transition:transform 0.1s, box-shadow 0.15s;
+  overflow:hidden;
+}
+.hskill:active { transform:scale(0.88); }
+/* Main attack (bottom-right, big) */
+#hskillAtk {
+  width:72px; height:72px; right:0; bottom:0;
+  background:radial-gradient(circle at 35% 30%, #e05030, #901808);
+  border:2px solid rgba(255,120,80,0.6);
+  box-shadow:0 0 20px rgba(200,60,20,0.5), inset 0 2px 0 rgba(255,200,180,0.2);
+  font-size:1.6rem;
+}
+/* Skill 1 (top-right, medium) */
+#hskill1 {
+  width:54px; height:54px; right:6px; bottom:80px;
+  background:radial-gradient(circle at 35% 30%, #2060d0, #081848);
+  border:2px solid rgba(80,160,255,0.5);
+  box-shadow:0 0 14px rgba(40,100,220,0.4), inset 0 2px 0 rgba(180,220,255,0.2);
+  font-size:1.2rem;
+}
+/* Skill 2 (left of atk, medium) */
+#hskill2 {
+  width:54px; height:54px; right:80px; bottom:8px;
+  background:radial-gradient(circle at 35% 30%, #6020a0, #200840);
+  border:2px solid rgba(160,80,255,0.5);
+  box-shadow:0 0 14px rgba(120,40,200,0.4), inset 0 2px 0 rgba(220,180,255,0.2);
+  font-size:1.2rem;
+}
+/* Skill 3 (diagonal, small) */
+#hskill3 {
+  width:44px; height:44px; right:72px; bottom:70px;
+  background:radial-gradient(circle at 35% 30%, #208060, #082820);
+  border:2px solid rgba(80,200,140,0.5);
+  box-shadow:0 0 12px rgba(40,160,100,0.4), inset 0 2px 0 rgba(180,255,220,0.2);
+  font-size:1rem;
+}
+.hskill-label { font-size:0.42rem; color:rgba(255,255,255,0.7); font-weight:700; }
+.hskill-ring {
+  position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(rgba(255,255,255,0.4) 0%, transparent 0%);
+  pointer-events:none;
+  transition:background 0.1s;
+}
+.hskill.ready .hskill-ring { background:conic-gradient(var(--gold) 100%, transparent 100%); }
+.hskill.used { opacity:0.5; }
+/* SP indicator on skill */
+.hskill-sp {
+  position:absolute; bottom:2px; left:2px; right:2px; height:2px; border-radius:1px;
+  background:rgba(255,255,255,0.1);
+  overflow:hidden;
+}
+.hskill-sp-fill { height:100%; background:#4ad0ff; transition:width 0.2s; }
+
+/* 좌하단: 조이스틱 */
+#hudJoystick {
+  position:absolute; bottom:20px; left:20px;
+  pointer-events:auto;
+}
+.joystick-base {
+  width:110px; height:110px; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, rgba(255,255,255,0.08), rgba(0,0,0,0.6));
+  border:1.5px solid rgba(255,255,255,0.15);
+  box-shadow:0 4px 24px rgba(0,0,0,0.6), inset 0 2px 6px rgba(255,255,255,0.04);
+  position:relative;
+}
+.joystick-knob {
+  position:absolute; width:44px; height:44px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), rgba(160,160,200,0.5));
+  border:1.5px solid rgba(255,255,255,0.8);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  box-shadow:0 4px 16px rgba(0,0,0,0.7), inset 0 -2px 4px rgba(0,0,0,0.3);
+}
+
+/* 하단 중앙: 상호작용 버튼 (건물 근처에서 표시) */
+#hudInteract {
+  position:absolute; bottom:24px; left:50%; transform:translateX(-50%);
+  pointer-events:auto; display:none;
+}
+#hudInteractBtn {
+  padding:10px 24px; border-radius:24px;
+  background:linear-gradient(135deg,rgba(20,14,40,0.95),rgba(12,8,26,0.97));
+  border:1px solid rgba(245,200,66,0.5); color:var(--gold); font-weight:800;
+  font-size:0.82rem; cursor:pointer; touch-action:manipulation;
+  box-shadow:0 4px 16px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,200,66,0.2);
+  display:flex; align-items:center; gap:8px;
+  animation:interact-bounce 1.2s ease-in-out infinite;
+}
+@keyframes interact-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+.interact-key {
+  width:20px; height:20px; border-radius:4px;
+  background:rgba(245,200,66,0.2); border:1px solid rgba(245,200,66,0.4);
+  display:flex; align-items:center; justify-content:center; font-size:0.7rem;
+}
+
+/* 상단 중앙: 지역 이름 표시 */
+#hudAreaName {
+  position:absolute; top:16px; left:50%; transform:translateX(-50%);
+  pointer-events:none; text-align:center;
+}
+#hudAreaNameText {
+  font-family:'Black Han Sans',sans-serif; font-size:0.9rem;
+  color:rgba(255,255,255,0.85); text-shadow:0 2px 8px rgba(0,0,0,0.8);
+  letter-spacing:2px;
+  animation:area-fade 4s ease-out forwards;
+}
+@keyframes area-fade { 0%{opacity:0;transform:translateY(-4px)} 15%{opacity:1;transform:translateY(0)} 70%{opacity:1} 100%{opacity:0} }
+
+/* 적 HP바 (전투 중) */
+#hudEnemyHp {
+  position:absolute; top:80px; left:50%; transform:translateX(-50%);
+  min-width:200px; pointer-events:none; display:none;
+}
+.enemy-hp-name {
+  font-size:0.7rem; color:#ff8080; font-weight:800; text-align:center;
+  margin-bottom:4px; text-shadow:0 0 8px rgba(255,80,80,0.6);
+}
+.enemy-hp-bg {
+  height:8px; background:rgba(0,0,0,0.5); border-radius:4px;
+  border:1px solid rgba(255,80,80,0.3); overflow:hidden;
+}
+.enemy-hp-fill {
+  height:100%; background:linear-gradient(90deg,#800,#e02020,#ff4040);
+  border-radius:4px; transition:width 0.3s;
+  box-shadow:0 0 6px rgba(255,40,40,0.5);
+}
+
+/* 골드/알림 표시 */
+#hudGold {
+  position:absolute; top:70px; left:14px;
+  pointer-events:none;
+  font-size:0.75rem; color:var(--gold); font-weight:800;
+  text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  display:flex; align-items:center; gap:4px;
+}
+
+/* =====================================================
+   UNIFIED WORLD MAP
+   ===================================================== */
+#worldScreen {
+  position:absolute; inset:0; overflow:hidden;
+  background:linear-gradient(180deg,#a8d8f0 0%,#c8eafc 20%,#e8f5fe 35%,#b8d890 42%,#7cbd5a 52%,#5aaa38 100%);
+}
+#worldScreen.active { display:block; }
+#worldCamera {
+  position:absolute; width:300%; height:300%;
+  /* camera pan handled by JS transform */
+  transition:transform 0.05s linear;
+}
+/* Zone labels */
+.zone-label {
+  position:absolute; font-size:0.6rem; color:rgba(255,255,255,0.6);
+  font-weight:700; letter-spacing:2px; text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  pointer-events:none; text-align:center;
+}
+/* Dungeon gate */
+#dungeonGate {
+  position:absolute; cursor:pointer; z-index:8;
+  filter:drop-shadow(0 8px 20px rgba(100,0,180,0.5));
+  animation:gate-pulse 2s ease-in-out infinite;
+}
+@keyframes gate-pulse { 0%,100%{filter:drop-shadow(0 8px 20px rgba(100,0,180,0.4))} 50%{filter:drop-shadow(0 8px 28px rgba(140,40,255,0.7))} }
+
+/* Path between village and dungeon */
+#worldPath {
+  position:absolute; pointer-events:none;
+  background:linear-gradient(180deg,#b89050,#a07840);
+  opacity:0.7; border-radius:20px;
+}
+
+/* =====================================================
+   BATTLE AREA (전투 화면 - 기존 유지 + 개선)
+   ===================================================== */
 #battleArea {
   position:absolute; inset:0; overflow:hidden;
-  background: linear-gradient(180deg, #04020e 0%, #08041c 25%, #0c0628 50%, #08041c 75%, #04020e 100%);
-  image-rendering: pixelated;
+  background:linear-gradient(180deg,#04020e 0%,#08041c 25%,#0c0628 50%,#08041c 75%,#04020e 100%);
+  display:none;
 }
+#battleArea.active { display:block; }
 /* Stars layer */
 .battle-bg-layer {
   position:absolute; inset:0; pointer-events:none;
@@ -514,34 +741,98 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
 /* ====== VILLAGE ====== */
 #villageScreen {
   position:absolute; inset:0; display:none; overflow:hidden; z-index:5;
-  background: linear-gradient(180deg, #2a7ad0 0%, #4ab0f8 30%, #60d060 55%, #3a9030 100%);
-  image-rendering: pixelated;
+  background:linear-gradient(180deg,#c8e8f8 0%,#ddf0fc 20%,#e8f5fe 35%,#b8d890 45%,#7cbd5a 55%,#5aaa38 100%);
 }
 #villageScreen.active { display:block; }
 
-/* Pixel tile floor */
-.village-ground {
-  position:absolute; bottom:0; left:0; right:0; height:45%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%233a9030'/%3E%3Crect width='16' height='1' fill='%2348b038'/%3E%3Crect x='0' y='0' width='1' height='16' fill='%2348b038'/%3E%3Crect x='7' y='3' width='2' height='1' fill='%2358c840'/%3E%3Crect x='3' y='10' width='2' height='1' fill='%2358c840'/%3E%3Crect x='12' y='7' width='1' height='2' fill='%2358c840'/%3E%3C/svg%3E");
-  background-size: 32px 32px;
-  border-top: 3px solid #2a6020;
+/* ── Sky & mist layers ── */
+#vSky {
+  position:absolute; top:0; left:0; right:0; height:50%;
+  background:linear-gradient(180deg,#a8d8f0 0%,#c8eafc 30%,#dff4fe 60%,rgba(220,245,250,0) 100%);
+  pointer-events:none;
 }
-/* Path (dirt road) */
-.village-path {
-  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-  width:80px; height:45%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23a07840'/%3E%3Crect x='2' y='4' width='3' height='1' fill='%23b08850'/%3E%3Crect x='10' y='10' width='2' height='1' fill='%23b08850'/%3E%3Crect x='6' y='8' width='2' height='1' fill='%23988038'/%3E%3C/svg%3E");
-  background-size: 32px 32px;
+/* Distant mountains */
+#vMountains {
+  position:absolute; top:12%; left:0; right:0; height:36%;
+  pointer-events:none; overflow:hidden;
 }
-/* Sky clouds */
-.village-cloud {
-  position:absolute; image-rendering:pixelated; pointer-events:none; opacity:0.9;
-  animation: cloud-drift 20s linear infinite;
+/* Rolling hills mid-ground */
+#vHills {
+  position:absolute; top:28%; left:0; right:0; height:30%;
+  pointer-events:none;
 }
-@keyframes cloud-drift { from{transform:translateX(-120px)} to{transform:translateX(110vw)} }
+/* Ground plane - perspective */
+#vGround {
+  position:absolute; bottom:0; left:-10%; right:-10%;
+  height:60%; pointer-events:none;
+  transform:perspective(600px) rotateX(22deg);
+  transform-origin:bottom center;
+}
+/* Grass tile grid */
+.vtile {
+  position:absolute; width:52px; height:52px;
+  transform-style:preserve-3d;
+}
+.vtile-top {
+  position:absolute; inset:0;
+  border-radius:3px;
+}
+.vtile-front {
+  position:absolute; left:2px; right:2px; height:10px;
+  bottom:-9px; border-radius:0 0 3px 3px;
+}
+/* Building wrapper */
+.vbuild {
+  position:absolute; pointer-events:auto; cursor:pointer;
+  transform:perspective(400px) rotateX(-8deg);
+  transform-origin:bottom center;
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,0.35));
+  transition:filter 0.15s;
+}
+.vbuild:hover { filter:drop-shadow(0 10px 24px rgba(0,0,0,0.5)) brightness(1.1); }
+.vbuild-label {
+  position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.65); color:#fff; font-size:0.62rem; font-weight:700;
+  padding:3px 8px; border-radius:6px; white-space:nowrap;
+  border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(4px);
+}
+/* Ambient fog overlay */
+#vFog {
+  position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(200,230,250,0.15) 70%, rgba(200,230,250,0.35) 100%);
+}
+/* Flowers / grass tufts */
+.vflower {
+  position:absolute; font-size:0.9rem; pointer-events:none;
+  animation:vflower-sway 3s ease-in-out infinite;
+  transform-origin:bottom center;
+}
+@keyframes vflower-sway {
+  0%,100%{transform:rotate(-4deg) scale(1)}
+  50%{transform:rotate(4deg) scale(1.05)}
+}
+/* Stream/river */
+#vStream {
+  position:absolute; pointer-events:none;
+  background:linear-gradient(180deg,#5ab0e0,#7ad0f8,#5ab0e0);
+  opacity:0.75; border-radius:12px;
+  animation:stream-shimmer 2s ease-in-out infinite;
+}
+@keyframes stream-shimmer {
+  0%,100%{opacity:0.7} 50%{opacity:0.9}
+}
+/* Trees */
+.vtree {
+  position:absolute; pointer-events:none;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+/* Character shadow on new ground */
+.vchar-shadow {
+  position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+  width:28px; height:8px; border-radius:50%;
+  background:rgba(0,0,0,0.28); filter:blur(3px);
+}
 
-/* Buildings */
-.village-building { position:absolute; image-rendering:pixelated; pointer-events:none; }
 
 /* Player character in village */
 .village-char {
@@ -869,6 +1160,30 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
   80%{opacity:1}
   100%{opacity:0;transform:translate(-50%,-60%)}
 }
+
+/* HUD menu button */
+.hud-menu-btn {
+  padding:8px 6px; border-radius:8px; border:none; cursor:pointer;
+  background:rgba(255,255,255,0.06); color:var(--text); font-size:0.7rem;
+  font-weight:700; font-family:inherit; touch-action:manipulation;
+  transition:background 0.15s;
+}
+.hud-menu-btn:active { background:rgba(245,200,66,0.15); }
+
+/* Legacy map HUD compat */
+#topHud { display:none; }
+#bottomBar { display:none; }
+#skillBtns { display:none !important; }
+#mapSkillBtns { position:absolute;bottom:90px;right:8px;z-index:20;display:flex;flex-direction:column;gap:6px; }
+#mapHud { position:absolute;top:8px;left:8px;z-index:20;display:flex;gap:6px; }
+.map-stat { background:rgba(0,0,0,0.5);border-radius:6px;padding:3px 8px;font-size:0.68rem;color:#fff;border:1px solid rgba(255,255,255,0.12); }
+#mapQuitBtn { position:absolute;top:8px;right:8px;z-index:20;padding:6px 12px;background:rgba(80,10,10,0.9);border:1px solid rgba(200,50,50,0.4);border-radius:8px;color:#ff8080;font-size:0.7rem;cursor:pointer;touch-action:manipulation; }
+#mapMonsterCount { position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,0,0,0.6);border-radius:8px;padding:4px 10px;font-size:0.7rem;color:#ffb0b0;border:1px solid rgba(200,50,50,0.3); }
+#waveIndicator { position:absolute;top:52px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,0,0,0.5);border-radius:6px;padding:3px 10px;font-size:0.65rem;color:rgba(240,232,200,0.7); }
+#bossHud { position:absolute;top:82px;left:50%;transform:translateX(-50%);z-index:52;min-width:180px;display:none;background:linear-gradient(160deg,rgba(20,5,5,0.95),rgba(10,3,3,0.97));border:1px solid rgba(220,50,50,0.45);border-radius:10px;padding:8px 14px;box-shadow:0 0 20px rgba(200,0,0,0.2); }
+.boss-name{font-size:0.72rem;color:#ff5050;font-weight:800;margin-bottom:5px;text-align:center;}
+.boss-bar-bg{height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden;}
+.boss-bar-fill{height:100%;background:linear-gradient(90deg,#700000,#d02020,#ff5040);border-radius:5px;transition:width 0.35s ease;}
 
 /* World Map Stage Grid */
 .world-map-grid {
@@ -1284,7 +1599,83 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
 
 <!-- MAIN GAME SCREEN -->
 <div id="gameScreen">
-  <!-- BATTLE AREA -->
+
+  <!-- ══════════════════════════════════════════
+       통합 월드맵 (마을 + 던전 입구)
+       ══════════════════════════════════════════ -->
+  <div id="worldScreen">
+    <!-- Sky & environment layers (filled by JS) -->
+    <div id="vSky"></div>
+    <div id="vMountains"></div>
+    <div id="vHills"></div>
+    <div id="vStream" style="position:absolute;bottom:52%;left:68%;width:28px;height:22%;transform:rotate(10deg);background:linear-gradient(180deg,#5ab0e0,#7ad0f8);opacity:0.7;border-radius:12px;"></div>
+    <div id="vGround"></div>
+    <div id="vFog"></div>
+
+    <!-- Dungeon gate (right side of world) -->
+    <div id="dungeonGate" style="position:absolute;right:8%;bottom:55%;">
+      <svg viewBox="0 0 64 80" width="96" height="120" xmlns="http://www.w3.org/2000/svg">
+        <!-- Gate frame -->
+        <rect x="8" y="10" width="48" height="70" fill="#1a0830"/>
+        <rect x="6" y="8" width="52" height="6" fill="#2a1050" rx="2"/>
+        <rect x="6" y="8" width="4" height="70" fill="#200840"/>
+        <rect x="54" y="8" width="4" height="70" fill="#200840"/>
+        <!-- Arch top -->
+        <ellipse cx="32" cy="28" rx="20" ry="22" fill="#280a50"/>
+        <ellipse cx="32" cy="30" rx="16" ry="18" fill="#0a0018"/>
+        <!-- Portal inner glow -->
+        <ellipse cx="32" cy="32" rx="14" ry="16" fill="#4000a0" opacity="0.7"/>
+        <ellipse cx="32" cy="32" rx="10" ry="12" fill="#7020d0" opacity="0.6"/>
+        <ellipse cx="32" cy="32" rx="6" ry="8" fill="#a040ff" opacity="0.5"/>
+        <!-- Gate bars -->
+        <rect x="18" y="42" width="3" height="36" fill="#302040"/>
+        <rect x="26" y="42" width="3" height="36" fill="#302040"/>
+        <rect x="34" y="42" width="3" height="36" fill="#302040"/>
+        <rect x="42" y="42" width="3" height="36" fill="#302040"/>
+        <rect x="14" y="52" width="36" height="3" fill="#302040"/>
+        <rect x="14" y="62" width="36" height="3" fill="#302040"/>
+        <!-- Rune symbols -->
+        <text x="32" y="22" text-anchor="middle" font-size="8" fill="#a040ff" opacity="0.8">⚡</text>
+        <!-- Skull decorations -->
+        <circle cx="10" cy="14" r="4" fill="#302038"/>
+        <circle cx="54" cy="14" r="4" fill="#302038"/>
+        <text x="10" y="17" text-anchor="middle" font-size="6" fill="#8040b0">💀</text>
+        <text x="54" y="17" text-anchor="middle" font-size="6" fill="#8040b0">💀</text>
+      </svg>
+      <div class="zone-label" style="bottom:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#c080ff;">⚠️ 던전 입구</div>
+    </div>
+
+    <!-- Village buildings layer -->
+    <div id="villageObjects"></div>
+    <!-- Deco layer (flowers, trees) -->
+    <div id="villageDecos"></div>
+
+    <!-- Other players -->
+    <div id="villageOtherPlayers"></div>
+
+    <!-- NPC Merchant -->
+    <div id="villageNpc" class="village-npc" style="display:none;position:absolute;bottom:50%;left:45%;z-index:12;" onclick="openGemShop()">
+      <div class="village-npc-bubble">✨ 희귀 상인!</div>
+      <svg viewBox="0 0 16 22" width="48" height="66" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="0" width="10" height="2" fill="#8020c0"/><rect x="2" y="1" width="12" height="3" fill="#6010a0"/><rect x="5" y="0" width="6" height="2" fill="#c040ff"/>
+        <rect x="4" y="3" width="8" height="6" fill="#e0c090"/><rect x="5" y="5" width="2" height="1" fill="#402010"/><rect x="9" y="5" width="2" height="1" fill="#402010"/>
+        <rect x="4" y="8" width="8" height="2" fill="#e0e0e0"/><rect x="3" y="10" width="10" height="9" fill="#6010a0"/>
+        <rect x="4" y="12" width="8" height="1" fill="#e0c040"/><rect x="0" y="11" width="4" height="6" fill="#a07030"/>
+        <rect x="4" y="19" width="3" height="3" fill="#401080"/><rect x="9" y="19" width="3" height="3" fill="#401080"/>
+      </svg>
+    </div>
+
+    <!-- My character -->
+    <div id="villageMyChar" class="village-char" style="bottom:46%;left:46%;z-index:11;">
+      <div class="vchar-shadow"></div>
+      <div class="village-char-label" id="villageMyLabel">나</div>
+      <div id="villageMyCharSvg"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       전투 화면 (배틀 아레나)
+       ══════════════════════════════════════════ -->
   <div id="battleArea">
     <div class="battle-bg-layer"></div>
     <div class="pixel-moon"></div>
@@ -1306,42 +1697,31 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
       <p>영웅들이 쓰러졌습니다...</p>
       <button class="login-btn" style="margin-top:16px;width:auto;padding:10px 30px;background:linear-gradient(135deg,#a02020,#e03030);box-shadow:none;" onclick="returnToLobby()">돌아가기</button>
     </div>
+    <!-- Battle quit -->
+    <button id="quitBtn" onclick="returnToLobby()">🚪 나가기</button>
+    <!-- Boss HUD -->
+    <div id="bossHud">
+      <div class="boss-name" id="bossHudName">보스</div>
+      <div class="boss-bar-bg"><div class="boss-bar-fill" id="bossBarFill" style="width:100%"></div></div>
+    </div>
+    <!-- Skill buttons (battle) -->
+    <div id="skillBtns"></div>
   </div>
 
-  <!-- BATTLE MAP SCREEN (TOP-DOWN) -->
+  <!-- ══════════════════════════════════════════
+       배틀맵 (탑다운 던전 탐험)
+       ══════════════════════════════════════════ -->
   <div id="battleMapScreen">
     <div class="bmap-bg" id="bmapBg"></div>
-    <!-- Decorations (trees, rocks etc.) -->
     <div id="bmapDecos"></div>
-    <!-- All entities: monsters + players -->
     <div id="mapEntities"></div>
-
-    <!-- HUD top-left -->
-    <div id="mapHud">
-      <div class="map-stat">🗺️ <span id="mapStageName"></span></div>
-      <div class="map-stat">💰 <span id="mapGold">0</span></div>
-      <div class="map-stat"><span id="mapRankBadge"></span></div>
-    </div>
-    <!-- Monster count top-right -->
-    <div id="mapMonsterCount">👹 <span id="mapAliveCount">0</span>마리 남음</div>
-
-    <!-- Quit button -->
-    <button id="mapQuitBtn" onclick="quitBattleMap()">🚪 나가기</button>
-
-    <!-- Joystick (reuse same element structure) -->
+    <div id="mapMonsterCount">👹 <span id="mapAliveCount">0</span>마리</div>
+    <button id="mapQuitBtn" onclick="quitBattleMap()">🚪</button>
     <div id="mapJoystick" style="position:absolute;bottom:90px;left:20px;z-index:20;width:100px;height:100px;pointer-events:none;">
       <div class="joystick-base"></div>
       <div class="joystick-knob" id="mapJoystickKnob"></div>
     </div>
-
-    <!-- Skill buttons (right side) -->
-    <div id="mapSkillBtns" style="position:absolute;bottom:100px;right:8px;z-index:20;display:flex;flex-direction:column;gap:6px;">
-      <button class="skill-btn" id="mapSkillBtn0" ontouchstart="handleMapSkillTap(0)" onclick="handleMapSkillTap(0)" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;"><div style="font-size:1.1rem;">⚔️</div><div class="skill-btn-label">전사</div><div class="skill-btn-sp" id="mapSpBar0"></div></button>
-      <button class="skill-btn" id="mapSkillBtn1" ontouchstart="handleMapSkillTap(1)" onclick="handleMapSkillTap(1)" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;"><div style="font-size:1.1rem;">🏹</div><div class="skill-btn-label">궁수</div><div class="skill-btn-sp" id="mapSpBar1"></div></button>
-      <button class="skill-btn" id="mapSkillBtn2" ontouchstart="handleMapSkillTap(2)" onclick="handleMapSkillTap(2)" style="-webkit-tap-highlight-color:transparent;touch-action:manipulation;"><div style="font-size:1.1rem;">🪄</div><div class="skill-btn-label">마법사</div><div class="skill-btn-sp" id="mapSpBar2"></div></button>
-    </div>
-
-    <!-- PvP Challenge Popup -->
+    <div id="mapSkillBtns"></div>
     <div id="pvpChallengePopup">
       <div class="pvp-popup-title">⚔️ PvP 도전!</div>
       <div class="pvp-popup-sub" id="pvpChallengerName"></div>
@@ -1352,20 +1732,144 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
     </div>
   </div>
 
-  <!-- VILLAGE SCREEN -->
-  <div id="villageScreen">
-    <!-- Village uses same top-down map system -->
-    <div class="bmap-bg" id="villageBg"></div>
-    <div id="villageDecos"></div>
+  <!-- ══════════════════════════════════════════
+       GENSHIN-STYLE HUD OVERLAY (항상 위에)
+       ══════════════════════════════════════════ -->
+  <div id="gameHud">
+    <!-- 좌상단: 캐릭터 + HP/MP/EXP -->
+    <div id="hudTopLeft">
+      <div id="hudPortrait" onclick="openPanel('statusPanel')">
+        <div id="hudPortraitSvg"></div>
+      </div>
+      <div id="hudBars">
+        <div id="hudPlayerName">
+          <span id="hudNameText">플레이어</span>
+          <span id="hudRankBadge" style="font-size:0.6rem;"></span>
+        </div>
+        <div class="hud-bar-wrap">
+          <div class="hud-bar-icon">❤️</div>
+          <div class="hud-bar-bg" style="width:110px;"><div class="hud-bar-fill" id="hudHpFill" style="width:100%"></div></div>
+          <div class="hud-bar-val" id="hudHpVal">-</div>
+        </div>
+        <div class="hud-bar-wrap">
+          <div class="hud-bar-icon">💠</div>
+          <div class="hud-bar-bg" style="width:110px;"><div class="hud-bar-fill" id="hudMpFill" style="width:60%"></div></div>
+          <div class="hud-bar-val" id="hudMpVal">-</div>
+        </div>
+        <div class="hud-bar-wrap">
+          <div class="hud-bar-icon">⭐</div>
+          <div class="hud-bar-bg" style="width:110px;"><div class="hud-bar-fill" id="hudExpFill" style="width:30%"></div></div>
+          <div class="hud-bar-val" id="hudExpVal">-</div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Village buildings as positioned SVG objects -->
+    <!-- 좌상단 아래: 골드 -->
+    <div id="hudGold">💰 <span id="hudGoldVal">0</span></div>
+
+    <!-- 우상단: 미니맵 + 메뉴 -->
+    <div id="hudTopRight">
+      <div id="hudMinimap">
+        <canvas id="hudMinimapCanvas" width="90" height="90"></canvas>
+        <div id="hudMinimapPlayer"></div>
+        <div id="hudMinimapLabel">마을</div>
+      </div>
+      <div id="hudMenuBtn" onclick="toggleHudMenu()">☰</div>
+    </div>
+
+    <!-- 상단 중앙: 지역 이름 -->
+    <div id="hudAreaName"><div id="hudAreaNameText"></div></div>
+
+    <!-- 적 HP (전투 중) -->
+    <div id="hudEnemyHp">
+      <div class="enemy-hp-name" id="hudEnemyName">적</div>
+      <div class="enemy-hp-bg"><div class="enemy-hp-fill" id="hudEnemyFill" style="width:100%"></div></div>
+    </div>
+
+    <!-- 좌하단: 조이스틱 -->
+    <div id="hudJoystick">
+      <div class="joystick-base">
+        <div class="joystick-knob" id="joystickKnob"></div>
+      </div>
+    </div>
+
+    <!-- 하단 중앙: 상호작용 버튼 -->
+    <div id="hudInteract">
+      <button id="hudInteractBtn" onclick="doInteract()">
+        <div class="interact-key">F</div>
+        <span id="hudInteractText">상호작용</span>
+      </button>
+    </div>
+
+    <!-- 우하단: 스킬 버튼 arc -->
+    <div id="hudSkills">
+      <button class="hskill" id="hskill3" ontouchstart="onHSkill(2)" onclick="onHSkill(2)">
+        <div style="font-size:1rem;">🪄</div>
+        <div class="hskill-label">마법</div>
+        <div class="hskill-sp"><div class="hskill-sp-fill" id="hsp2" style="width:0%"></div></div>
+        <div class="hskill-ring" id="hring2"></div>
+      </button>
+      <button class="hskill" id="hskill1" ontouchstart="onHSkill(0)" onclick="onHSkill(0)">
+        <div style="font-size:1.2rem;">⚔️</div>
+        <div class="hskill-label">전사</div>
+        <div class="hskill-sp"><div class="hskill-sp-fill" id="hsp0" style="width:0%"></div></div>
+        <div class="hskill-ring" id="hring0"></div>
+      </button>
+      <button class="hskill" id="hskill2" ontouchstart="onHSkill(1)" onclick="onHSkill(1)">
+        <div style="font-size:1.2rem;">🏹</div>
+        <div class="hskill-label">궁수</div>
+        <div class="hskill-sp"><div class="hskill-sp-fill" id="hsp1" style="width:0%"></div></div>
+        <div class="hskill-ring" id="hring1"></div>
+      </button>
+      <button class="hskill" id="hskillAtk" ontouchstart="onHAttack()" onclick="onHAttack()">
+        <div style="font-size:1.6rem;">⚡</div>
+        <div class="hskill-ring" id="hringAtk"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- HUD 메뉴 (우상단 ☰ 클릭) -->
+  <div id="hudMenu" style="display:none;position:fixed;top:60px;right:14px;z-index:200;
+    background:linear-gradient(160deg,rgba(12,8,24,0.97),rgba(8,4,16,0.99));
+    border:1px solid rgba(245,200,66,0.25);border-radius:14px;padding:10px;min-width:140px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <button class="hud-menu-btn" onclick="openPanel('stagePanel');toggleHudMenu()">🗺️ 스테이지</button>
+      <button class="hud-menu-btn" onclick="openPanel('inventoryPanel');toggleHudMenu()">🎒 인벤토리</button>
+      <button class="hud-menu-btn" onclick="openPanel('shopPanel');toggleHudMenu()">🏪 상점</button>
+      <button class="hud-menu-btn" onclick="openPanel('rankPanel');toggleHudMenu()">🏆 랭킹</button>
+      <button class="hud-menu-btn" onclick="openPanel('chatPanel');toggleHudMenu()">💬 채팅</button>
+      <button class="hud-menu-btn" onclick="openPanel('partyPanel');toggleHudMenu()">👥 파티</button>
+      <button class="hud-menu-btn" onclick="openPanel('settingsPanel');toggleHudMenu()">⚙️ 설정</button>
+      <button class="hud-menu-btn" onclick="openPanel('friendsPanel');toggleHudMenu()">👫 친구</button>
+    </div>
+  </div>
+</div>
+  <div id="villageScreen">
+    <!-- Sky -->
+    <div id="vSky"></div>
+    <!-- Mountains (background) -->
+    <div id="vMountains"></div>
+    <!-- Mid hills -->
+    <div id="vHills"></div>
+    <!-- Stream -->
+    <div id="vStream" style="bottom:52%;left:55%;width:32px;height:25%;transform:rotate(8deg);"></div>
+    <!-- Ground plane (perspective grass) -->
+    <div id="vGround"></div>
+    <!-- Fog overlay -->
+    <div id="vFog"></div>
+
+    <!-- Buildings layer (above ground perspective) -->
     <div id="villageObjects"></div>
+
+    <!-- Flowers / deco layer -->
+    <div id="villageDecos"></div>
 
     <!-- Other village players -->
     <div id="villageOtherPlayers"></div>
 
     <!-- NPC Merchant -->
-    <div id="villageNpc" class="village-npc" style="display:none;position:absolute;bottom:47%;left:45%;" onclick="openGemShop()">
+    <div id="villageNpc" class="village-npc" style="display:none;position:absolute;bottom:50%;left:45%;z-index:12;" onclick="openGemShop()">
       <div class="village-npc-bubble">✨ 희귀 상인!</div>
       <svg viewBox="0 0 16 22" width="52" height="70" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
         <rect x="3" y="0" width="10" height="2" fill="#8020c0"/><rect x="2" y="1" width="12" height="3" fill="#6010a0"/>
@@ -1383,7 +1887,8 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
     </div>
 
     <!-- My character -->
-    <div id="villageMyChar" class="village-char" style="bottom:46%;left:46%;">
+    <div id="villageMyChar" class="village-char" style="bottom:46%;left:46%;z-index:11;">
+      <div class="vchar-shadow"></div>
       <div class="village-char-label" id="villageMyLabel">나</div>
       <div id="villageMyCharSvg"></div>
     </div>
@@ -4124,13 +4629,16 @@ function getEnemyHTML(type) {
 // ============================================================
 function updateHUD() {
   if (!player) return;
-  document.getElementById('goldDisplay').textContent = Math.floor(player.gold||0).toLocaleString();
-  document.getElementById('gemsDisplay').textContent = Math.floor(player.gems||0).toLocaleString();
-  document.getElementById('levelDisplay').textContent = Math.floor(player.level||1);
-  // 계급 뱃지 업데이트
-  const rankEl = document.getElementById('rankDisplay');
-  if (rankEl) rankEl.innerHTML = getRankBadge(player.level||1);
-  updateHUDBars();
+  // Legacy bars (battleArea)
+  const createBar = (id, pct, max) => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = Math.min(100, pct) + '%';
+  };
+  createBar('hpBar0', (player.hp/player.maxHp)*100);
+  createBar('hpBar1', (player.hp/player.maxHp)*100);
+  createBar('hpBar2', (player.hp/player.maxHp)*100);
+  // Update Genshin HUD
+  updateGameHud();
 }
 
 function updateHUDBars() {
@@ -4931,23 +5439,38 @@ function getVillageCharSVG(heroClass, animClass) {
 
 function enterVillage(fromLogin) {
   villageActive = true;
-  document.getElementById('villageScreen').classList.add('active');
+  // Show worldScreen (unified map)
+  document.getElementById('worldScreen').classList.add('active');
+  document.getElementById('worldScreen').style.display = 'block';
+  document.getElementById('battleArea').classList.remove('active');
+  document.getElementById('battleArea').style.display = 'none';
+  document.getElementById('battleMapScreen').classList.remove('active');
+  // Show Genshin HUD
+  document.getElementById('gameHud').classList.add('active');
+  document.getElementById('gameScreen').style.display = 'block';
+
   const flash = document.createElement('div');
   flash.className = 'village-transition';
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 500);
 
-  // ★ Apply village top-down graphics
-  applyMapGraphics('villageScreen', VILLAGE_THEME, true);
+  // Render world
+  renderVillageScene();
   renderVillageBuildings();
+  updateDungeonZone();
 
-  // Set my character
-  const heroClass = player ? (player.level % 3) : 0;
-  document.getElementById('villageMyCharSvg').innerHTML = getVillageCharSVG(heroClass, 'idle');
-  document.getElementById('villageMyLabel').innerHTML = `${player ? player.username : '나'} ${getRankBadge(player?.level||1)}`;
-  updateVillageHUD();
+  // Set character
+  const heroClass = player ? ((player.level||1) % 3) : 0;
+  const charEl = document.getElementById('villageMyCharSvg');
+  if (charEl) charEl.innerHTML = getVillageCharSVG(heroClass, 'idle');
+  const labelEl = document.getElementById('villageMyLabel');
+  if (labelEl) labelEl.innerHTML = `${player ? player.username : '나'} ${getRankBadge(player?.level||1)}`;
 
-  villagePos = { x: 46, y: 46 };
+  // Update Genshin HUD
+  updateGameHud();
+  showAreaName('🏘️ 평화의 마을');
+
+  villagePos = { x: 38, y: 46 };
   updateVillageCharPos();
   setupJoystick();
   if (villageMoveLoop) clearInterval(villageMoveLoop);
@@ -4957,123 +5480,376 @@ function enterVillage(fromLogin) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
 }
 
+// 던전 입구 zone 표시
+function updateDungeonZone() {
+  const gateEl = document.getElementById('dungeonGate');
+  if (!gateEl) return;
+  // Already in HTML, just make visible
+  gateEl.style.display = 'block';
+}
+
+// Genshin HUD 업데이트
+function updateGameHud() {
+  if (!player) return;
+  const hp = player.hp || 0, maxHp = player.maxHp || 100;
+  const sp = 60, maxSp = 100; // SP placeholder
+  const level = player.level || 1;
+  const exp = player.exp || 0;
+  const expNeeded = level * 120;
+  const expPct = Math.min(100, (exp / expNeeded) * 100);
+
+  // Bars
+  const hpPct = Math.min(100, (hp/maxHp)*100);
+  const el = (id) => document.getElementById(id);
+  if (el('hudHpFill')) el('hudHpFill').style.width = hpPct + '%';
+  if (el('hudMpFill')) el('hudMpFill').style.width = '70%';
+  if (el('hudExpFill')) el('hudExpFill').style.width = expPct + '%';
+  if (el('hudHpVal')) el('hudHpVal').textContent = `${Math.floor(hp)}/${maxHp}`;
+  if (el('hudMpVal')) el('hudMpVal').textContent = 'Lv.' + level;
+  if (el('hudExpVal')) el('hudExpVal').textContent = Math.floor(expPct) + '%';
+
+  // Name & rank
+  if (el('hudNameText')) el('hudNameText').textContent = player.username || '플레이어';
+  if (el('hudRankBadge')) el('hudRankBadge').innerHTML = getRankBadge(level);
+
+  // Gold
+  if (el('hudGoldVal')) el('hudGoldVal').textContent = Math.floor(player.gold||0).toLocaleString();
+
+  // Portrait (job class icon)
+  const jobIcons = {warrior:'⚔️',archer:'🏹',mage:'🪄',paladin:'🛡️',assassin:'🗡️',berserker:'⚡',sage:'✨'};
+  const icon = jobIcons[player.jobClass||'warrior'] || '⚔️';
+  if (el('hudPortraitSvg')) el('hudPortraitSvg').innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;">${icon}</div>`;
+
+  // SP bars on skill buttons
+  updateHudSkillSp();
+  updateMinimapDot();
+}
+
+function showAreaName(name) {
+  const el = document.getElementById('hudAreaNameText');
+  if (!el) return;
+  el.textContent = name;
+  el.style.animation = 'none';
+  el.offsetHeight; // reflow
+  el.style.animation = 'area-fade 4s ease-out forwards';
+  setTimeout(() => { el.textContent = ''; }, 4100);
+}
+
+function updateHudSkillSp() {
+  // Sync with mapState sp if in map
+  const sp = (typeof mapState !== 'undefined' && mapState) ? mapState.sp : [0,0,0];
+  const maxSp = (typeof mapState !== 'undefined' && mapState) ? mapState.maxSp : [100,100,100];
+  [0,1,2].forEach(i => {
+    const pct = Math.min(100, ((sp[i]||0)/(maxSp[i]||100))*100);
+    const el = document.getElementById('hsp'+i);
+    const ring = document.getElementById('hring'+i);
+    const btn = document.getElementById('hskill'+(i+1));
+    if (el) el.style.width = pct + '%';
+    if (ring) ring.style.background = pct >= 100 ? `conic-gradient(var(--gold) 100%, transparent 100%)` : `conic-gradient(rgba(255,255,255,0.2) ${pct}%, transparent ${pct}%)`;
+    if (btn) { btn.classList.toggle('ready', pct >= 100); btn.classList.toggle('used', pct < 10); }
+  });
+}
+
+function updateMinimapDot() {
+  const dot = document.getElementById('hudMinimapPlayer');
+  const label = document.getElementById('hudMinimapLabel');
+  if (!dot) return;
+  // Map villagePos (0-100%) to minimap (90x90px circle)
+  const r = 38; // minimap radius minus margin
+  const cx = 45, cy = 45; // center
+  const px = (villagePos.x / 100) * 80 + 5;
+  const py = 80 - (villagePos.y / 100) * 80 + 5;
+  dot.style.left = px + 'px'; dot.style.top = py + 'px';
+  dot.style.transform = 'none';
+  // Area label
+  const inDungeon = villagePos.x > 75;
+  if (label) label.textContent = inDungeon ? '⚠️ 던전' : '🏘️ 마을';
+  // Interaction hint
+  checkInteractionZone();
+}
+
+let currentInteraction = null;
+function checkInteractionZone() {
+  const px = villagePos.x, py = villagePos.y;
+  const zones = [
+    { id:'inn',  x:8,  y:58, r:12, label:'🏨 여관 입장',    fn:'openInn()' },
+    { id:'bs',   x:88, y:56, r:12, label:'⚒️ 대장간 입장',  fn:'openBlacksmith()' },
+    { id:'shop', x:40, y:54, r:10, label:'🏪 상점 입장',    fn:'openVillageShop()' },
+    { id:'well', x:62, y:52, r:8,  label:'🌊 우물 (장식)',  fn:'' },
+    { id:'dg',   x:88, y:54, r:14, label:'⚔️ 던전 입장!',  fn:'goToBattle()' },
+  ];
+  const near = zones.find(z => Math.hypot(px-z.x, py-z.y) < z.r);
+  const iEl = document.getElementById('hudInteract');
+  const tEl = document.getElementById('hudInteractText');
+  if (near && near.fn) {
+    currentInteraction = near.fn;
+    if (tEl) tEl.textContent = near.label;
+    if (iEl) iEl.style.display = 'block';
+  } else {
+    currentInteraction = null;
+    if (iEl) iEl.style.display = 'none';
+  }
+}
+
+function doInteract() {
+  if (currentInteraction) eval(currentInteraction);
+}
+
+function toggleHudMenu() {
+  const m = document.getElementById('hudMenu');
+  if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+
+// 스킬 버튼 → 맵 스킬 탭
+function onHSkill(idx) {
+  if (typeof handleMapSkillTap === 'function') handleMapSkillTap(idx);
+  else if (typeof handleSkillTap === 'function') handleSkillTap(idx);
+}
+function onHAttack() {
+  // Auto-attack or trigger battle
+  if (typeof triggerBattle === 'function') triggerBattle();
+}
+
+
+function renderVillageScene() {
+  const W = window.innerWidth, H = window.innerHeight;
+
+  // ── Mountains (SVG) ──
+  const mEl = document.getElementById('vMountains');
+  if (mEl) mEl.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H*0.36}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Far mountains misty -->
+    <polygon points="0,${H*.36} ${W*.08},${H*.06} ${W*.18},${H*.22} ${W*.28},${H*.04} ${W*.40},${H*.18} ${W*.52},${H*.02} ${W*.65},${H*.16} ${W*.78},${H*.08} ${W*.90},${H*.20} ${W},${H*.10} ${W},${H*.36}" fill="rgba(160,195,220,0.5)"/>
+    <!-- Near mountains -->
+    <polygon points="0,${H*.36} ${W*.05},${H*.15} ${W*.15},${H*.28} ${W*.25},${H*.12} ${W*.38},${H*.24} ${W*.50},${H*.10} ${W*.62},${H*.22} ${W*.75},${H*.14} ${W*.88},${H*.26} ${W},${H*.15} ${W},${H*.36}" fill="rgba(130,175,200,0.55)"/>
+    <!-- Mist at base -->
+    <rect x="0" y="${H*.28}" width="${W}" height="${H*.08}" fill="url(#mistGrad)"/>
+    <defs><linearGradient id="mistGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(220,240,250,0)"/><stop offset="1" stop-color="rgba(220,240,250,0.7)"/></linearGradient></defs>
+  </svg>`;
+
+  // ── Rolling hills ──
+  const hEl = document.getElementById('vHills');
+  if (hEl) hEl.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H*0.3}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,${H*.3} Q${W*.15},${H*.05} ${W*.3},${H*.18} Q${W*.45},${H*.3} ${W*.6},${H*.1} Q${W*.75},${H*.0} ${W*.9},${H*.15} L${W},${H*.12} L${W},${H*.3} Z" fill="#7cbd5a"/>
+    <path d="M0,${H*.3} Q${W*.12},${H*.12} ${W*.25},${H*.2} Q${W*.4},${H*.28} ${W*.55},${H*.14} Q${W*.7},${H*.04} ${W*.85},${H*.18} L${W},${H*.16} L${W},${H*.3} Z" fill="#6aad48" opacity="0.8"/>
+  </svg>`;
+
+  // ── Ground tiles (voxel grass) ──
+  const gEl = document.getElementById('vGround');
+  if (!gEl) return;
+  const COLS = 14, ROWS = 9;
+  const tileW = Math.ceil(W * 1.2 / COLS);
+  const tileH = Math.ceil(H * 0.6 / ROWS);
+
+  const GRASS_COLORS = [
+    ['#6dc848','#5ab838','#4aa428'], // bright grass
+    ['#58b830','#4aa020','#3a8818'], // medium grass
+    ['#48a828','#3a9018','#2a7808'], // dark grass
+    ['#72cc4c','#60bc38','#50a828'], // light patch
+    ['#a09060','#907850','#806840'], // dirt patch
+  ];
+
+  let html = '';
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const x = col * tileW - tileW * 0.1;
+      const y = row * tileH;
+      // Random tile color, with path area being dirt
+      const isPath = col >= 5 && col <= 8 && row >= 4;
+      const seed = (col * 7 + row * 13 + col * row) % 4;
+      const gc = isPath ? GRASS_COLORS[4] : GRASS_COLORS[seed];
+      const h = 8 + (seed * 3); // varied height
+      html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${tileW-1}px;height:${tileH}px;background:${gc[0]};border-radius:4px 4px 0 0;box-shadow:inset 0 -${h}px 0 ${gc[2]},inset 0 2px 0 rgba(255,255,255,0.2);"></div>`;
+    }
+  }
+  gEl.innerHTML = html;
+
+  // ── Flowers & grass tufts ──
+  const dEl = document.getElementById('villageDecos');
+  if (dEl) {
+    const decos = [];
+    const flowers = ['🌸','🌼','🌺','🌻','🍀','🌿','🌾'];
+    for (let i = 0; i < 22; i++) {
+      const x = 3 + Math.random() * 94;
+      const y = 44 + Math.random() * 22;
+      const f = flowers[Math.floor(Math.random() * flowers.length)];
+      const delay = Math.random() * 3;
+      const scale = 0.7 + Math.random() * 0.6;
+      // skip path area
+      if (x > 40 && x < 65 && y > 50) continue;
+      decos.push(`<div class="vflower" style="left:${x}%;bottom:${y}%;font-size:${scale}rem;animation-delay:${delay}s;">${f}</div>`);
+    }
+    // Trees
+    [[8,62],[12,58],[88,60],[92,55],[18,40],[78,42]].forEach(([x,y]) => {
+      decos.push(`<div class="vtree" style="position:absolute;left:${x}%;bottom:${y}%;">
+        <svg viewBox="0 0 28 44" width="56" height="88" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="30" width="8" height="14" fill="#7a5028"/>
+          <rect x="9" y="30" width="10" height="2" fill="#5a3818"/>
+          <!-- Canopy layers -->
+          <rect x="2" y="16" width="24" height="16" fill="#2a8020"/>
+          <rect x="4" y="16" width="20" height="2" fill="#3a9830"/>
+          <rect x="4" y="8" width="20" height="12" fill="#38a028"/>
+          <rect x="6" y="8" width="16" height="2" fill="#48b038"/>
+          <rect x="6" y="2" width="16" height="10" fill="#42b030"/>
+          <rect x="8" y="2" width="12" height="2" fill="#52c040"/>
+          <rect x="10" y="0" width="8" height="4" fill="#58c840"/>
+          <!-- Shadow -->
+          <rect x="2" y="16" width="4" height="16" fill="#1a6010" opacity="0.4"/>
+        </svg>
+      </div>`);
+    });
+    dEl.innerHTML = decos.join('');
+  }
+
+  // ── Clouds ──
+  const skyEl = document.getElementById('vSky');
+  if (skyEl) {
+    skyEl.innerHTML = `
+      <div style="position:absolute;top:8%;left:-80px;animation:cloud-drift 28s linear infinite;">
+        <svg viewBox="0 0 80 28" width="160" height="56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="20" rx="36" ry="10" fill="rgba(255,255,255,0.9)"/>
+          <ellipse cx="26" cy="18" rx="16" ry="12" fill="rgba(255,255,255,0.95)"/>
+          <ellipse cx="54" cy="17" rx="18" ry="11" fill="rgba(255,255,255,0.9)"/>
+          <ellipse cx="40" cy="16" rx="20" ry="14" fill="rgba(255,255,255,0.95)"/>
+          <ellipse cx="40" cy="20" rx="36" ry="6" fill="rgba(230,242,255,0.6)"/>
+        </svg>
+      </div>
+      <div style="position:absolute;top:4%;left:-80px;animation:cloud-drift 18s linear infinite;animation-delay:-6s;">
+        <svg viewBox="0 0 60 22" width="120" height="44" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="30" cy="16" rx="26" ry="8" fill="rgba(255,255,255,0.85)"/>
+          <ellipse cx="20" cy="14" rx="12" ry="10" fill="rgba(255,255,255,0.9)"/>
+          <ellipse cx="42" cy="13" rx="14" ry="9" fill="rgba(255,255,255,0.88)"/>
+          <ellipse cx="30" cy="14" rx="16" ry="10" fill="rgba(255,255,255,0.92)"/>
+        </svg>
+      </div>`;
+  }
+}
+
 function renderVillageBuildings() {
   const obj = document.getElementById('villageObjects');
   if (!obj) return;
   obj.innerHTML = `
-    <!-- Inn (left) -->
-    <div style="position:absolute;left:3%;bottom:52%;pointer-events:auto;cursor:pointer;" onclick="openInn()" title="여관 - 전직">
-      <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#ffe080;font-size:0.6rem;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid rgba(255,224,128,0.3);">🏨 여관 (전직)</div>
-      <svg viewBox="0 0 56 60" width="112" height="120" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <!-- Walls -->
-        <rect x="0" y="20" width="56" height="40" fill="#c08840"/>
-        <rect x="0" y="20" width="56" height="3" fill="#d09a50"/>
-        <!-- Roof -->
-        <rect x="4" y="2" width="48" height="20" fill="#903820"/>
-        <rect x="10" y="0" width="36" height="12" fill="#a04428"/>
-        <rect x="16" y="0" width="24" height="6" fill="#b05030"/>
-        <!-- Roof ridge -->
-        <rect x="24" y="0" width="8" height="3" fill="#c06038"/>
-        <!-- Windows -->
-        <rect x="4" y="28" width="14" height="12" fill="#5090d0" opacity="0.8"/>
-        <rect x="5" y="29" width="12" height="10" fill="#70b0f0" opacity="0.6"/>
-        <rect x="10" y="28" width="2" height="12" fill="#4070a0"/>
-        <rect x="4" y="34" width="14" height="2" fill="#4070a0"/>
-        <rect x="38" y="28" width="14" height="12" fill="#5090d0" opacity="0.8"/>
-        <rect x="39" y="29" width="12" height="10" fill="#70b0f0" opacity="0.6"/>
-        <rect x="44" y="28" width="2" height="12" fill="#4070a0"/>
-        <rect x="38" y="34" width="14" height="2" fill="#4070a0"/>
-        <!-- Door -->
-        <rect x="22" y="36" width="12" height="24" fill="#7a3010"/>
-        <rect x="23" y="37" width="10" height="22" fill="#6a2808"/>
-        <rect x="28" y="37" width="2" height="22" fill="#5a1e04"/>
-        <rect x="30" y="48" width="2" height="2" fill="#d0a040"/>
-        <!-- Sign -->
-        <rect x="20" y="22" width="16" height="6" fill="#c09040"/>
-        <rect x="21" y="23" width="14" height="4" fill="#b08030"/>
-        <text x="22" y="27" font-size="4" fill="#ffe080" font-weight="bold">여관</text>
-        <!-- Base shadow -->
-        <rect x="0" y="58" width="56" height="2" fill="#906030" opacity="0.5"/>
+    <!-- Inn - half-timbered -->
+    <div class="vbuild" style="left:4%;bottom:60%;" onclick="openInn()">
+      <div class="vbuild-label">🏨 여관 (전직)</div>
+      <svg viewBox="0 0 70 90" width="126" height="162" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="78" width="66" height="12" fill="#808870"/>
+        <rect x="0" y="76" width="70" height="4" fill="#909880"/>
+        <rect x="4" y="34" width="62" height="44" fill="#e8dcc8"/>
+        <rect x="4" y="34" width="3" height="44" fill="#5c3820"/>
+        <rect x="63" y="34" width="3" height="44" fill="#5c3820"/>
+        <rect x="4" y="34" width="62" height="3" fill="#5c3820"/>
+        <rect x="4" y="56" width="62" height="3" fill="#5c3820"/>
+        <rect x="33" y="34" width="3" height="44" fill="#5c3820"/>
+        <line x1="4" y1="34" x2="33" y2="56" stroke="#6a4028" stroke-width="2.5"/>
+        <line x1="36" y1="34" x2="63" y2="56" stroke="#6a4028" stroke-width="2.5"/>
+        <rect x="8" y="40" width="18" height="14" fill="#80b8e0" opacity="0.85"/>
+        <rect x="9" y="41" width="16" height="12" fill="#a0d0f0" opacity="0.6"/>
+        <rect x="16" y="40" width="2" height="14" fill="#5090b8"/>
+        <rect x="8" y="47" width="18" height="2" fill="#5090b8"/>
+        <rect x="44" y="40" width="18" height="14" fill="#80b8e0" opacity="0.85"/>
+        <rect x="45" y="41" width="16" height="12" fill="#a0d0f0" opacity="0.6"/>
+        <rect x="52" y="40" width="2" height="14" fill="#5090b8"/>
+        <rect x="44" y="47" width="18" height="2" fill="#5090b8"/>
+        <rect x="28" y="57" width="14" height="21" fill="#7a4820"/>
+        <rect x="29" y="58" width="12" height="20" fill="#6a3818"/>
+        <rect x="35" y="58" width="2" height="20" fill="#5a2c10"/>
+        <rect x="36" y="67" width="3" height="2" fill="#d0a040"/>
+        <rect x="22" y="36" width="26" height="8" fill="#c09040"/>
+        <rect x="23" y="37" width="24" height="6" fill="#b08030"/>
+        <text x="24" y="43" font-size="5" fill="#fff8e0" font-weight="bold" font-family="sans-serif">여 관</text>
+        <polygon points="0,34 35,2 70,34" fill="#2a3038"/>
+        <polygon points="2,34 35,5 68,34" fill="#323a44"/>
+        <rect x="0" y="32" width="70" height="4" fill="#1e2830"/>
+        <rect x="30" y="2" width="10" height="3" fill="#3a4450"/>
+        <rect x="50" y="0" width="10" height="18" fill="#484850"/>
+        <rect x="48" y="0" width="14" height="3" fill="#383840"/>
+        <polygon points="2,34 35,5 40,8 5,34" fill="rgba(255,255,255,0.06)"/>
+        <rect x="32" y="26" width="6" height="8" fill="#f0c040" opacity="0.7"/>
+        <rect x="31" y="24" width="8" height="3" fill="#a08028"/>
       </svg>
     </div>
+
     <!-- Blacksmith (right) -->
-    <div style="position:absolute;right:3%;bottom:52%;pointer-events:auto;cursor:pointer;" onclick="openBlacksmith()" title="대장간 - 강화">
-      <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#c0e0ff;font-size:0.6rem;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid rgba(192,224,255,0.3);">⚒️ 대장간 (강화)</div>
-      <svg viewBox="0 0 52 56" width="104" height="112" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="16" width="48" height="40" fill="#686868"/>
-        <rect x="2" y="16" width="48" height="3" fill="#888888"/>
-        <rect x="0" y="8" width="52" height="10" fill="#4a4a4a"/>
-        <rect x="4" y="0" width="44" height="10" fill="#383838"/>
-        <!-- Chimney -->
-        <rect x="36" y="0" width="8" height="14" fill="#303030"/>
-        <rect x="35" y="0" width="10" height="3" fill="#282828"/>
-        <!-- Fire in chimney -->
-        <rect x="37" y="1" width="6" height="3" fill="#ff6010" opacity="0.8"/>
-        <!-- Windows -->
-        <rect x="4" y="24" width="10" height="10" fill="#3090b0" opacity="0.6"/>
-        <rect x="5" y="25" width="8" height="8" fill="#50b0d0" opacity="0.5"/>
-        <!-- Forge fire -->
-        <rect x="16" y="24" width="12" height="12" fill="#202020"/>
-        <rect x="17" y="25" width="10" height="10" fill="#ff5000" opacity="0.8"/>
-        <rect x="19" y="24" width="6" height="4" fill="#ff8020" opacity="0.9"/>
-        <rect x="21" y="23" width="2" height="2" fill="#ffc040"/>
-        <!-- Door -->
-        <rect x="20" y="38" width="12" height="18" fill="#252525"/>
-        <rect x="21" y="39" width="10" height="16" fill="#1a1a1a"/>
-        <rect x="29" y="46" width="2" height="2" fill="#808080"/>
-        <!-- Sign -->
-        <rect x="16" y="18" width="20" height="5" fill="#484848"/>
-        <text x="17" y="23" font-size="4" fill="#c0e0ff" font-weight="bold">대장간</text>
-        <rect x="2" y="54" width="48" height="2" fill="#404040" opacity="0.5"/>
+    <div class="vbuild" style="right:4%;bottom:58%;" onclick="openBlacksmith()">
+      <div class="vbuild-label">⚒️ 대장간 (강화)</div>
+      <svg viewBox="0 0 64 84" width="110" height="144" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="72" width="60" height="12" fill="#605850"/>
+        <rect x="4" y="30" width="56" height="44" fill="#909080"/>
+        <rect x="4" y="30" width="56" height="3" fill="#a0a090"/>
+        <rect x="4" y="42" width="56" height="1" fill="#808070" opacity="0.5"/>
+        <rect x="4" y="54" width="56" height="1" fill="#808070" opacity="0.5"/>
+        <rect x="20" y="30" width="1" height="44" fill="#808070" opacity="0.4"/>
+        <rect x="44" y="30" width="1" height="44" fill="#808070" opacity="0.4"/>
+        <rect x="6" y="38" width="12" height="10" fill="#4090b0" opacity="0.7"/>
+        <rect x="7" y="39" width="10" height="8" fill="#60b0d0" opacity="0.5"/>
+        <rect x="22" y="38" width="18" height="16" fill="#1a1a1a"/>
+        <rect x="23" y="39" width="16" height="14" fill="#ff5000" opacity="0.9"/>
+        <rect x="25" y="38" width="12" height="5" fill="#ff8020"/>
+        <rect x="28" y="36" width="6" height="4" fill="#ffc040"/>
+        <rect x="26" y="52" width="12" height="22" fill="#303030"/>
+        <rect x="27" y="53" width="10" height="20" fill="#202020"/>
+        <rect x="33" y="61" width="2" height="2" fill="#909090"/>
+        <polygon points="0,30 32,2 64,30" fill="#282830"/>
+        <polygon points="2,30 32,5 62,30" fill="#303038"/>
+        <rect x="0" y="28" width="64" height="4" fill="#1c1c24"/>
+        <rect x="44" y="0" width="12" height="20" fill="#404040"/>
+        <rect x="42" y="0" width="16" height="3" fill="#303030"/>
+        <circle cx="50" cy="-4" r="5" fill="#c8c8c8" opacity="0.6"/>
+        <circle cx="54" cy="-8" r="4" fill="#d0d0d0" opacity="0.4"/>
+        <rect x="16" y="32" width="22" height="6" fill="#505048"/>
+        <text x="17" y="38" font-size="5" fill="#90d0ff" font-weight="bold" font-family="sans-serif">대장간</text>
       </svg>
     </div>
-    <!-- Market stall (center-left) -->
-    <div style="position:absolute;left:33%;bottom:52%;pointer-events:auto;cursor:pointer;" onclick="openVillageShop()" title="상점">
-      <div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#a0e0a0;font-size:0.6rem;padding:2px 6px;border-radius:4px;white-space:nowrap;border:1px solid rgba(160,224,160,0.3);">🏪 상점</div>
-      <svg viewBox="0 0 44 40" width="88" height="80" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="12" width="40" height="28" fill="#d0b060"/>
-        <rect x="0" y="8" width="44" height="8" fill="#e05020"/>
-        <rect x="0" y="8" width="44" height="3" fill="#f06030"/>
-        <!-- Awning stripes -->
-        <rect x="4" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
-        <rect x="12" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
-        <rect x="20" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
-        <rect x="28" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
-        <rect x="36" y="8" width="4" height="8" fill="#fff" opacity="0.2"/>
-        <!-- Pillars -->
-        <rect x="2" y="8" width="3" height="32" fill="#b09040"/>
-        <rect x="39" y="8" width="3" height="32" fill="#b09040"/>
-        <!-- Counter -->
-        <rect x="4" y="20" width="36" height="4" fill="#b08030"/>
-        <!-- Items on counter -->
-        <rect x="8" y="17" width="4" height="4" fill="#e04040"/>
-        <rect x="16" y="16" width="3" height="5" fill="#40c040"/>
-        <rect x="24" y="17" width="4" height="4" fill="#4040e0"/>
-        <rect x="32" y="17" width="3" height="4" fill="#e0c040"/>
-        <text x="10" y="36" font-size="4" fill="#604010" font-weight="bold">상점</text>
+
+    <!-- Shop (center) -->
+    <div class="vbuild" style="left:36%;bottom:56%;" onclick="openVillageShop()">
+      <div class="vbuild-label">🏪 상점</div>
+      <svg viewBox="0 0 56 56" width="96" height="96" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="14" width="52" height="42" fill="#d4b870"/>
+        <rect x="2" y="14" width="52" height="3" fill="#e4c880"/>
+        <rect x="0" y="10" width="56" height="8" fill="#c04828"/>
+        <rect x="0" y="10" width="56" height="3" fill="#d85830"/>
+        <rect x="6" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
+        <rect x="17" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
+        <rect x="28" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
+        <rect x="39" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
+        <rect x="2" y="10" width="4" height="46" fill="#a88030"/>
+        <rect x="50" y="10" width="4" height="46" fill="#a88030"/>
+        <rect x="4" y="24" width="48" height="5" fill="#b08030"/>
+        <rect x="8" y="20" width="5" height="5" fill="#e04040" rx="1"/>
+        <rect x="17" y="19" width="4" height="6" fill="#40c040" rx="1"/>
+        <rect x="26" y="20" width="5" height="5" fill="#4060e0" rx="1"/>
+        <rect x="36" y="19" width="5" height="6" fill="#e0c040" rx="1"/>
+        <rect x="44" y="20" width="4" height="5" fill="#c040a0" rx="1"/>
+        <polygon points="0,10 28,0 56,10" fill="#383830"/>
+        <rect x="0" y="8" width="56" height="4" fill="#282828"/>
+        <rect x="18" y="3" width="20" height="6" fill="#c09040"/>
+        <rect x="19" y="4" width="18" height="4" fill="#b08030"/>
+        <text x="20" y="8" font-size="4" fill="#fff8e0" font-weight="bold" font-family="sans-serif">상 점</text>
       </svg>
     </div>
-    <!-- Well (center-right) -->
-    <div style="position:absolute;left:58%;bottom:52%;pointer-events:none;">
-      <svg viewBox="0 0 32 36" width="64" height="72" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="14" width="24" height="22" fill="#909888"/>
-        <rect x="4" y="14" width="24" height="3" fill="#b0b8a8"/>
-        <rect x="2" y="14" width="4" height="24" fill="#808878"/><rect x="26" y="14" width="4" height="24" fill="#808878"/>
-        <rect x="6" y="18" width="20" height="16" fill="#3878b8"/>
-        <rect x="6" y="18" width="20" height="2" fill="#58a0e0"/>
-        <!-- Reflection -->
-        <rect x="10" y="22" width="6" height="2" fill="#80c0f0" opacity="0.5"/>
-        <rect x="0" y="12" width="32" height="4" fill="#a0a898"/>
-        <!-- Roof structure -->
-        <rect x="14" y="0" width="4" height="14" fill="#704820"/>
-        <rect x="10" y="2" width="12" height="3" fill="#906030"/>
-        <rect x="8" y="0" width="3" height="6" fill="#785028"/><rect x="21" y="0" width="3" height="6" fill="#785028"/>
-        <!-- Rope -->
-        <rect x="15" y="6" width="2" height="8" fill="#c0a060" opacity="0.7"/>
+
+    <!-- Well -->
+    <div style="position:absolute;left:60%;bottom:54%;z-index:8;pointer-events:none;">
+      <svg viewBox="0 0 36 44" width="64" height="80" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="18" width="28" height="26" fill="#909888"/>
+        <rect x="4" y="18" width="28" height="4" fill="#b0b8a8"/>
+        <rect x="2" y="18" width="4" height="28" fill="#808878"/>
+        <rect x="30" y="18" width="4" height="28" fill="#808878"/>
+        <rect x="6" y="22" width="24" height="20" fill="#3888c8"/>
+        <rect x="6" y="22" width="24" height="3" fill="#58a8e8"/>
+        <ellipse cx="18" cy="33" rx="8" ry="2" fill="#6abcf0" opacity="0.4"/>
+        <rect x="0" y="16" width="36" height="4" fill="#a0a898"/>
+        <rect x="14" y="0" width="4" height="18" fill="#8a5828"/>
+        <rect x="10" y="2" width="16" height="4" fill="#a06830"/>
+        <rect x="8" y="0" width="4" height="8" fill="#785020"/>
+        <rect x="24" y="0" width="4" height="8" fill="#785020"/>
+        <rect x="17" y="6" width="2" height="12" fill="#c0a060" opacity="0.8"/>
       </svg>
     </div>
   `;
 }
+
 
 function leaveVillage() {
   if (!villageActive) return;
@@ -6203,27 +6979,6 @@ async function loadAdminUsers() {
     if (s1) { s1.innerHTML = opts; loadAdminTarget(); }
     if (s2) s2.innerHTML = opts;
   } catch(e) { showNotif('유저 목록 로드 실패: '+e.message); }
-}
-
-async function loadAdminManageUsers() {
-  if (!player.isAdmin) return;
-  try {
-    const res = await fetch(SERVER_URL + '/api/users');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const users = await res.json();
-    // 관리자 선택 드롭다운
-    const sel = document.getElementById('adminManageSelect');
-    if (sel) sel.innerHTML = users.filter(u => u.username !== player.username).map(u =>
-      `<option value="${u.username}">${u.username} (Lv.${u.level})${u.isAdmin ? ' 👑' : ''}</option>`
-    ).join('');
-    // 전체 유저 목록
-    const list = document.getElementById('adminUserListFull');
-    if (list) list.innerHTML = users.map(u => `
-      <div style="display:flex;align-items:center;gap:6px;padding:5px 6px;border-bottom:1px solid rgba(255,255,255,0.06);">
-        <span style="flex:1;color:${u.isAdmin?'#f5c842':'rgba(240,232,200,0.7)'};">${u.isAdmin?'👑 ':''} ${u.username}</span>
-        <span style="color:rgba(240,232,200,0.4);">Lv.${u.level}</span>
-      </div>`).join('');
-  } catch(e) { showNotif('목록 로드 실패: '+e.message); }
 }
 
 async function adminMakeAdmin(grant) {
