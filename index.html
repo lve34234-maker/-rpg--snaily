@@ -3144,13 +3144,398 @@ let mapJoystickSetup = false;
 let pvpPendingChallenger = null;
 
 const BMAP_THEMES = {
-  forest:  { sky:'#87ceeb', ground:'#3a7a28', tile:'#4a9a38', path:'#c8a060', accent:'#2a5a18', deco:'forest' },
-  mountain:{ sky:'#b0c8e0', ground:'#6a7858', tile:'#7a8868', path:'#a09080', accent:'#4a5838', deco:'mountain' },
-  castle:  { sky:'#5060a0', ground:'#504870', tile:'#5c5480', path:'#807868', accent:'#382840', deco:'castle' },
-  volcano: { sky:'#c04010', ground:'#6a2010', tile:'#7a3018', path:'#d05020', accent:'#401008', deco:'volcano' },
-  dungeon: { sky:'#101020', ground:'#181828', tile:'#202038', path:'#504060', accent:'#080810', deco:'dungeon' },
-  boss:    { sky:'#100010', ground:'#1a001a', tile:'#200020', path:'#800090', accent:'#080008', deco:'boss' },
+  forest:  { deco:'forest',   fog:'rgba(40,80,20,0.18)' },
+  mountain:{ deco:'mountain', fog:'rgba(60,70,80,0.22)' },
+  castle:  { deco:'castle',   fog:'rgba(60,40,90,0.28)' },
+  volcano: { deco:'volcano',  fog:'rgba(180,40,0,0.25)' },
+  dungeon: { deco:'dungeon',  fog:'rgba(0,0,30,0.35)'   },
+  boss:    { deco:'boss',     fog:'rgba(80,0,100,0.40)' },
 };
+
+function getMapTheme(stageId) {
+  const types = ['forest','forest','mountain','mountain','volcano','dungeon','castle','boss','dungeon','mountain','castle','dungeon','boss','volcano','dungeon','castle','boss','dungeon','forest','boss'];
+  return BMAP_THEMES[types[(stageId-1) % types.length]] || BMAP_THEMES.forest;
+}
+
+// ══════════════════════════════════════════════════════════
+//  HIGH-QUALITY DUNGEON MAP GRAPHICS
+// ══════════════════════════════════════════════════════════
+function applyMapGraphics(screenId, theme, isVillage) {
+  const bg = document.getElementById('bmapBg');
+  const decosEl = document.getElementById('bmapDecos');
+  if (!bg || !decosEl) return;
+
+  const deco = theme.deco;
+  const W = window.innerWidth, H = window.innerHeight;
+
+  // ── Per-theme background ──
+  const BG = {
+    forest:  { sky:'linear-gradient(180deg,#1a3010 0%,#2a5020 30%,#1a3010 100%)',
+               ground:'#2a5018', tile:'#304020', path:'#8a6030', wallTop:'#1a2810' },
+    mountain:{ sky:'linear-gradient(180deg,#0a1828 0%,#1a3048 35%,#0e1e30 100%)',
+               ground:'#303428', tile:'#40443c', path:'#706050', wallTop:'#202418' },
+    castle:  { sky:'linear-gradient(180deg,#080818 0%,#101030 40%,#080818 100%)',
+               ground:'#181828', tile:'#242438', path:'#604870', wallTop:'#0e0e1e' },
+    volcano: { sky:'linear-gradient(180deg,#200800 0%,#401000 30%,#200800 100%)',
+               ground:'#3a1008', tile:'#502010', path:'#e05020', wallTop:'#180400' },
+    dungeon: { sky:'linear-gradient(180deg,#050508 0%,#0a0a18 40%,#050508 100%)',
+               ground:'#0d0d18', tile:'#141428', path:'#383050', wallTop:'#050505' },
+    boss:    { sky:'linear-gradient(180deg,#08000e 0%,#14001e 40%,#08000e 100%)',
+               ground:'#0e0010', tile:'#160020', path:'#600080', wallTop:'#050005' },
+  }[deco] || { sky:'linear-gradient(180deg,#0a0a18,#14142a)', ground:'#101020', tile:'#181830', path:'#404060', wallTop:'#050510' };
+
+  // ── Tile floor pattern ──
+  const tilePattern = `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'>
+      <rect width='48' height='48' fill='${BG.tile}'/>
+      <rect x='0' y='0' width='24' height='24' fill='${BG.ground}' opacity='0.5'/>
+      <rect x='24' y='24' width='24' height='24' fill='${BG.ground}' opacity='0.5'/>
+      <rect x='0' y='0' width='48' height='1' fill='rgba(0,0,0,0.4)'/>
+      <rect x='0' y='0' width='1' height='48' fill='rgba(0,0,0,0.4)'/>
+      <rect x='24' y='0' width='1' height='48' fill='rgba(0,0,0,0.3)'/>
+      <rect x='0' y='24' width='48' height='1' fill='rgba(0,0,0,0.3)'/>
+      <rect x='4' y='8' width='3' height='1' fill='rgba(255,255,255,0.05)'/>
+      <rect x='30' y='34' width='4' height='1' fill='rgba(255,255,255,0.04)'/>
+    </svg>`
+  )}")`;
+
+  // ── Build background HTML ──
+  bg.style.cssText = 'position:absolute;inset:0;overflow:hidden;';
+  bg.innerHTML = `
+    <!-- Sky/ceiling -->
+    <div style="position:absolute;inset:0;background:${BG.sky};"></div>
+    <!-- Wall detail at top -->
+    <div style="position:absolute;top:0;left:0;right:0;height:${deco==='dungeon'||deco==='boss'?28:22}%;
+      background:linear-gradient(180deg,${BG.wallTop} 0%,transparent 100%);"></div>
+    <!-- Ground floor tiles -->
+    <div style="position:absolute;left:0;right:0;top:${deco==='dungeon'||deco==='boss'?28:22}%;bottom:0;
+      background-image:${tilePattern};background-size:48px 48px;image-rendering:pixelated;"></div>
+    <!-- Floor depth line -->
+    <div style="position:absolute;left:0;right:0;top:${deco==='dungeon'||deco==='boss'?28:22}%;height:4px;
+      background:linear-gradient(180deg,rgba(0,0,0,0.7),transparent);"></div>
+    <!-- Atmospheric fog/glow overlay -->
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,transparent 30%,${theme.fog} 100%);pointer-events:none;"></div>
+    <!-- Top vignette -->
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.65) 0%,transparent 35%,transparent 65%,rgba(0,0,0,0.5) 100%);pointer-events:none;"></div>
+  `;
+
+  // ── Build decorations ──
+  const svg = buildRichMapDecos(deco, W, H, BG);
+  const pathDiv = buildMapPath(deco, BG);
+  decosEl.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+  decosEl.innerHTML = pathDiv + svg;
+}
+
+function buildMapPath(deco, BG) {
+  // Horizontal path through the map (where monsters walk)
+  const pathColor = BG.path;
+  if (deco === 'dungeon' || deco === 'boss') {
+    // Stone corridor
+    return `<div style="position:absolute;left:0;right:0;top:35%;height:32%;
+      background:repeating-linear-gradient(0deg,rgba(0,0,0,0.15) 0px,rgba(0,0,0,0.15) 1px,transparent 1px,transparent 16px),
+                repeating-linear-gradient(90deg,rgba(0,0,0,0.1) 0px,rgba(0,0,0,0.1) 1px,transparent 1px,transparent 32px),
+                ${pathColor};
+      border-top:2px solid rgba(255,255,255,0.06);border-bottom:2px solid rgba(0,0,0,0.5);">
+    </div>`;
+  }
+  return `<div style="position:absolute;left:0;right:0;top:38%;height:28%;
+    background:${pathColor};opacity:0.55;
+    border-top:2px solid rgba(255,255,255,0.08);border-bottom:2px solid rgba(0,0,0,0.4);">
+  </div>`;
+}
+
+function buildRichMapDecos(deco, W, H, BG) {
+  // Rich per-theme SVG decorations
+  const vb = `0 0 ${W} ${H}`;
+  let inner = '';
+
+  // ── Helper generators ──
+  const rect = (x,y,w,h,fill,op='') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"${op?` opacity="${op}"`:''}/>`; 
+  const glow = (cx,cy,r,c,op) => `<radialGradient id="g${cx}${cy}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${c}" stop-opacity="${op}"/><stop offset="100%" stop-color="${c}" stop-opacity="0"/></radialGradient><ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r*0.6}" fill="url(#g${cx}${cy})"/>`;
+
+  // Torch: pole + flame + light pool
+  const torch = (x,y,fc='#ff8020') => {
+    const lx=x,ly=y;
+    return `<g>
+      ${rect(lx-2,ly-28,4,20,'#8a5028')}
+      ${rect(lx-4,ly-30,8,4,'#604018')}
+      <!-- flame layers -->
+      <ellipse cx="${lx}" cy="${ly-38}" rx="6" ry="10" fill="#ff4000" opacity="0.9"/>
+      <ellipse cx="${lx}" cy="${ly-38}" rx="4" ry="8" fill="#ff8020" opacity="0.85"/>
+      <ellipse cx="${lx}" cy="${ly-40}" rx="2" ry="5" fill="#ffe060" opacity="0.9"/>
+      <!-- light pool on ground -->
+      <radialGradient id="tl${lx}" cx="50%" cy="100%" r="50%">
+        <stop offset="0%" stop-color="${fc}" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="${fc}" stop-opacity="0"/>
+      </radialGradient>
+      <ellipse cx="${lx}" cy="${ly+20}" rx="50" ry="20" fill="url(#tl${lx})"/>
+    </g>`;
+  };
+
+  // Stone pillar with cracks
+  const pillar = (x,y,c='#484858',h=60) => `<g>
+    ${rect(x-8,y-h,16,h,c)}
+    ${rect(x-10,y-h,20,8,c)}
+    ${rect(x-10,y-8,20,8,c)}
+    ${rect(x-8,y-h,2,h,'rgba(255,255,255,0.07)')}
+    ${rect(x+2,y-Math.floor(h*0.4),1,Math.floor(h*0.3),'rgba(0,0,0,0.4)')}
+    ${rect(x-5,y-Math.floor(h*0.7),1,Math.floor(h*0.25),'rgba(0,0,0,0.3)')}
+  </g>`;
+
+  // Glowing crystal
+  const crystal = (x,y,c='#4060ff',h=20) => `<g>
+    <polygon points="${x},${y-h} ${x-6},${y-h/2} ${x-4},${y} ${x+4},${y} ${x+6},${y-h/2}" fill="${c}" opacity="0.85"/>
+    <polygon points="${x},${y-h} ${x-6},${y-h/2} ${x},${y-h*0.5}" fill="rgba(255,255,255,0.25)"/>
+    <radialGradient id="cr${x}" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="${c}" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="${c}" stop-opacity="0"/>
+    </radialGradient>
+    <ellipse cx="${x}" cy="${y}" rx="20" ry="8" fill="url(#cr${x})"/>
+  </g>`;
+
+  // Skull
+  const skull = (x,y) => `<g transform="translate(${x},${y})">
+    ${rect(-5,-10,10,8,'#d8d0b8')}
+    ${rect(-4,-10,8,2,'#e8e0c8')}
+    ${rect(-6,-6,12,4,'#d8d0b8')}
+    ${rect(-3,-4,2,3,'#201810')}
+    ${rect(1,-4,2,3,'#201810')}
+    ${rect(-2,-1,4,2,'#c8c0a8')}
+  </g>`;
+
+  // Bone pile
+  const bones = (x,y) => `<g transform="translate(${x},${y})">
+    ${rect(-8,-2,16,3,'#d0c8b0')}
+    ${rect(-6,-3,4,5,'#d0c8b0')}
+    ${rect(2,-3,4,5,'#d0c8b0')}
+    ${rect(-5,-1,10,2,'rgba(255,255,255,0.1)')}
+  </g>`;
+
+  // Lava pool with animation
+  const lava = (x,y,rx=30,ry=12) => `<g>
+    <radialGradient id="lv${x}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff6000" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#c03000" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#600000" stop-opacity="1"/>
+    </radialGradient>
+    <ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="url(#lv${x})"/>
+    <ellipse cx="${x}" cy="${y}" rx="${rx*0.6}" ry="${ry*0.6}" fill="#ff8020" opacity="0.5"/>
+    <ellipse cx="${x}" cy="${y}" rx="${rx*0.3}" ry="${ry*0.3}" fill="#ffb040" opacity="0.4"/>
+    <!-- heat glow -->
+    <radialGradient id="lh${x}" cx="50%" cy="100%" r="50%">
+      <stop offset="0%" stop-color="#ff4000" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff4000" stop-opacity="0"/>
+    </radialGradient>
+    <ellipse cx="${x}" cy="${y-30}" rx="${rx*0.8}" ry="${ry*2}" fill="url(#lh${x})"/>
+  </g>`;
+
+  // Portal
+  const portal = (x,y,c='#8000d0') => `<g>
+    <radialGradient id="pt${x}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.6"/>
+      <stop offset="40%" stop-color="${c}" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="${c}" stop-opacity="0"/>
+    </radialGradient>
+    <ellipse cx="${x}" cy="${y}" rx="30" ry="40" fill="url(#pt${x})"/>
+    <ellipse cx="${x}" cy="${y}" rx="20" ry="28" fill="${c}" opacity="0.7"/>
+    <ellipse cx="${x}" cy="${y}" rx="12" ry="18" fill="#c060ff" opacity="0.6"/>
+    <ellipse cx="${x}" cy="${y}" rx="5" ry="8" fill="#fff" opacity="0.4"/>
+    <!-- outer ring glow -->
+    <radialGradient id="pr${x}" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="${c}" stop-opacity="0"/>
+      <stop offset="100%" stop-color="${c}" stop-opacity="0.4"/>
+    </radialGradient>
+    <ellipse cx="${x}" cy="${y}" rx="50" ry="65" fill="url(#pr${x})"/>
+  </g>`;
+
+  // ── Per-theme content ──
+  const skyH = (deco==='dungeon'||deco==='boss') ? 0.28 : 0.22;
+  const ground = H * (1 - skyH);
+  const midY = H * 0.52; // center of path
+
+  if (deco === 'forest') {
+    // Big trees at sides, mushrooms, glowing plants
+    [[0.05,0.22],[0.08,0.55],[0.92,0.25],[0.88,0.58],[0.15,0.15],[0.82,0.15]].forEach(([xp,yp])=>{
+      const x=W*xp, y=H*yp;
+      inner += `<g>
+        ${rect(x-5,y+10,10,30,'#6a3c18')}
+        ${rect(x-18,y,36,24,'#1a5a10')}
+        ${rect(x-14,y-16,28,20,'#228018')}
+        ${rect(x-10,y-30,20,18,'#2a9020')}
+        ${rect(x-6,y-42,12,14,'#30a028')}
+        ${rect(x-3,y-52,6,12,'#38b030')}
+        ${rect(x-18,y,3,24,'rgba(255,255,255,0.08)')}
+      </g>`;
+    });
+    // Glowing mushrooms
+    [[0.22,0.78],[0.45,0.82],[0.65,0.76],[0.78,0.80]].forEach(([xp,yp])=>{
+      const x=W*xp, y=H*yp;
+      inner += `<g>
+        ${rect(x-2,y-10,4,10,'#d0b080')}
+        <ellipse cx="${x}" cy="${y-14}" rx="9" ry="6" fill="#d03020"/>
+        <ellipse cx="${x}" cy="${y-14}" rx="6" ry="4" fill="#e04030"/>
+        ${rect(x-2,y-14,3,2,'rgba(255,255,255,0.4)')}
+        <radialGradient id="mg${x|0}"><stop offset="0%" stop-color="#ff2020" stop-opacity="0.3"/><stop offset="100%" stop-color="#ff2020" stop-opacity="0"/></radialGradient>
+        <ellipse cx="${x}" cy="${y}" rx="14" ry="6" fill="url(#mg${x|0})"/>
+      </g>`;
+    });
+    // Fireflies
+    [[0.3,0.4],[0.5,0.3],[0.7,0.45],[0.2,0.6],[0.8,0.5]].forEach(([xp,yp])=>{
+      const x=W*xp, y=H*yp;
+      inner += `<circle cx="${x}" cy="${y}" r="2" fill="#80ff40" opacity="0.7"/>
+        <radialGradient id="ff${x|0}"><stop offset="0%" stop-color="#80ff40" stop-opacity="0.5"/><stop offset="100%" stop-color="#80ff40" stop-opacity="0"/></radialGradient>
+        <circle cx="${x}" cy="${y}" r="8" fill="url(#ff${x|0})"/>`;
+    });
+  }
+
+  else if (deco === 'mountain') {
+    // Stalagmites + icicles
+    [[0.05,0.92],[0.12,0.88],[0.88,0.90],[0.94,0.86],[0.25,0.92],[0.75,0.91]].forEach(([xp,yp])=>{
+      const x=W*xp, y=H*yp, h=40+Math.floor(x%30);
+      inner += `<polygon points="${x},${y-h} ${x-8},${y} ${x+8},${y}" fill="#7a8090"/>
+        <polygon points="${x},${y-h} ${x-4},${y-h+10} ${x},${y-h+5}" fill="rgba(255,255,255,0.15)"/>`;
+    });
+    // Ice crystals (stalactites from ceiling)
+    [[0.15,0],[0.35,0],[0.55,0],[0.75,0],[0.9,0]].forEach(([xp,yp])=>{
+      const x=W*xp, h=20+Math.floor(x%25);
+      inner += `<polygon points="${x},0 ${x-6},${h} ${x+6},${h}" fill="#8090a8" opacity="0.7"/>
+        <polygon points="${x},0 ${x-3},${h*0.5} ${x},${h*0.3}" fill="rgba(255,255,255,0.2)"/>`;
+    });
+    // Glowing ore veins
+    [[0.1,0.5],[0.85,0.48],[0.5,0.2]].forEach(([xp,yp])=>{
+      const x=W*xp, y=H*yp;
+      inner += crystal(x, y, '#4080e0', 18);
+    });
+    // Torches on walls
+    [[0.18,0.68],[0.82,0.68]].forEach(([xp,yp])=>{
+      inner += torch(W*xp, H*yp, '#60a0ff');
+    });
+  }
+
+  else if (deco === 'dungeon') {
+    // Main pillars at sides
+    [[0.04,0.9],[0.96,0.9],[0.04,0.3],[0.96,0.3]].forEach(([xp,yp])=>{
+      inner += pillar(W*xp, H*yp, '#3a3848', 70);
+    });
+    // Torches with warm glow
+    [[0.15,0.82],[0.85,0.82],[0.5,0.25]].forEach(([xp,yp])=>{
+      inner += torch(W*xp, H*yp, '#ff6020');
+    });
+    // Bones scattered
+    [[0.2,0.9],[0.5,0.92],[0.72,0.88]].forEach(([xp,yp])=>{
+      inner += bones(W*xp, H*yp);
+    });
+    // Skulls
+    [[0.08,0.87],[0.9,0.86]].forEach(([xp,yp])=>{
+      inner += skull(W*xp, H*yp);
+    });
+    // Blue crystals
+    [[0.25,0.18],[0.72,0.15],[0.5,0.12]].forEach(([xp,yp])=>{
+      inner += crystal(W*xp, H*yp, '#2040c0', 22);
+    });
+    // Chains from ceiling
+    [[0.3,0],[0.7,0],[0.5,0]].forEach(([xp])=>{
+      const x=W*xp;
+      for(let i=0;i<6;i++) inner += rect(x-1,i*12,2,10,'#404040');
+      inner += rect(x-3,72,6,6,'#383838');
+    });
+    // Floor cracks
+    inner += `<line x1="${W*0.2}" y1="${H*0.75}" x2="${W*0.35}" y2="${H*0.85}" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>`;
+    inner += `<line x1="${W*0.6}" y1="${H*0.72}" x2="${W*0.72}" y2="${H*0.82}" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>`;
+    // Ambient dungeon glow pools
+    [[0.15,0.82,'#2020a0'],[0.85,0.82,'#2020a0'],[0.5,0.25,'#4040c0']].forEach(([xp,yp,c])=>{
+      inner += glow(W*xp, H*yp, 60, c, 0.18);
+    });
+  }
+
+  else if (deco === 'volcano') {
+    // Lava pools
+    [[0.1,0.88],[0.88,0.85],[0.5,0.92]].forEach(([xp,yp])=>{
+      inner += lava(W*xp, H*yp, 35, 14);
+    });
+    // Magma rocks
+    [[0.05,0.8],[0.92,0.78],[0.28,0.88],[0.7,0.86]].forEach(([xp,yp])=>{
+      const x=W*xp,y=H*yp;
+      inner += `<ellipse cx="${x}" cy="${y}" rx="18" ry="10" fill="#3a1004"/>
+        <ellipse cx="${x-3}" cy="${y-3}" rx="12" ry="7" fill="#501808"/>
+        <ellipse cx="${x-5}" cy="${y-5}" rx="5" ry="3" fill="#ff4000" opacity="0.4"/>`;
+    });
+    // Fire vents
+    [[0.2,0.7],[0.78,0.72]].forEach(([xp,yp])=>{
+      const x=W*xp,y=H*yp;
+      inner += `<ellipse cx="${x}" cy="${y}" rx="8" ry="4" fill="#800000"/>
+        <ellipse cx="${x}" cy="${y-12}" rx="6" ry="14" fill="#ff3000" opacity="0.7"/>
+        <ellipse cx="${x}" cy="${y-18}" rx="4" ry="10" fill="#ff6020" opacity="0.6"/>
+        <ellipse cx="${x}" cy="${y-22}" rx="2" ry="6" fill="#ffa040" opacity="0.5"/>`;
+      inner += glow(x, y-10, 40, '#ff4000', 0.25);
+    });
+    // Ember particles
+    for(let i=0;i<12;i++){
+      const ex=W*(0.1+Math.sin(i*77)*0.4+0.4),ey=H*(0.3+Math.cos(i*53)*0.3+0.3);
+      inner += `<circle cx="${ex}" cy="${ey}" r="2" fill="#ff6020" opacity="${0.3+i%3*0.2}"/>`;
+    }
+  }
+
+  else if (deco === 'castle') {
+    // Stone pillars (gothic)
+    [[0.04,0.9],[0.96,0.9],[0.04,0.25],[0.96,0.25],[0.3,0.9],[0.7,0.9]].forEach(([xp,yp])=>{
+      inner += pillar(W*xp, H*yp, '#504860', 80);
+    });
+    // Gothic arch at back
+    inner += `<path d="M${W*0.35},${H*0.6} Q${W*0.5},${H*0.1} ${W*0.65},${H*0.6}" stroke="#3a3448" stroke-width="8" fill="none" opacity="0.7"/>`;
+    // Gravestones
+    [[0.15,0.87],[0.82,0.85],[0.5,0.9]].forEach(([xp,yp])=>{
+      const x=W*xp,y=H*yp;
+      inner += `<rect x="${x-6}" y="${y-20}" width="12" height="16" fill="#606070" rx="4"/>
+        <rect x="${x-8}" y="${y-4}" width="16" height="10" fill="#606070"/>
+        <rect x="${x-4}" y="${y-18}" width="8" height="1" fill="#404050"/>
+        <rect x="${x-2}" y="${y-22}" width="4" height="5" fill="#404050"/>
+        <rect x="${x-1}" y="${y-5}" width="2" height="4" fill="#404048"/>`;
+    });
+    // Torches purple-tinted
+    [[0.12,0.8],[0.88,0.8],[0.5,0.2]].forEach(([xp,yp])=>{
+      inner += torch(W*xp, H*yp, '#c060ff');
+    });
+    // Magic runes on floor
+    [[0.3,0.7],[0.5,0.65],[0.7,0.7]].forEach(([xp,yp])=>{
+      inner += `<circle cx="${W*xp}" cy="${H*yp}" r="12" fill="none" stroke="#8040c0" stroke-width="1.5" opacity="0.5"/>`;
+      inner += glow(W*xp, H*yp, 20, '#8040c0', 0.2);
+    });
+  }
+
+  else if (deco === 'boss') {
+    // Multiple portals
+    [[0.15,0.5],[0.85,0.5]].forEach(([xp,yp])=>{
+      inner += portal(W*xp, H*yp, '#8000d0');
+    });
+    // Central massive portal
+    inner += portal(W*0.5, H*0.3, '#c000ff');
+    // Pentagrams
+    [[0.3,0.75],[0.7,0.75]].forEach(([xp,yp])=>{
+      const x=W*xp,y=H*yp;
+      inner += `<circle cx="${x}" cy="${y}" r="25" fill="none" stroke="#800080" stroke-width="1.5" opacity="0.6"/>
+        <polygon points="${x},${y-25} ${x+23},${y+17} ${x-15},${y-8} ${x+15},${y-8} ${x-23},${y+17}" fill="none" stroke="#c000ff" stroke-width="1" opacity="0.5"/>`;
+      inner += glow(x, y, 35, '#8000c0', 0.22);
+    });
+    // Skulls
+    [[0.08,0.85],[0.92,0.83],[0.5,0.88]].forEach(([xp,yp])=>{
+      inner += skull(W*xp, H*yp);
+    });
+    // Boss glow on floor
+    inner += glow(W*0.5, H*0.6, 120, '#6000a0', 0.28);
+    // Lightning bolts
+    [[0.2,0.4],[0.8,0.38]].forEach(([xp,yp])=>{
+      const x=W*xp,y=H*yp;
+      inner += `<polyline points="${x},${y-60} ${x+8},${y-30} ${x-4},${y} ${x+10},${y+30}" stroke="#c040ff" stroke-width="2" fill="none" opacity="0.5"/>`;
+      inner += glow(x+5, y, 20, '#c040ff', 0.3);
+    });
+  }
+
+  return `<svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="${vb}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs></defs>
+    ${inner}
+  </svg>`;
+}
 
 const VILLAGE_THEME = { sky:'#5ba8e8', ground:'#3d8c2a', tile:'#4ea038', path:'#b89050', accent:'#2a5a18', deco:'village' };
 
@@ -5765,242 +6150,287 @@ function onHAttack() {
 function renderVillageScene() {
   const W = window.innerWidth, H = window.innerHeight;
 
-  // ── Mountains (SVG) ──
-  const mEl = document.getElementById('vMountains');
-  if (mEl) mEl.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H*0.36}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Far mountains misty -->
-    <polygon points="0,${H*.36} ${W*.08},${H*.06} ${W*.18},${H*.22} ${W*.28},${H*.04} ${W*.40},${H*.18} ${W*.52},${H*.02} ${W*.65},${H*.16} ${W*.78},${H*.08} ${W*.90},${H*.20} ${W},${H*.10} ${W},${H*.36}" fill="rgba(160,195,220,0.5)"/>
-    <!-- Near mountains -->
-    <polygon points="0,${H*.36} ${W*.05},${H*.15} ${W*.15},${H*.28} ${W*.25},${H*.12} ${W*.38},${H*.24} ${W*.50},${H*.10} ${W*.62},${H*.22} ${W*.75},${H*.14} ${W*.88},${H*.26} ${W},${H*.15} ${W},${H*.36}" fill="rgba(130,175,200,0.55)"/>
-    <!-- Mist at base -->
-    <rect x="0" y="${H*.28}" width="${W}" height="${H*.08}" fill="url(#mistGrad)"/>
-    <defs><linearGradient id="mistGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(220,240,250,0)"/><stop offset="1" stop-color="rgba(220,240,250,0.7)"/></linearGradient></defs>
-  </svg>`;
-
-  // ── Rolling hills ──
-  const hEl = document.getElementById('vHills');
-  if (hEl) hEl.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 ${W} ${H*0.3}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0,${H*.3} Q${W*.15},${H*.05} ${W*.3},${H*.18} Q${W*.45},${H*.3} ${W*.6},${H*.1} Q${W*.75},${H*.0} ${W*.9},${H*.15} L${W},${H*.12} L${W},${H*.3} Z" fill="#7cbd5a"/>
-    <path d="M0,${H*.3} Q${W*.12},${H*.12} ${W*.25},${H*.2} Q${W*.4},${H*.28} ${W*.55},${H*.14} Q${W*.7},${H*.04} ${W*.85},${H*.18} L${W},${H*.16} L${W},${H*.3} Z" fill="#6aad48" opacity="0.8"/>
-  </svg>`;
-
-  // ── Ground tiles (voxel grass) ──
-  const gEl = document.getElementById('vGround');
-  if (!gEl) return;
-  const COLS = 14, ROWS = 9;
-  const tileW = Math.ceil(W * 1.2 / COLS);
-  const tileH = Math.ceil(H * 0.6 / ROWS);
-
-  const GRASS_COLORS = [
-    ['#6dc848','#5ab838','#4aa428'], // bright grass
-    ['#58b830','#4aa020','#3a8818'], // medium grass
-    ['#48a828','#3a9018','#2a7808'], // dark grass
-    ['#72cc4c','#60bc38','#50a828'], // light patch
-    ['#a09060','#907850','#806840'], // dirt patch
-  ];
-
-  let html = '';
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      const x = col * tileW - tileW * 0.1;
-      const y = row * tileH;
-      // Random tile color, with path area being dirt
-      const isPath = col >= 5 && col <= 8 && row >= 4;
-      const seed = (col * 7 + row * 13 + col * row) % 4;
-      const gc = isPath ? GRASS_COLORS[4] : GRASS_COLORS[seed];
-      const h = 8 + (seed * 3); // varied height
-      html += `<div style="position:absolute;left:${x}px;top:${y}px;width:${tileW-1}px;height:${tileH}px;background:${gc[0]};border-radius:4px 4px 0 0;box-shadow:inset 0 -${h}px 0 ${gc[2]},inset 0 2px 0 rgba(255,255,255,0.2);"></div>`;
-    }
+  // ── Sky ──
+  const skyEl = document.getElementById('vSky');
+  if (skyEl) {
+    skyEl.style.cssText = `position:absolute;top:0;left:0;right:0;height:42%;
+      background:linear-gradient(180deg,#6ec6f0 0%,#a8dcf8 50%,#d0eefc 100%);pointer-events:none;`;
+    skyEl.innerHTML = `
+      <div style="position:absolute;top:8%;left:5%;animation:cloud-drift 26s linear infinite;">
+        <svg viewBox="0 0 110 38" width="220" height="76" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="55" cy="28" rx="50" ry="13" fill="rgba(255,255,255,0.92)"/>
+          <ellipse cx="35" cy="24" rx="22" ry="16" fill="rgba(255,255,255,0.95)"/>
+          <ellipse cx="75" cy="23" rx="26" ry="15" fill="rgba(255,255,255,0.90)"/>
+          <ellipse cx="55" cy="22" rx="28" ry="18" fill="rgba(255,255,255,0.97)"/>
+        </svg>
+      </div>
+      <div style="position:absolute;top:4%;left:50%;animation:cloud-drift 18s linear infinite;animation-delay:-7s;">
+        <svg viewBox="0 0 80 28" width="160" height="56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="20" rx="36" ry="10" fill="rgba(255,255,255,0.88)"/>
+          <ellipse cx="25" cy="17" rx="18" ry="13" fill="rgba(255,255,255,0.93)"/>
+          <ellipse cx="56" cy="16" rx="20" ry="12" fill="rgba(255,255,255,0.90)"/>
+          <ellipse cx="40" cy="15" rx="22" ry="14" fill="rgba(255,255,255,0.95)"/>
+        </svg>
+      </div>`;
   }
-  gEl.innerHTML = html;
 
-  // ── Flowers & grass tufts ──
+  // ── Mountains (behind hills) ──
+  const mEl = document.getElementById('vMountains');
+  if (mEl) {
+    mEl.style.cssText = `position:absolute;bottom:38%;left:0;right:0;height:22%;pointer-events:none;overflow:hidden;`;
+    mEl.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 1200 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,160 80,40 180,110 300,20 420,90 540,10 660,80 780,30 900,100 1020,50 1140,90 1200,60 1200,160" fill="rgba(150,185,210,0.55)"/>
+      <polygon points="0,160 60,70 160,120 280,45 400,105 520,30 640,95 760,55 880,115 1000,65 1120,100 1200,75 1200,160" fill="rgba(120,160,195,0.45)"/>
+    </svg>`;
+  }
+
+  // ── Rolling hills (green, just above ground) ──
+  const hEl = document.getElementById('vHills');
+  if (hEl) {
+    hEl.style.cssText = `position:absolute;bottom:38%;left:-2%;right:-2%;height:16%;pointer-events:none;`;
+    hEl.innerHTML = `<svg width="104%" height="100%" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,120 Q150,30 300,70 Q450,110 600,40 Q750,0 900,60 Q1050,110 1200,50 L1200,120 Z" fill="#7ec855"/>
+      <path d="M0,120 Q120,50 260,80 Q400,110 550,55 Q700,15 850,75 Q1000,110 1200,65 L1200,120 Z" fill="#6ab840" opacity="0.75"/>
+    </svg>`;
+  }
+
+  // ── Ground (grass tiles) ──
+  const gEl = document.getElementById('vGround');
+  if (gEl) {
+    gEl.style.cssText = `position:absolute;bottom:0;left:0;right:0;height:42%;overflow:hidden;`;
+    const COLS = 18, ROWS = 6;
+    const tW = Math.ceil(W / COLS);
+    const tH = Math.ceil(H * 0.42 / ROWS);
+    const GC = [
+      ['#5ab830','#48a020','#3a8018'],
+      ['#64c838','#52b028','#409020'],
+      ['#50a828','#409018','#307810'],
+      ['#6acc40','#58b830','#48a028'],
+    ];
+    let g = '';
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        const isPath = col >= 7 && col <= 10;
+        const seed = (col * 5 + row * 9) % 4;
+        const c = isPath ? ['#b09050','#a07840','#906830'] : GC[seed];
+        const sh = 6 + seed * 3;
+        g += `<div style="position:absolute;left:${col*tW}px;top:${row*tH}px;width:${tW}px;height:${tH}px;background:${c[0]};box-shadow:inset 0 -${sh}px 0 ${c[2]},inset 0 2px 0 rgba(255,255,255,0.18);"></div>`;
+      }
+    }
+    gEl.innerHTML = g;
+  }
+
+  // ── Fog/atmosphere ──
+  const fogEl = document.getElementById('vFog');
+  if (fogEl) {
+    fogEl.style.cssText = `position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 42%,transparent 30%,rgba(200,230,250,0.12) 70%,rgba(200,230,250,0.28) 100%);`;
+  }
+
+  // ── Flowers & trees ──
   const dEl = document.getElementById('villageDecos');
   if (dEl) {
-    const decos = [];
-    const flowers = ['🌸','🌼','🌺','🌻','🍀','🌿','🌾'];
-    for (let i = 0; i < 22; i++) {
-      const x = 3 + Math.random() * 94;
-      const y = 44 + Math.random() * 22;
-      const f = flowers[Math.floor(Math.random() * flowers.length)];
-      const delay = Math.random() * 3;
-      const scale = 0.7 + Math.random() * 0.6;
-      // skip path area
-      if (x > 40 && x < 65 && y > 50) continue;
-      decos.push(`<div class="vflower" style="left:${x}%;bottom:${y}%;font-size:${scale}rem;animation-delay:${delay}s;">${f}</div>`);
+    dEl.style.cssText = `position:absolute;inset:0;pointer-events:none;`;
+    const items = [];
+    // Flowers (scattered on ground)
+    const flowers = ['🌸','🌼','🌺','🌻','🍀','🌿'];
+    const rng = (n) => Math.floor(Math.random()*n);
+    for (let i = 0; i < 18; i++) {
+      const x = 2 + Math.random()*96;
+      const y = 40 + Math.random()*20;
+      if (x > 38 && x < 64 && y > 50) continue; // skip path
+      const f = flowers[rng(flowers.length)];
+      const sz = (0.6 + Math.random()*0.5).toFixed(1);
+      const delay = (Math.random()*3).toFixed(1);
+      items.push(`<div style="position:absolute;left:${x.toFixed(1)}%;bottom:${y.toFixed(1)}%;font-size:${sz}rem;animation:vflower-sway 3s ease-in-out ${delay}s infinite;transform-origin:bottom center;pointer-events:none;">${f}</div>`);
     }
-    // Trees
-    [[8,62],[12,58],[88,60],[92,55],[18,40],[78,42]].forEach(([x,y]) => {
-      decos.push(`<div class="vtree" style="position:absolute;left:${x}%;bottom:${y}%;">
-        <svg viewBox="0 0 28 44" width="56" height="88" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-          <rect x="10" y="30" width="8" height="14" fill="#7a5028"/>
-          <rect x="9" y="30" width="10" height="2" fill="#5a3818"/>
-          <!-- Canopy layers -->
-          <rect x="2" y="16" width="24" height="16" fill="#2a8020"/>
-          <rect x="4" y="16" width="20" height="2" fill="#3a9830"/>
-          <rect x="4" y="8" width="20" height="12" fill="#38a028"/>
-          <rect x="6" y="8" width="16" height="2" fill="#48b038"/>
-          <rect x="6" y="2" width="16" height="10" fill="#42b030"/>
-          <rect x="8" y="2" width="12" height="2" fill="#52c040"/>
-          <rect x="10" y="0" width="8" height="4" fill="#58c840"/>
-          <!-- Shadow -->
-          <rect x="2" y="16" width="4" height="16" fill="#1a6010" opacity="0.4"/>
+    // Trees (side view, base at ground level)
+    const trees = [[6,42],[10,46],[87,44],[92,48],[15,40],[80,41]];
+    trees.forEach(([x,y]) => {
+      items.push(`<div style="position:absolute;left:${x}%;bottom:${y}%;pointer-events:none;filter:drop-shadow(3px 6px 8px rgba(0,0,0,0.3));">
+        <svg viewBox="0 0 32 52" width="64" height="104" xmlns="http://www.w3.org/2000/svg">
+          <rect x="12" y="34" width="8" height="18" fill="#7a5028"/>
+          <rect x="11" y="34" width="10" height="3" fill="#5a3818"/>
+          <rect x="2" y="18" width="28" height="18" fill="#2a8020"/>
+          <rect x="4" y="18" width="24" height="3" fill="#3a9830"/>
+          <rect x="4" y="10" width="24" height="12" fill="#38a028"/>
+          <rect x="6" y="10" width="20" height="3" fill="#48b038"/>
+          <rect x="6" y="2" width="20" height="12" fill="#42b030"/>
+          <rect x="8" y="2" width="16" height="3" fill="#52c040"/>
+          <rect x="10" y="0" width="12" height="5" fill="#58c840"/>
+          <rect x="2" y="18" width="5" height="18" fill="#1a6010" opacity="0.35"/>
         </svg>
       </div>`);
     });
-    dEl.innerHTML = decos.join('');
-  }
-
-  // ── Clouds ──
-  const skyEl = document.getElementById('vSky');
-  if (skyEl) {
-    skyEl.innerHTML = `
-      <div style="position:absolute;top:8%;left:-80px;animation:cloud-drift 28s linear infinite;">
-        <svg viewBox="0 0 80 28" width="160" height="56" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="40" cy="20" rx="36" ry="10" fill="rgba(255,255,255,0.9)"/>
-          <ellipse cx="26" cy="18" rx="16" ry="12" fill="rgba(255,255,255,0.95)"/>
-          <ellipse cx="54" cy="17" rx="18" ry="11" fill="rgba(255,255,255,0.9)"/>
-          <ellipse cx="40" cy="16" rx="20" ry="14" fill="rgba(255,255,255,0.95)"/>
-          <ellipse cx="40" cy="20" rx="36" ry="6" fill="rgba(230,242,255,0.6)"/>
-        </svg>
-      </div>
-      <div style="position:absolute;top:4%;left:-80px;animation:cloud-drift 18s linear infinite;animation-delay:-6s;">
-        <svg viewBox="0 0 60 22" width="120" height="44" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="30" cy="16" rx="26" ry="8" fill="rgba(255,255,255,0.85)"/>
-          <ellipse cx="20" cy="14" rx="12" ry="10" fill="rgba(255,255,255,0.9)"/>
-          <ellipse cx="42" cy="13" rx="14" ry="9" fill="rgba(255,255,255,0.88)"/>
-          <ellipse cx="30" cy="14" rx="16" ry="10" fill="rgba(255,255,255,0.92)"/>
-        </svg>
-      </div>`;
+    dEl.innerHTML = items.join('');
   }
 }
 
 function renderVillageBuildings() {
   const obj = document.getElementById('villageObjects');
   if (!obj) return;
+  obj.style.cssText = 'position:absolute;inset:0;pointer-events:auto;';
+
+  // Helper: building label
+  const lbl = (text) => `<div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.72);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(4px);">${text}</div>`;
+
   obj.innerHTML = `
-    <!-- Inn - half-timbered -->
-    <div class="vbuild" style="left:4%;bottom:60%;" onclick="openInn()">
-      <div class="vbuild-label">🏨 여관 (전직)</div>
-      <svg viewBox="0 0 70 90" width="126" height="162" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="78" width="66" height="12" fill="#808870"/>
-        <rect x="0" y="76" width="70" height="4" fill="#909880"/>
-        <rect x="4" y="34" width="62" height="44" fill="#e8dcc8"/>
-        <rect x="4" y="34" width="3" height="44" fill="#5c3820"/>
-        <rect x="63" y="34" width="3" height="44" fill="#5c3820"/>
-        <rect x="4" y="34" width="62" height="3" fill="#5c3820"/>
-        <rect x="4" y="56" width="62" height="3" fill="#5c3820"/>
-        <rect x="33" y="34" width="3" height="44" fill="#5c3820"/>
-        <line x1="4" y1="34" x2="33" y2="56" stroke="#6a4028" stroke-width="2.5"/>
-        <line x1="36" y1="34" x2="63" y2="56" stroke="#6a4028" stroke-width="2.5"/>
-        <rect x="8" y="40" width="18" height="14" fill="#80b8e0" opacity="0.85"/>
-        <rect x="9" y="41" width="16" height="12" fill="#a0d0f0" opacity="0.6"/>
-        <rect x="16" y="40" width="2" height="14" fill="#5090b8"/>
-        <rect x="8" y="47" width="18" height="2" fill="#5090b8"/>
-        <rect x="44" y="40" width="18" height="14" fill="#80b8e0" opacity="0.85"/>
-        <rect x="45" y="41" width="16" height="12" fill="#a0d0f0" opacity="0.6"/>
-        <rect x="52" y="40" width="2" height="14" fill="#5090b8"/>
-        <rect x="44" y="47" width="18" height="2" fill="#5090b8"/>
-        <rect x="28" y="57" width="14" height="21" fill="#7a4820"/>
-        <rect x="29" y="58" width="12" height="20" fill="#6a3818"/>
-        <rect x="35" y="58" width="2" height="20" fill="#5a2c10"/>
-        <rect x="36" y="67" width="3" height="2" fill="#d0a040"/>
-        <rect x="22" y="36" width="26" height="8" fill="#c09040"/>
-        <rect x="23" y="37" width="24" height="6" fill="#b08030"/>
-        <text x="24" y="43" font-size="5" fill="#fff8e0" font-weight="bold" font-family="sans-serif">여 관</text>
-        <polygon points="0,34 35,2 70,34" fill="#2a3038"/>
-        <polygon points="2,34 35,5 68,34" fill="#323a44"/>
-        <rect x="0" y="32" width="70" height="4" fill="#1e2830"/>
-        <rect x="30" y="2" width="10" height="3" fill="#3a4450"/>
-        <rect x="50" y="0" width="10" height="18" fill="#484850"/>
-        <rect x="48" y="0" width="14" height="3" fill="#383840"/>
-        <polygon points="2,34 35,5 40,8 5,34" fill="rgba(255,255,255,0.06)"/>
-        <rect x="32" y="26" width="6" height="8" fill="#f0c040" opacity="0.7"/>
-        <rect x="31" y="24" width="8" height="3" fill="#a08028"/>
+    <!-- INN (left) - half-timbered -->
+    <div style="position:absolute;left:3%;bottom:42%;cursor:pointer;" onclick="openInn()">
+      ${lbl('🏨 여관 (전직)')}
+      <svg viewBox="0 0 80 96" width="130" height="156" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="84" width="80" height="12" fill="#707860" rx="1"/>
+        <rect x="2" y="36" width="76" height="50" fill="#ede0c4"/>
+        <rect x="2" y="36" width="76" height="3" fill="#d0c4a0"/>
+        <rect x="2" y="36" width="4" height="50" fill="#6a4020"/>
+        <rect x="74" y="36" width="4" height="50" fill="#6a4020"/>
+        <rect x="2" y="60" width="76" height="3" fill="#6a4020"/>
+        <rect x="38" y="36" width="4" height="50" fill="#6a4020"/>
+        <line x1="2" y1="36" x2="38" y2="60" stroke="#7a4828" stroke-width="3"/>
+        <line x1="42" y1="36" x2="78" y2="60" stroke="#7a4828" stroke-width="3"/>
+        <rect x="6" y="42" width="22" height="16" fill="#5aa0d8" opacity="0.85"/>
+        <rect x="7" y="43" width="20" height="14" fill="#80c0f0" opacity="0.55"/>
+        <rect x="16" y="42" width="2" height="16" fill="#3878a8"/>
+        <rect x="6" y="50" width="22" height="2" fill="#3878a8"/>
+        <rect x="52" y="42" width="22" height="16" fill="#5aa0d8" opacity="0.85"/>
+        <rect x="53" y="43" width="20" height="14" fill="#80c0f0" opacity="0.55"/>
+        <rect x="62" y="42" width="2" height="16" fill="#3878a8"/>
+        <rect x="52" y="50" width="22" height="2" fill="#3878a8"/>
+        <rect x="30" y="62" width="20" height="24" fill="#8a3c18"/>
+        <rect x="31" y="63" width="18" height="22" fill="#7a2e10"/>
+        <rect x="39" y="63" width="2" height="22" fill="#681e08"/>
+        <rect x="41" y="74" width="3" height="2" fill="#d8a030"/>
+        <rect x="26" y="38" width="28" height="8" fill="#c09840"/>
+        <rect x="27" y="39" width="26" height="6" fill="#b08830"/>
+        <text x="28" y="45" font-size="6" fill="#fff8e0" font-weight="bold" font-family="sans-serif">여 관</text>
+        <polygon points="0,36 40,2 80,36" fill="#22282e"/>
+        <polygon points="2,36 40,5 78,36" fill="#2c343e"/>
+        <rect x="0" y="34" width="80" height="4" fill="#181e24"/>
+        <rect x="55" y="0" width="12" height="22" fill="#404848"/>
+        <rect x="53" y="0" width="16" height="4" fill="#303838"/>
+        <circle cx="61" cy="-3" r="5" fill="#c0c0c0" opacity="0.6"/>
+        <circle cx="65" cy="-7" r="3" fill="#d0d0d0" opacity="0.4"/>
+        <rect x="36" y="28" width="8" height="10" fill="#f0c840" opacity="0.7"/>
+        <rect x="35" y="26" width="10" height="4" fill="#a07828"/>
       </svg>
     </div>
 
-    <!-- Blacksmith (right) -->
-    <div class="vbuild" style="right:4%;bottom:58%;" onclick="openBlacksmith()">
-      <div class="vbuild-label">⚒️ 대장간 (강화)</div>
-      <svg viewBox="0 0 64 84" width="110" height="144" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="72" width="60" height="12" fill="#605850"/>
-        <rect x="4" y="30" width="56" height="44" fill="#909080"/>
-        <rect x="4" y="30" width="56" height="3" fill="#a0a090"/>
-        <rect x="4" y="42" width="56" height="1" fill="#808070" opacity="0.5"/>
-        <rect x="4" y="54" width="56" height="1" fill="#808070" opacity="0.5"/>
-        <rect x="20" y="30" width="1" height="44" fill="#808070" opacity="0.4"/>
-        <rect x="44" y="30" width="1" height="44" fill="#808070" opacity="0.4"/>
-        <rect x="6" y="38" width="12" height="10" fill="#4090b0" opacity="0.7"/>
-        <rect x="7" y="39" width="10" height="8" fill="#60b0d0" opacity="0.5"/>
-        <rect x="22" y="38" width="18" height="16" fill="#1a1a1a"/>
-        <rect x="23" y="39" width="16" height="14" fill="#ff5000" opacity="0.9"/>
-        <rect x="25" y="38" width="12" height="5" fill="#ff8020"/>
-        <rect x="28" y="36" width="6" height="4" fill="#ffc040"/>
-        <rect x="26" y="52" width="12" height="22" fill="#303030"/>
-        <rect x="27" y="53" width="10" height="20" fill="#202020"/>
-        <rect x="33" y="61" width="2" height="2" fill="#909090"/>
-        <polygon points="0,30 32,2 64,30" fill="#282830"/>
-        <polygon points="2,30 32,5 62,30" fill="#303038"/>
-        <rect x="0" y="28" width="64" height="4" fill="#1c1c24"/>
-        <rect x="44" y="0" width="12" height="20" fill="#404040"/>
-        <rect x="42" y="0" width="16" height="3" fill="#303030"/>
-        <circle cx="50" cy="-4" r="5" fill="#c8c8c8" opacity="0.6"/>
-        <circle cx="54" cy="-8" r="4" fill="#d0d0d0" opacity="0.4"/>
-        <rect x="16" y="32" width="22" height="6" fill="#505048"/>
-        <text x="17" y="38" font-size="5" fill="#90d0ff" font-weight="bold" font-family="sans-serif">대장간</text>
+    <!-- SHOP (center-left) -->
+    <div style="position:absolute;left:30%;bottom:42%;cursor:pointer;" onclick="openVillageShop()">
+      ${lbl('🏪 상점')}
+      <svg viewBox="0 0 72 64" width="110" height="98" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="16" width="68" height="48" fill="#d4b068"/>
+        <rect x="2" y="16" width="68" height="4" fill="#e4c078"/>
+        <rect x="0" y="10" width="72" height="10" fill="#c84020"/>
+        <rect x="0" y="10" width="72" height="4" fill="#e05030"/>
+        <rect x="6" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
+        <rect x="18" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
+        <rect x="30" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
+        <rect x="42" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
+        <rect x="54" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
+        <rect x="2" y="10" width="5" height="54" fill="#b07828"/>
+        <rect x="65" y="10" width="5" height="54" fill="#b07828"/>
+        <rect x="4" y="26" width="64" height="6" fill="#c09030"/>
+        <rect x="4" y="26" width="64" height="1" fill="#d8a840"/>
+        <rect x="8" y="21" width="7" height="6" fill="#e03838" rx="1"/>
+        <rect x="20" y="20" width="6" height="7" fill="#38c038" rx="1"/>
+        <rect x="32" y="21" width="7" height="6" fill="#3850e0" rx="1"/>
+        <rect x="44" y="20" width="7" height="7" fill="#e0c030" rx="1"/>
+        <rect x="56" y="21" width="6" height="6" fill="#c030a0" rx="1"/>
+        <rect x="28" y="32" width="16" height="30" fill="#9a5010"/>
+        <rect x="29" y="33" width="14" height="28" fill="#8a3e08"/>
+        <rect x="35" y="33" width="2" height="28" fill="#7a2e04"/>
+        <rect x="37" y="46" width="3" height="2" fill="#c09030"/>
+        <polygon points="0,10 36,0 72,10" fill="#282018"/>
+        <rect x="0" y="8" width="72" height="4" fill="#1e1810"/>
+        <rect x="22" y="2" width="28" height="7" fill="#b88028"/>
+        <rect x="23" y="3" width="26" height="5" fill="#a87018"/>
+        <text x="25" y="8" font-size="5" fill="#fff0c0" font-weight="bold" font-family="sans-serif">상 점</text>
       </svg>
     </div>
 
-    <!-- Shop (center) -->
-    <div class="vbuild" style="left:36%;bottom:56%;" onclick="openVillageShop()">
-      <div class="vbuild-label">🏪 상점</div>
-      <svg viewBox="0 0 56 56" width="96" height="96" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="14" width="52" height="42" fill="#d4b870"/>
-        <rect x="2" y="14" width="52" height="3" fill="#e4c880"/>
-        <rect x="0" y="10" width="56" height="8" fill="#c04828"/>
-        <rect x="0" y="10" width="56" height="3" fill="#d85830"/>
-        <rect x="6" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
-        <rect x="17" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
-        <rect x="28" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
-        <rect x="39" y="10" width="5" height="8" fill="rgba(255,255,255,0.2)"/>
-        <rect x="2" y="10" width="4" height="46" fill="#a88030"/>
-        <rect x="50" y="10" width="4" height="46" fill="#a88030"/>
-        <rect x="4" y="24" width="48" height="5" fill="#b08030"/>
-        <rect x="8" y="20" width="5" height="5" fill="#e04040" rx="1"/>
-        <rect x="17" y="19" width="4" height="6" fill="#40c040" rx="1"/>
-        <rect x="26" y="20" width="5" height="5" fill="#4060e0" rx="1"/>
-        <rect x="36" y="19" width="5" height="6" fill="#e0c040" rx="1"/>
-        <rect x="44" y="20" width="4" height="5" fill="#c040a0" rx="1"/>
-        <polygon points="0,10 28,0 56,10" fill="#383830"/>
-        <rect x="0" y="8" width="56" height="4" fill="#282828"/>
-        <rect x="18" y="3" width="20" height="6" fill="#c09040"/>
-        <rect x="19" y="4" width="18" height="4" fill="#b08030"/>
-        <text x="20" y="8" font-size="4" fill="#fff8e0" font-weight="bold" font-family="sans-serif">상 점</text>
+    <!-- WELL (center) -->
+    <div style="position:absolute;left:52%;bottom:43%;pointer-events:none;">
+      <svg viewBox="0 0 44 52" width="72" height="85" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="22" width="36" height="30" fill="#909888"/>
+        <rect x="4" y="22" width="36" height="4" fill="#b0b8a8"/>
+        <rect x="2" y="22" width="6" height="30" fill="#808878"/>
+        <rect x="36" y="22" width="6" height="30" fill="#808878"/>
+        <rect x="8" y="26" width="28" height="24" fill="#3888c8"/>
+        <rect x="8" y="26" width="28" height="3" fill="#58a8e8"/>
+        <ellipse cx="22" cy="38" rx="10" ry="3" fill="#6abcf0" opacity="0.5"/>
+        <rect x="0" y="20" width="44" height="4" fill="#a0a898"/>
+        <rect x="16" y="0" width="5" height="22" fill="#8a5828"/>
+        <rect x="12" y="2" width="20" height="5" fill="#a06830"/>
+        <rect x="10" y="0" width="5" height="10" fill="#785020"/>
+        <rect x="29" y="0" width="5" height="10" fill="#785020"/>
+        <rect x="18" y="7" width="3" height="15" fill="#c0a060" opacity="0.8"/>
+        <rect x="15" y="15" width="9" height="7" fill="#8a5020" rx="1"/>
       </svg>
     </div>
 
-    <!-- Well -->
-    <div style="position:absolute;left:60%;bottom:54%;z-index:8;pointer-events:none;">
-      <svg viewBox="0 0 36 44" width="64" height="80" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="18" width="28" height="26" fill="#909888"/>
-        <rect x="4" y="18" width="28" height="4" fill="#b0b8a8"/>
-        <rect x="2" y="18" width="4" height="28" fill="#808878"/>
-        <rect x="30" y="18" width="4" height="28" fill="#808878"/>
-        <rect x="6" y="22" width="24" height="20" fill="#3888c8"/>
-        <rect x="6" y="22" width="24" height="3" fill="#58a8e8"/>
-        <ellipse cx="18" cy="33" rx="8" ry="2" fill="#6abcf0" opacity="0.4"/>
-        <rect x="0" y="16" width="36" height="4" fill="#a0a898"/>
-        <rect x="14" y="0" width="4" height="18" fill="#8a5828"/>
-        <rect x="10" y="2" width="16" height="4" fill="#a06830"/>
-        <rect x="8" y="0" width="4" height="8" fill="#785020"/>
-        <rect x="24" y="0" width="4" height="8" fill="#785020"/>
-        <rect x="17" y="6" width="2" height="12" fill="#c0a060" opacity="0.8"/>
+    <!-- BLACKSMITH (right) -->
+    <div style="position:absolute;right:3%;bottom:42%;cursor:pointer;" onclick="openBlacksmith()">
+      ${lbl('⚒️ 대장간 (강화)')}
+      <svg viewBox="0 0 76 88" width="118" height="137" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="76" width="72" height="12" fill="#585048" rx="1"/>
+        <rect x="4" y="32" width="68" height="46" fill="#888070"/>
+        <rect x="4" y="32" width="68" height="4" fill="#9890a0"/>
+        <rect x="4" y="44" width="68" height="1" fill="#706860" opacity="0.6"/>
+        <rect x="4" y="56" width="68" height="1" fill="#706860" opacity="0.6"/>
+        <rect x="22" y="32" width="1" height="46" fill="#706860" opacity="0.5"/>
+        <rect x="54" y="32" width="1" height="46" fill="#706860" opacity="0.5"/>
+        <rect x="6" y="40" width="14" height="12" fill="#3898b0" opacity="0.7"/>
+        <rect x="7" y="41" width="12" height="10" fill="#58b8d0" opacity="0.5"/>
+        <rect x="26" y="38" width="22" height="20" fill="#1a1a1a"/>
+        <rect x="27" y="39" width="20" height="18" fill="#ff4800" opacity="0.92"/>
+        <rect x="30" y="38" width="14" height="6" fill="#ff7820"/>
+        <rect x="33" y="35" width="8" height="6" fill="#ffc030"/>
+        <rect x="26" y="38" width="22" height="20" fill="#ff5800" opacity="0.18"/>
+        <rect x="30" y="58" width="16" height="26" fill="#252520"/>
+        <rect x="31" y="59" width="14" height="24" fill="#1a1a18"/>
+        <rect x="38" y="69" width="3" height="2" fill="#888080"/>
+        <polygon points="0,32 38,2 76,32" fill="#202028"/>
+        <polygon points="2,32 38,5 74,32" fill="#282830"/>
+        <rect x="0" y="30" width="76" height="4" fill="#181820"/>
+        <rect x="52" y="0" width="14" height="24" fill="#383830"/>
+        <rect x="50" y="0" width="18" height="4" fill="#282820"/>
+        <circle cx="59" cy="-4" r="6" fill="#c0c0b0" opacity="0.6"/>
+        <circle cx="63" cy="-9" r="4" fill="#d0d0c0" opacity="0.45"/>
+        <circle cx="57" cy="-12" r="3" fill="#c8c8b8" opacity="0.3"/>
+        <rect x="18" y="34" width="26" height="6" fill="#484840"/>
+        <text x="19" y="40" font-size="5" fill="#88c8ff" font-weight="bold" font-family="sans-serif">대장간</text>
+      </svg>
+    </div>
+
+    <!-- DUNGEON GATE (far right) -->
+    <div style="position:absolute;right:5%;bottom:42%;cursor:pointer;filter:drop-shadow(0 0 16px rgba(120,0,200,0.6));" onclick="goToBattle()" title="던전 입장">
+      ${lbl('⚔️ 던전 입장!')}
+      <svg viewBox="0 0 72 90" width="100" height="126" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="12" width="56" height="78" fill="#180830"/>
+        <rect x="6" y="9" width="60" height="7" fill="#280a50" rx="2"/>
+        <rect x="6" y="9" width="5" height="78" fill="#1e0640"/>
+        <rect x="61" y="9" width="5" height="78" fill="#1e0640"/>
+        <ellipse cx="36" cy="32" rx="22" ry="24" fill="#280a50"/>
+        <ellipse cx="36" cy="34" rx="18" ry="20" fill="#0a0018"/>
+        <ellipse cx="36" cy="35" rx="14" ry="16" fill="#5000b0" opacity="0.75"/>
+        <ellipse cx="36" cy="36" rx="10" ry="12" fill="#8020e0" opacity="0.65"/>
+        <ellipse cx="36" cy="37" rx="6" ry="8" fill="#b040ff" opacity="0.55"/>
+        <ellipse cx="36" cy="38" rx="3" ry="4" fill="#fff" opacity="0.25"/>
+        <rect x="18" y="48" width="4" height="40" fill="#302040"/>
+        <rect x="27" y="48" width="4" height="40" fill="#302040"/>
+        <rect x="36" y="48" width="4" height="40" fill="#302040"/>
+        <rect x="45" y="48" width="4" height="40" fill="#302040"/>
+        <rect x="14" y="59" width="44" height="4" fill="#302040"/>
+        <rect x="14" y="72" width="44" height="4" fill="#302040"/>
+        <circle cx="8" cy="14" r="5" fill="#2a1840"/>
+        <circle cx="64" cy="14" r="5" fill="#2a1840"/>
+        <text x="8" y="17" text-anchor="middle" font-size="7" fill="#8030c0">💀</text>
+        <text x="64" y="17" text-anchor="middle" font-size="7" fill="#8030c0">💀</text>
+        <text x="36" y="24" text-anchor="middle" font-size="9" fill="#c060ff" opacity="0.8">⚡</text>
       </svg>
     </div>
   `;
 }
-
 
 function leaveVillage() {
   if (!villageActive) return;
