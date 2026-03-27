@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>📓 공책 RPG</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 :root {
   --gold: #f5c842;
@@ -587,41 +588,6 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeOut{from{opacity:1}to{opacity:0}}
 @keyframes popIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
-}
-@keyframes attack-flash {
-  0% { opacity:0; transform:scale(0.5); }
-  30% { opacity:1; transform:scale(1.2); }
-  100% { opacity:0; transform:scale(1.5); }
-}
-@keyframes damage-float {
-  0% { transform:translateY(0); opacity:1; }
-  100% { transform:translateY(-60px); opacity:0; }
-}
-@keyframes skill-glow {
-  0%,100% { box-shadow:0 0 10px rgba(245,200,66,0.5); }
-  50% { box-shadow:0 0 30px rgba(245,200,66,1), 0 0 60px rgba(245,200,66,0.5); }
-}
-@keyframes btn-blink {
-  0%,100% { opacity:1; transform:scale(1); }
-  50% { opacity:0.7; transform:scale(1.05); }
-}
-@keyframes wave-in {
-  from { transform:translateX(100%); opacity:0; }
-  to { transform:translateX(0); opacity:1; }
-}
-@keyframes slide-up {
-  from { transform:translateY(100%); opacity:0; }
-  to { transform:translateY(0); opacity:1; }
-}
-@keyframes shake {
-  0%,100% { transform:translateX(0) scaleX(-1); }
-  25% { transform:translateX(-6px) scaleX(-1); }
-  75% { transform:translateX(6px) scaleX(-1); }
-}
-@keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-@keyframes fadeOut { from{opacity:1} to{opacity:0} }
-@keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
 
 /* ====== BATTLE MAP (TOP-DOWN) ====== */
 #battleMapScreen {
@@ -698,24 +664,73 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
 }
 
 /* ====== BATTLE MAP CSS END ====== */
-@keyframes char-walk-r {
-  0%,100%{ transform:translateY(0) scaleX(1); }
-  25%,75%{ transform:translateY(-5px) scaleX(1); }
-  50%    { transform:translateY(-1px) scaleX(1); }
+/* ====== CHARACTER ANIMATION SYSTEM ====== */
+/* Frame-based walk cycle - legs/arms swing via CSS transforms */
+@keyframes leg-l-walk {
+  0%  { transform:rotate(-28deg) translateY(0); }
+  25% { transform:rotate(0deg)   translateY(-2px); }
+  50% { transform:rotate(28deg)  translateY(0); }
+  75% { transform:rotate(0deg)   translateY(-2px); }
+  100%{ transform:rotate(-28deg) translateY(0); }
 }
-@keyframes char-walk-l {
-  0%,100%{ transform:translateY(0) scaleX(-1); }
-  25%,75%{ transform:translateY(-5px) scaleX(-1); }
-  50%    { transform:translateY(-1px) scaleX(-1); }
+@keyframes leg-r-walk {
+  0%  { transform:rotate(28deg)  translateY(0); }
+  25% { transform:rotate(0deg)   translateY(-2px); }
+  50% { transform:rotate(-28deg) translateY(0); }
+  75% { transform:rotate(0deg)   translateY(-2px); }
+  100%{ transform:rotate(28deg)  translateY(0); }
+}
+@keyframes arm-l-walk {
+  0%  { transform:rotate(22deg); }
+  50% { transform:rotate(-22deg); }
+  100%{ transform:rotate(22deg); }
+}
+@keyframes arm-r-walk {
+  0%  { transform:rotate(-22deg); }
+  50% { transform:rotate(22deg); }
+  100%{ transform:rotate(-22deg); }
+}
+@keyframes body-bob {
+  0%,100%{ transform:translateY(0); }
+  50%    { transform:translateY(-3px); }
 }
 @keyframes char-idle-bob {
-  0%,100%{ transform:translateY(0); }
-  50%    { transform:translateY(-2px); }
+  0%,100%{ transform:translateY(0) scaleY(1); }
+  50%    { transform:translateY(-2px) scaleY(1.02); }
 }
-.vc-body { image-rendering:pixelated; display:block; }
-.vc-body.walk-r { animation:char-walk-r 0.32s steps(4) infinite; }
-.vc-body.walk-l { animation:char-walk-l 0.32s steps(4) infinite; }
-.vc-body.idle   { animation:char-idle-bob 1.4s steps(2) infinite; }
+@keyframes char-shadow-walk {
+  0%,100%{ transform:translateX(-50%) scaleX(1); }
+  50%    { transform:translateX(-50%) scaleX(0.8); }
+}
+
+.vc-body { image-rendering:pixelated; display:block; position:relative; }
+.vc-body.idle .char-body-group   { animation:char-idle-bob 1.6s ease-in-out infinite; }
+.vc-body.walk-r { transform:scaleX(1); }
+.vc-body.walk-l { transform:scaleX(-1); }
+.vc-body.walk-r .char-body-group,
+.vc-body.walk-l .char-body-group { animation:body-bob 0.36s ease-in-out infinite; }
+.vc-body.walk-r .char-leg-l,
+.vc-body.walk-l .char-leg-l      { animation:leg-l-walk 0.36s linear infinite; transform-origin:50% 0%; }
+.vc-body.walk-r .char-leg-r,
+.vc-body.walk-l .char-leg-r      { animation:leg-r-walk 0.36s linear infinite; transform-origin:50% 0%; }
+.vc-body.walk-r .char-arm-l,
+.vc-body.walk-l .char-arm-l      { animation:arm-r-walk 0.36s linear infinite; transform-origin:50% 0%; }
+.vc-body.walk-r .char-arm-r,
+.vc-body.walk-l .char-arm-r      { animation:arm-l-walk 0.36s linear infinite; transform-origin:50% 0%; }
+.char-shadow {
+  position:absolute; bottom:-4px; left:50%;
+  transform:translateX(-50%);
+  width:28px; height:7px; border-radius:50%;
+  background:rgba(0,0,0,0.30); filter:blur(3px);
+}
+.vc-body.walk-r .char-shadow,
+.vc-body.walk-l .char-shadow { animation:char-shadow-walk 0.36s linear infinite; }
+
+.village-char {
+  position:absolute; image-rendering:pixelated;
+  transition:left 0.08s linear, bottom 0.08s linear;
+  z-index:10;
+}
 
 /* ====== RANK SYSTEM ====== */
 .rank-badge {
@@ -1817,55 +1832,12 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
        통합 월드맵 (마을 + 던전 입구)
        ══════════════════════════════════════════ -->
   <div id="villageScreen">
-    <!-- Sky & environment layers (filled by JS) -->
-    <div id="vSky"></div>
-    <div id="vMountains"></div>
-    <div id="vHills"></div>
-    <div id="vStream" style="position:absolute;bottom:52%;left:68%;width:28px;height:22%;transform:rotate(10deg);background:linear-gradient(180deg,#5ab0e0,#7ad0f8);opacity:0.7;border-radius:12px;"></div>
-    <div id="vGround"></div>
-    <div id="vFog"></div>
-
-    <!-- Dungeon gate (right side of world) -->
-    <div id="dungeonGate" style="position:absolute;right:8%;bottom:55%;">
-      <svg viewBox="0 0 64 80" width="96" height="120" xmlns="http://www.w3.org/2000/svg">
-        <!-- Gate frame -->
-        <rect x="8" y="10" width="48" height="70" fill="#1a0830"/>
-        <rect x="6" y="8" width="52" height="6" fill="#2a1050" rx="2"/>
-        <rect x="6" y="8" width="4" height="70" fill="#200840"/>
-        <rect x="54" y="8" width="4" height="70" fill="#200840"/>
-        <!-- Arch top -->
-        <ellipse cx="32" cy="28" rx="20" ry="22" fill="#280a50"/>
-        <ellipse cx="32" cy="30" rx="16" ry="18" fill="#0a0018"/>
-        <!-- Portal inner glow -->
-        <ellipse cx="32" cy="32" rx="14" ry="16" fill="#4000a0" opacity="0.7"/>
-        <ellipse cx="32" cy="32" rx="10" ry="12" fill="#7020d0" opacity="0.6"/>
-        <ellipse cx="32" cy="32" rx="6" ry="8" fill="#a040ff" opacity="0.5"/>
-        <!-- Gate bars -->
-        <rect x="18" y="42" width="3" height="36" fill="#302040"/>
-        <rect x="26" y="42" width="3" height="36" fill="#302040"/>
-        <rect x="34" y="42" width="3" height="36" fill="#302040"/>
-        <rect x="42" y="42" width="3" height="36" fill="#302040"/>
-        <rect x="14" y="52" width="36" height="3" fill="#302040"/>
-        <rect x="14" y="62" width="36" height="3" fill="#302040"/>
-        <!-- Rune symbols -->
-        <text x="32" y="22" text-anchor="middle" font-size="8" fill="#a040ff" opacity="0.8">⚡</text>
-        <!-- Skull decorations -->
-        <circle cx="10" cy="14" r="4" fill="#302038"/>
-        <circle cx="54" cy="14" r="4" fill="#302038"/>
-        <text x="10" y="17" text-anchor="middle" font-size="6" fill="#8040b0">💀</text>
-        <text x="54" y="17" text-anchor="middle" font-size="6" fill="#8040b0">💀</text>
-      </svg>
-      <div class="zone-label" style="bottom:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#c080ff;">⚠️ 던전 입구</div>
-    </div>
-
-    <!-- Village buildings layer -->
-    <div id="villageObjects"></div>
-    <!-- Deco layer (flowers, trees) -->
-    <div id="villageDecos"></div>
-
-    <!-- Other players -->
-    <div id="villageOtherPlayers"></div>
-
+    <!-- Three.js 3D renders here -->
+    <canvas id="threeCanvas" style="position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;"></canvas>
+    <!-- Interaction labels rendered over 3D -->
+    <div id="v3dLabels" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+    <!-- Other players (DOM overlay for names) -->
+    <div id="villageOtherPlayers" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
     <!-- NPC Merchant -->
     <div id="villageNpc" class="village-npc" style="display:none;position:absolute;bottom:50%;left:45%;z-index:12;" onclick="openGemShop()">
       <div class="village-npc-bubble">✨ 희귀 상인!</div>
@@ -1876,13 +1848,6 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
         <rect x="4" y="12" width="8" height="1" fill="#e0c040"/><rect x="0" y="11" width="4" height="6" fill="#a07030"/>
         <rect x="4" y="19" width="3" height="3" fill="#401080"/><rect x="9" y="19" width="3" height="3" fill="#401080"/>
       </svg>
-    </div>
-
-    <!-- My character -->
-    <div id="villageMyChar" class="village-char" style="bottom:46%;left:46%;z-index:11;">
-      <div class="vchar-shadow"></div>
-      <div class="village-char-label" id="villageMyLabel">나</div>
-      <div id="villageMyCharSvg"></div>
     </div>
   </div>
 
@@ -2372,7 +2337,7 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
   </div>
   <div class="panel-body">
     <!-- 탭 -->
-    <div class="shop-tabs" style="margin-bottom:16px;">
+    <div class="shop-tabs" style="margin-bottom:16px;flex-wrap:wrap;gap:4px;">
       <div class="shop-tab active" onclick="switchAdminTab('stat',this)">📊 스탯</div>
       <div class="shop-tab" onclick="switchAdminTab('item',this)">🎁 아이템</div>
       <div class="shop-tab" onclick="switchAdminTab('weapon',this)">🛠️ 제작</div>
@@ -2380,6 +2345,8 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
       <div class="shop-tab" onclick="switchAdminTab('monster',this)">👹 몬스터</div>
       <div class="shop-tab" onclick="switchAdminTab('notice',this)">📢 공지</div>
       <div class="shop-tab" onclick="switchAdminTab('manage',this)">👑 관리</div>
+      <div class="shop-tab" onclick="switchAdminTab('punish',this)" style="color:#ff8080;">🔨 처벌</div>
+      <div class="shop-tab" onclick="switchAdminTab('chatlog',this)" style="color:#80c8ff;">💬 채팅로그</div>
     </div>
 
     <!-- 스탯 탭 -->
@@ -2655,6 +2622,72 @@ body { background:var(--dark); color:var(--text); font-family:'Noto Sans KR',san
         <div id="adminUserListFull" style="max-height:200px;overflow-y:auto;font-size:0.75rem;"></div>
       </div>
     </div>
+
+    <!-- ── 처벌 탭 ── -->
+    <div id="adminTab_punish" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">🔨 플레이어 처벌</div>
+        <select id="punishTarget" class="admin-target-select" style="margin-bottom:8px;"></select>
+        <input type="text" id="punishReason" class="admin-input" placeholder="처벌 사유" style="margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+          <select id="punishDuration" class="admin-target-select">
+            <option value="1800000">30분</option>
+            <option value="3600000">1시간</option>
+            <option value="86400000">1일</option>
+            <option value="604800000">7일</option>
+            <option value="permanent">영구</option>
+          </select>
+          <select id="punishType" class="admin-target-select">
+            <option value="mute">채팅 금지 (뮤트)</option>
+            <option value="ban">계정 정지 (밴)</option>
+            <option value="kick">강제 퇴장</option>
+          </select>
+        </div>
+        <button class="admin-btn" style="background:linear-gradient(135deg,#a02020,#e03030);" onclick="adminPunishPlayer()">🔨 처벌 적용</button>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">📋 처벌 목록</div>
+        <button class="admin-btn" onclick="adminLoadPunishments()">목록 새로고침</button>
+        <div id="adminPunishList" style="margin-top:10px;max-height:250px;overflow-y:auto;font-size:0.72rem;"></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">⚡ 빠른 명령어</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <button class="admin-btn" style="background:rgba(80,0,0,0.7);" onclick="adminKickAll()">모두 강제퇴장</button>
+          <button class="admin-btn" style="background:rgba(60,0,80,0.7);" onclick="adminSilentMode()">전체 채팅금지</button>
+          <button class="admin-btn" style="background:rgba(0,60,80,0.7);" onclick="adminGodMode()">갓모드 ON/OFF</button>
+          <button class="admin-btn" style="background:rgba(0,80,20,0.7);" onclick="adminHealAll()">전원 HP회복</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 채팅 로그 탭 ── -->
+    <div id="adminTab_chatlog" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section-title">💬 채팅 로그 (최근 100개)</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <input type="text" id="chatlogSearch" class="admin-input" placeholder="검색..." style="flex:1;">
+          <button class="admin-btn" style="width:auto;margin:0;padding:0 12px;" onclick="adminSearchChatLog()">검색</button>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;">
+          <button class="admin-btn" style="width:auto;margin:0;padding:4px 8px;font-size:0.65rem;" onclick="adminFilterChat('all')">전체</button>
+          <button class="admin-btn" style="width:auto;margin:0;padding:4px 8px;font-size:0.65rem;background:rgba(200,50,50,0.5);" onclick="adminFilterChat('filtered')">🚫 검열됨</button>
+          <button class="admin-btn" style="width:auto;margin:0;padding:4px 8px;font-size:0.65rem;background:rgba(200,100,0,0.5);" onclick="adminFilterChat('spam')">⚠️ 스팸</button>
+        </div>
+        <button class="admin-btn" onclick="adminLoadChatLog()">로그 새로고침</button>
+        <div id="adminChatLogList" style="margin-top:10px;max-height:300px;overflow-y:auto;font-size:0.68rem;font-family:monospace;background:rgba(0,0,0,0.3);border-radius:6px;padding:6px;"></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section-title">🚫 금지어 관리</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <input type="text" id="badWordInput" class="admin-input" placeholder="추가할 금지어" style="flex:1;">
+          <button class="admin-btn" style="width:auto;margin:0;padding:0 12px;" onclick="adminAddBadWord()">추가</button>
+        </div>
+        <div id="badWordList" style="max-height:120px;overflow-y:auto;font-size:0.7rem;background:rgba(0,0,0,0.2);border-radius:4px;padding:6px;"></div>
+        <button class="admin-btn" onclick="adminLoadBadWords()">금지어 목록</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -4586,10 +4619,11 @@ function getDropGrade(stageId) {
 function addExp(exp) {
   if (!player) return;
   player.exp = (player.exp||0) + exp;
-  const expNeeded = (player.level||1) * 100;
+  let expNeeded = (player.level||1) * 100;
   while (player.exp >= expNeeded) {
     player.exp -= expNeeded;
     player.level = (player.level||1) + 1;
+    expNeeded = player.level * 100; // 레벨업 후 필요경험치 재계산
     player.maxHp = (player.maxHp||100) + 10;
     player.attack = (player.attack||10) + 3;
     player.defense = (player.defense||5) + 2;
@@ -4776,13 +4810,13 @@ function getHeroHTML(idx) {
   <!-- Chest armor -->
   <rect x="5" y="9" width="10" height="9" fill="#4058a0"/>
   <rect x="6" y="10" width="8" height="1" fill="#6878b8"/><!-- chest highlight -->
-  <rect x="7" y="12" width="6" height="2" fill="#3048900"/>
+  <rect x="7" y="12" width="6" height="2" fill="#304890"/>
   <!-- Center chest gem -->
   <rect x="9" y="13" width="2" height="2" fill="#80d0ff"/><rect x="9" y="13" width="1" height="1" fill="#c0f0ff"/>
   <!-- Belt -->
   <rect x="5" y="18" width="10" height="2" fill="#c08030"/><rect x="9" y="18" width="2" height="2" fill="#e8d040"/>
   <!-- Hip guards / tassets -->
-  <rect x="3" y="20" width="5" height="3" fill="#3850900"/><rect x="12" y="20" width="5" height="3" fill="#384090"/>
+  <rect x="3" y="20" width="5" height="3" fill="#385090"/><rect x="12" y="20" width="5" height="3" fill="#384090"/>
   <rect x="3" y="20" width="5" height="1" fill="#5068a8"/><rect x="12" y="20" width="5" height="1" fill="#5068a8"/>
   <!-- Legs -->
   <rect x="5" y="23" width="4" height="4" fill="#30406a"/><rect x="11" y="23" width="4" height="4" fill="#30406a"/>
@@ -4859,7 +4893,7 @@ function getHeroHTML(idx) {
   <!-- Mage: Purple robed wizard -->
   <!-- Wizard hat -->
   <rect x="4" y="5" width="10" height="2" fill="#6020a0"/><rect x="4" y="5" width="10" height="1" fill="#8040c0"/><!-- hat brim -->
-  <rect x="7" y="2" width="4" height="4" fill="#5018900"/><rect x="8" y="0" width="2" height="3" fill="#401080"/>
+  <rect x="7" y="2" width="4" height="4" fill="#501890"/><rect x="8" y="0" width="2" height="3" fill="#401080"/>
   <rect x="7" y="1" width="4" height="1" fill="#702ab0"/><!-- hat highlight -->
   <!-- Hat star deco -->
   <rect x="9" y="2" width="1" height="1" fill="#e0d040"/>
@@ -4875,7 +4909,7 @@ function getHeroHTML(idx) {
   <rect x="5" y="12" width="8" height="2" fill="#501898"/>
   <rect x="8" y="12" width="2" height="2" fill="#e0c040"/><!-- brooch -->
   <!-- Robe body -->
-  <rect x="4" y="14" width="10" height="10" fill="#5018900"/>
+  <rect x="4" y="14" width="10" height="10" fill="#501890"/>
   <rect x="4" y="14" width="10" height="1" fill="#702ab0"/><!-- robe highlight -->
   <!-- Robe runes/details -->
   <rect x="5" y="17" width="2" height="1" fill="#e040ff"/><rect x="11" y="17" width="2" height="1" fill="#e040ff"/>
@@ -5051,7 +5085,7 @@ function getEnemyHTML(type) {
   <rect x="1" y="7" width="3" height="1" fill="#202030"/>
   <rect x="2" y="7" width="1" height="18" fill="#c00000"/><!-- blood channel -->
   <rect x="0" y="15" width="5" height="2" fill="#303050"/><!-- crossguard -->
-  <rect x="1" y="13" width="1" height="4" fill="#4040600"/><!-- guard detail -->
+  <rect x="1" y="13" width="1" height="4" fill="#404060"/><!-- guard detail -->
   <!-- Dark aura particles -->
   <rect x="4" y="3" width="1" height="1" fill="#400040"/><rect x="17" y="2" width="1" height="1" fill="#400040"/>
   <rect x="3" y="20" width="1" height="1" fill="#600060"/><rect x="18" y="22" width="1" height="1" fill="#600060"/>
@@ -5176,6 +5210,7 @@ function updateHUD() {
 
 function updateHUDBars() {
   const topHud = document.getElementById('topHud');
+  if (!topHud) return;
   if (!battleState) { topHud.innerHTML = ''; return; }
   topHud.innerHTML = battleState.heroes.map((h,i) => `
     <div class="hero-hud">
@@ -5822,301 +5857,790 @@ let npcTimer = null;
 // Hero SVGs - 고품질 픽셀아트 캐릭터 (직업별로 뚜렷하게 구분)
 function getVillageCharSVG(heroClass, animClass) {
   const cls = `vc-body ${animClass || 'idle'}`;
-  // 전사 - 파란 갑옷, 금빛 검, 방패
-  if (heroClass === 0) return `<svg class="${cls}" viewBox="0 0 24 34" width="48" height="68" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-    <!-- 투구 -->
-    <rect x="8" y="0" width="8" height="2" fill="#707898"/>
-    <rect x="6" y="1" width="12" height="4" fill="#8898c8"/>
-    <rect x="6" y="1" width="12" height="1" fill="#a0b0e0"/>
-    <!-- 바이저 -->
-    <rect x="7" y="5" width="10" height="1" fill="#606888"/>
-    <!-- 얼굴 -->
-    <rect x="7" y="3" width="10" height="4" fill="#e0c090"/>
-    <rect x="8" y="5" width="2" height="1" fill="#3a2010"/>
-    <rect x="14" y="5" width="2" height="1" fill="#3a2010"/>
-    <rect x="10" y="6" width="4" height="1" fill="#c09070"/>
-    <!-- 어깨 -->
-    <rect x="3" y="8" width="5" height="3" fill="#607098"/>
-    <rect x="16" y="8" width="5" height="3" fill="#607098"/>
-    <rect x="3" y="8" width="5" height="1" fill="#8898b8"/>
-    <rect x="16" y="8" width="5" height="1" fill="#8898b8"/>
-    <!-- 갑옷 몸통 -->
-    <rect x="6" y="8" width="12" height="10" fill="#4860a0"/>
-    <rect x="6" y="8" width="12" height="1" fill="#6878b8"/>
-    <!-- 흉갑 디테일 -->
-    <rect x="9" y="10" width="6" height="4" fill="#3850a0"/>
-    <rect x="10" y="11" width="4" height="2" fill="#2840a0"/>
-    <rect x="11" y="13" width="2" height="1" fill="#f0c840"/>
-    <!-- 팔 -->
-    <rect x="4" y="11" width="3" height="6" fill="#4870b0"/>
-    <rect x="17" y="11" width="3" height="6" fill="#4870b0"/>
-    <!-- 장갑 -->
-    <rect x="4" y="17" width="3" height="2" fill="#384860"/>
-    <rect x="17" y="17" width="3" height="2" fill="#384860"/>
-    <!-- 허리띠 -->
-    <rect x="6" y="18" width="12" height="2" fill="#f0c840"/>
-    <rect x="6" y="18" width="12" height="1" fill="#ffe060"/>
-    <!-- 다리 -->
-    <rect x="7" y="20" width="4" height="8" fill="#3050a0"/>
-    <rect x="13" y="20" width="4" height="8" fill="#3050a0"/>
-    <!-- 정강이 갑옷 -->
-    <rect x="7" y="22" width="4" height="4" fill="#607098"/>
-    <rect x="13" y="22" width="4" height="4" fill="#607098"/>
-    <!-- 부츠 -->
-    <rect x="6" y="28" width="5" height="4" fill="#302008"/>
-    <rect x="13" y="28" width="5" height="4" fill="#302008"/>
-    <!-- 검 (오른쪽) -->
-    <rect x="20" y="5" width="2" height="16" fill="#d0d8e0"/>
-    <rect x="20" y="5" width="2" height="1" fill="#ffe060"/>
-    <rect x="18" y="11" width="6" height="2" fill="#b09040"/>
-    <!-- 방패 (왼쪽) -->
-    <rect x="1" y="9" width="4" height="6" fill="#3050c0"/>
-    <rect x="1" y="9" width="4" height="1" fill="#5070e0"/>
-    <rect x="2" y="10" width="2" height="4" fill="#2040b0"/>
-    <rect x="2" y="12" width="2" height="1" fill="#f0c840"/>
-  </svg>`;
-  // 궁수 - 초록 레인저, 활
-  if (heroClass === 1) return `<svg class="${cls}" viewBox="0 0 24 34" width="48" height="68" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-    <!-- 모자 (깃털) -->
-    <rect x="7" y="0" width="10" height="3" fill="#2a5018"/>
-    <rect x="7" y="0" width="10" height="1" fill="#3a7028"/>
-    <rect x="14" y="0" width="3" height="5" fill="#3a6020" transform="rotate(-15 14 0)"/>
-    <rect x="15" y="0" width="2" height="4" fill="#f0a040" opacity="0.7"/>
-    <!-- 머리 -->
-    <rect x="7" y="3" width="10" height="5" fill="#d0a070"/>
-    <rect x="8" y="5" width="2" height="1" fill="#3a2010"/>
-    <rect x="13" y="5" width="2" height="1" fill="#3a2010"/>
-    <rect x="10" y="7" width="4" height="1" fill="#b08060"/>
-    <!-- 스카프 -->
-    <rect x="7" y="7" width="10" height="2" fill="#a03020"/>
-    <!-- 조끼 몸통 -->
-    <rect x="7" y="9" width="10" height="9" fill="#2a5020"/>
-    <rect x="7" y="9" width="10" height="1" fill="#3a6030"/>
-    <!-- 가죽 조끼 디테일 -->
-    <rect x="9" y="10" width="2" height="6" fill="#205018"/>
-    <rect x="13" y="10" width="2" height="6" fill="#205018"/>
-    <rect x="11" y="10" width="2" height="1" fill="#c08030"/>
-    <!-- 퀴버 (화살통) -->
-    <rect x="17" y="9" width="3" height="8" fill="#8a4820"/>
-    <rect x="17" y="9" width="3" height="1" fill="#b06030"/>
-    <rect x="18" y="10" width="1" height="7" fill="#703818"/>
-    <!-- 화살 -->
-    <rect x="18" y="8" width="1" height="3" fill="#d0b060"/>
-    <rect x="18" y="7" width="1" height="1" fill="#d04020"/>
-    <!-- 팔 -->
-    <rect x="4" y="9" width="3" height="8" fill="#c09060"/>
-    <rect x="17" y="9" width="3" height="5" fill="#c09060"/>
-    <!-- 글러브 -->
-    <rect x="4" y="17" width="3" height="2" fill="#703818"/>
-    <rect x="17" y="17" width="3" height="2" fill="#703818"/>
-    <!-- 허리띠 -->
-    <rect x="6" y="18" width="12" height="2" fill="#8a4020"/>
-    <rect x="10" y="18" width="4" height="2" fill="#c06020"/>
-    <!-- 바지 -->
-    <rect x="7" y="20" width="4" height="9" fill="#1e3e18"/>
-    <rect x="13" y="20" width="4" height="9" fill="#1e3e18"/>
-    <!-- 부츠 -->
-    <rect x="6" y="28" width="5" height="4" fill="#4a2810"/>
-    <rect x="13" y="28" width="5" height="4" fill="#4a2810"/>
-    <!-- 활 (왼쪽) -->
-    <rect x="2" y="8" width="2" height="14" fill="#7a5020"/>
-    <rect x="1" y="9" width="2" height="12" fill="#6a4018"/>
-    <rect x="1" y="9" width="1" height="12" fill="#ffffff" opacity="0.2"/>
-    <!-- 시위 -->
-    <rect x="1" y="9" width="1" height="1" fill="#e0d0a0"/>
-    <rect x="1" y="20" width="1" height="1" fill="#e0d0a0"/>
-    <!-- 화살 조준 -->
-    <rect x="2" y="14" width="6" height="1" fill="#d0b060"/>
-    <rect x="7" y="13" width="1" height="1" fill="#d04020"/>
-  </svg>`;
-  // 마법사 - 보라 로브, 지팡이
-  return `<svg class="${cls}" viewBox="0 0 24 34" width="48" height="68" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
-    <!-- 마법사 모자 -->
-    <rect x="6" y="0" width="12" height="2" fill="#501090"/>
-    <rect x="8" y="2" width="8" height="2" fill="#601090"/>
-    <rect x="9" y="4" width="6" height="2" fill="#6810a0"/>
-    <rect x="10" y="6" width="4" height="2" fill="#6810a0"/>
-    <rect x="6" y="0" width="12" height="1" fill="#8030c0"/>
-    <!-- 모자 별 -->
-    <rect x="10" y="2" width="1" height="1" fill="#f0e040"/>
-    <rect x="13" y="4" width="1" height="1" fill="#f0e040"/>
-    <!-- 얼굴 -->
-    <rect x="7" y="8" width="10" height="5" fill="#d8c0e8"/>
-    <rect x="8" y="10" width="2" height="1" fill="#4020a0"/>
-    <rect x="13" y="10" width="2" height="1" fill="#4020a0"/>
-    <rect x="10" y="12" width="4" height="1" fill="#c0a0d8"/>
-    <!-- 로브 -->
-    <rect x="5" y="13" width="14" height="13" fill="#5818a0"/>
-    <rect x="5" y="13" width="14" height="1" fill="#7828c0"/>
-    <!-- 로브 무늬 -->
-    <rect x="8" y="15" width="8" height="1" fill="#f0c840" opacity="0.6"/>
-    <rect x="9" y="18" width="6" height="1" fill="#f0c840" opacity="0.4"/>
-    <rect x="10" y="21" width="4" height="1" fill="#f0c840" opacity="0.3"/>
-    <!-- 로브 소매 -->
-    <rect x="3" y="13" width="3" height="8" fill="#4010a0"/>
-    <rect x="18" y="13" width="3" height="8" fill="#4010a0"/>
-    <!-- 손 -->
-    <rect x="3" y="21" width="3" height="2" fill="#d8c0e8"/>
-    <rect x="18" y="21" width="3" height="2" fill="#d8c0e8"/>
-    <!-- 로브 아래 -->
-    <rect x="5" y="26" width="14" height="6" fill="#4010a0"/>
-    <rect x="7" y="26" width="4" height="6" fill="#5020b0"/>
-    <rect x="13" y="26" width="4" height="6" fill="#5020b0"/>
-    <!-- 지팡이 -->
-    <rect x="20" y="9" width="2" height="18" fill="#805028"/>
-    <rect x="19" y="9" width="4" height="4" fill="#c040f0"/>
-    <rect x="20" y="8" width="2" height="2" fill="#ffffff" opacity="0.8"/>
-    <rect x="19" y="11" width="4" height="1" fill="#e060ff" opacity="0.6"/>
-  </svg>`;
-}
+  const W=48, H=68;
 
-function enterVillage(fromLogin) {
-  villageActive = true;
-
-  // Hide battle screens, show village
-  document.getElementById('battleArea').style.display = 'none';
-  document.getElementById('battleMapScreen').classList.remove('active');
-  const vs = document.getElementById('villageScreen');
-  vs.classList.add('active');
-  vs.style.display = 'block';
-
-  // Show Genshin HUD
-  const hud = document.getElementById('gameHud');
-  if (hud) hud.classList.add('active');
-  document.getElementById('gameScreen').style.display = 'block';
-
-  const flash = document.createElement('div');
-  flash.className = 'village-transition';
-  document.body.appendChild(flash);
-  setTimeout(() => flash.remove(), 500);
-
-  // Render world scene
-  renderVillageScene();
-  renderVillageBuildings();
-
-  // Character
-  const heroClass = player ? ((player.level || 1) % 3) : 0;
-  const charEl = document.getElementById('villageMyCharSvg');
-  if (charEl) charEl.innerHTML = getVillageCharSVG(heroClass, 'idle');
-  const labelEl = document.getElementById('villageMyLabel');
-  if (labelEl) labelEl.innerHTML = `${player ? player.username : '나'} ${getRankBadge(player?.level||1)}`;
-
-  updateGameHud();
-  showAreaName('🏘️ 평화의 마을');
-
-  villagePos = { x: 38, y: 46 };
-  updateVillageCharPos();
-  setupJoystick();
-  if (villageMoveLoop) clearInterval(villageMoveLoop);
-  villageMoveLoop = setInterval(villageMoveTick, 50);
-  wsSend({ type: 'village_enter', x: villagePos.x, y: villagePos.y, heroClass });
-  scheduleNpc();
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
-}
-
-
-// 던전 입구 zone 표시
-function updateDungeonZone() {
-  const gateEl = document.getElementById('dungeonGate');
-  if (!gateEl) return;
-  // Already in HTML, just make visible
-  gateEl.style.display = 'block';
-}
-
-// Genshin HUD 업데이트
-function updateGameHud() {
-  if (!player) return;
-  const hp = player.hp || 0, maxHp = player.maxHp || 100;
-  const sp = 60, maxSp = 100; // SP placeholder
-  const level = player.level || 1;
-  const exp = player.exp || 0;
-  const expNeeded = level * 120;
-  const expPct = Math.min(100, (exp / expNeeded) * 100);
-
-  // Bars
-  const hpPct = Math.min(100, (hp/maxHp)*100);
-  const el = (id) => document.getElementById(id);
-  if (el('hudHpFill')) el('hudHpFill').style.width = hpPct + '%';
-  if (el('hudMpFill')) el('hudMpFill').style.width = '70%';
-  if (el('hudExpFill')) el('hudExpFill').style.width = expPct + '%';
-  if (el('hudHpVal')) el('hudHpVal').textContent = `${Math.floor(hp)}/${maxHp}`;
-  if (el('hudMpVal')) el('hudMpVal').textContent = 'Lv.' + level;
-  if (el('hudExpVal')) el('hudExpVal').textContent = Math.floor(expPct) + '%';
-
-  // Name & rank
-  if (el('hudNameText')) el('hudNameText').textContent = player.username || '플레이어';
-  if (el('hudRankBadge')) el('hudRankBadge').innerHTML = getRankBadge(level);
-
-  // Gold + gems
-  if (el('hudGoldVal')) el('hudGoldVal').textContent = Math.floor(player.gold||0).toLocaleString();
-  if (el('hudGemsVal')) el('hudGemsVal').textContent = Math.floor(player.gems||0).toLocaleString();
-
-  // Portrait (job class icon)
-  const jobIcons = {warrior:'⚔️',archer:'🏹',mage:'🪄',paladin:'🛡️',assassin:'🗡️',berserker:'⚡',sage:'✨'};
-  const icon = jobIcons[player.jobClass||'warrior'] || '⚔️';
-  if (el('hudPortraitSvg')) el('hudPortraitSvg').innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;">${icon}</div>`;
-
-  // SP bars on skill buttons
-  updateHudSkillSp();
-  updateMinimapDot();
-}
-
-function showAreaName(name) {
-  const el = document.getElementById('hudAreaNameText');
-  if (!el) return;
-  el.textContent = name;
-  el.style.animation = 'none';
-  el.offsetHeight; // reflow
-  el.style.animation = 'area-fade 4s ease-out forwards';
-  setTimeout(() => { el.textContent = ''; }, 4100);
-}
-
-function updateHudSkillSp() {
-  // Sync with mapState sp if in map
-  const sp = (typeof mapState !== 'undefined' && mapState) ? mapState.sp : [0,0,0];
-  const maxSp = (typeof mapState !== 'undefined' && mapState) ? mapState.maxSp : [100,100,100];
-  [0,1,2].forEach(i => {
-    const pct = Math.min(100, ((sp[i]||0)/(maxSp[i]||100))*100);
-    const el = document.getElementById('hsp'+i);
-    const ring = document.getElementById('hring'+i);
-    const btn = document.getElementById('hskill'+(i+1));
-    if (el) el.style.width = pct + '%';
-    if (ring) ring.style.background = pct >= 100 ? `conic-gradient(var(--gold) 100%, transparent 100%)` : `conic-gradient(rgba(255,255,255,0.2) ${pct}%, transparent ${pct}%)`;
-    if (btn) { btn.classList.toggle('ready', pct >= 100); btn.classList.toggle('used', pct < 10); }
-  });
-}
-
-function updateMinimapDot() {
-  const dot = document.getElementById('hudMinimapPlayer');
-  const label = document.getElementById('hudMinimapLabel');
-  if (!dot) return;
-  // Map villagePos (0-100%) to minimap (90x90px circle)
-  const r = 38; // minimap radius minus margin
-  const cx = 45, cy = 45; // center
-  const px = (villagePos.x / 100) * 80 + 5;
-  const py = 80 - (villagePos.y / 100) * 80 + 5;
-  dot.style.left = px + 'px'; dot.style.top = py + 'px';
-  dot.style.transform = 'none';
-  // Area label
-  const inDungeon = villagePos.x > 75;
-  if (label) label.textContent = inDungeon ? '⚠️ 던전' : '🏘️ 마을';
-  // Interaction hint
-  checkInteractionZone();
-}
-
-let currentInteraction = null;
-function checkInteractionZone() {
-  const px = villagePos.x, py = villagePos.y;
-  const zones = [
-    { id:'inn',  x:8,  y:58, r:12, label:'🏨 여관 입장',    fn:'openInn()' },
-    { id:'bs',   x:88, y:56, r:12, label:'⚒️ 대장간 입장',  fn:'openBlacksmith()' },
-    { id:'shop', x:40, y:54, r:10, label:'🏪 상점 입장',    fn:'openVillageShop()' },
-    { id:'well', x:62, y:52, r:8,  label:'🌊 우물 (장식)',  fn:'' },
-    { id:'dg',   x:88, y:54, r:14, label:'⚔️ 던전 입장!',  fn:'goToBattle()' },
+  // ── Shared colors by class ──
+  const configs = [
+    { // 0: Warrior
+      helm:'#8898c8', helmTop:'#a0b0e0', helmVisor:'#606888',
+      body:'#4860a0', bodyHi:'#6878b8', chest:'#3850a0',
+      arm:'#4870b0', glove:'#384860', belt:'#f0c840',
+      leg:'#3050a0', shin:'#607098', boot:'#302008',
+      shoulder:'#607098', shoulderHi:'#8898b8',
+      weaponR: `<rect x="20" y="5" width="2" height="16" fill="#d0d8e0"/>
+        <rect x="20" y="5" width="2" height="1" fill="#ffe060"/>
+        <rect x="18" y="11" width="6" height="2" fill="#b09040"/>`,
+      shieldL: `<rect x="1" y="9" width="4" height="6" fill="#3050c0"/>
+        <rect x="1" y="9" width="4" height="1" fill="#5070e0"/>
+        <rect x="2" y="10" width="2" height="4" fill="#2040b0"/>
+        <rect x="2" y="12" width="2" height="1" fill="#f0c840"/>`,
+    },
+    { // 1: Archer
+      helm:'#2a5018', helmTop:'#3a7028', helmVisor:'#1a3010',
+      body:'#2a5020', bodyHi:'#3a6030', chest:'#205018',
+      arm:'#c09060', glove:'#703818', belt:'#8a4020',
+      leg:'#1e3e18', shin:'#2a5020', boot:'#4a2810',
+      shoulder:'#2a4018', shoulderHi:'#3a5028',
+      weaponR: `<rect x="2" y="8" width="2" height="14" fill="#7a5020"/>
+        <rect x="1" y="9" width="2" height="12" fill="#6a4018"/>
+        <rect x="2" y="14" width="6" height="1" fill="#d0b060"/>
+        <rect x="7" y="13" width="1" height="1" fill="#d04020"/>`,
+      shieldL: ``,
+    },
+    { // 2: Mage
+      helm:'#501090', helmTop:'#8030c0', helmVisor:'#401080',
+      body:'#5818a0', bodyHi:'#7828c0', chest:'#401080',
+      arm:'#4010a0', glove:'#d8c0e8', belt:'#f0c840',
+      leg:'#4010a0', shin:'#5020b0', boot:'#281060',
+      shoulder:'#4010a0', shoulderHi:'#6020b0',
+      weaponR: `<rect x="20" y="9" width="2" height="18" fill="#805028"/>
+        <rect x="19" y="9" width="4" height="4" fill="#c040f0"/>
+        <rect x="20" y="8" width="2" height="2" fill="#fff" opacity="0.8"/>
+        <rect x="19" y="11" width="4" height="1" fill="#e060ff" opacity="0.6"/>`,
+      shieldL: ``,
+    },
   ];
-  const near = zones.find(z => Math.hypot(px-z.x, py-z.y) < z.r);
+  const C = configs[heroClass % 3];
+
+  return `<svg class="${cls}" viewBox="0 0 24 36" width="${W}" height="${H}"
+    shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"
+    style="overflow:visible;">
+
+    <!-- Shadow -->
+    <ellipse class="char-shadow" cx="12" cy="35" rx="7" ry="2.5" fill="rgba(0,0,0,0.28)"/>
+
+    <!-- Left arm (behind body) -->
+    <g class="char-arm-l" style="transform-origin:5px 11px;">
+      <rect x="3" y="10" width="3" height="7" fill="${C.arm}"/>
+      <rect x="3" y="17" width="3" height="2" fill="${C.glove}"/>
+      ${C.shieldL}
+    </g>
+
+    <!-- Body group (bobs up/down) -->
+    <g class="char-body-group">
+      <!-- Legs -->
+      <g class="char-leg-l" style="transform-origin:9px 20px;">
+        <rect x="7" y="20" width="4" height="8" fill="${C.leg}"/>
+        <rect x="7" y="22" width="4" height="4" fill="${C.shin}"/>
+        <rect x="6" y="28" width="5" height="4" fill="${C.boot}"/>
+        <rect x="6" y="28" width="5" height="1" fill="rgba(255,255,255,0.1)"/>
+      </g>
+      <g class="char-leg-r" style="transform-origin:15px 20px;">
+        <rect x="13" y="20" width="4" height="8" fill="${C.leg}"/>
+        <rect x="13" y="22" width="4" height="4" fill="${C.shin}"/>
+        <rect x="13" y="28" width="5" height="4" fill="${C.boot}"/>
+        <rect x="13" y="28" width="5" height="1" fill="rgba(255,255,255,0.1)"/>
+      </g>
+
+      <!-- Belt -->
+      <rect x="6" y="18" width="12" height="2" fill="${C.belt}"/>
+      <rect x="6" y="18" width="12" height="1" fill="rgba(255,255,255,0.3)"/>
+
+      <!-- Torso -->
+      <rect x="6" y="8" width="12" height="10" fill="${C.body}"/>
+      <rect x="6" y="8" width="12" height="1" fill="${C.bodyHi}"/>
+      <!-- Chest detail -->
+      <rect x="9" y="10" width="6" height="4" fill="${C.chest}"/>
+      <rect x="10" y="11" width="4" height="2" fill="${C.chest}"/>
+      <rect x="11" y="13" width="2" height="1" fill="${C.belt}"/>
+
+      <!-- Shoulders -->
+      <rect x="3" y="8" width="4" height="3" fill="${C.shoulder}"/>
+      <rect x="17" y="8" width="4" height="3" fill="${C.shoulder}"/>
+      <rect x="3" y="8" width="4" height="1" fill="${C.shoulderHi}"/>
+      <rect x="17" y="8" width="4" height="1" fill="${C.shoulderHi}"/>
+
+      <!-- Helmet -->
+      <rect x="8" y="0" width="8" height="2" fill="${C.helm}"/>
+      <rect x="6" y="1" width="12" height="4" fill="${C.helm}"/>
+      <rect x="6" y="1" width="12" height="1" fill="${C.helmTop}"/>
+      <rect x="7" y="5" width="10" height="1" fill="${C.helmVisor}"/>
+      <!-- Face -->
+      <rect x="7" y="3" width="10" height="4" fill="#e0c090"/>
+      <rect x="8" y="5" width="2" height="1" fill="#3a2010"/>
+      <rect x="14" y="5" width="2" height="1" fill="#3a2010"/>
+      <rect x="10" y="6" width="4" height="1" fill="#c09070"/>
+    </g>
+
+    <!-- Right arm (in front) -->
+    <g class="char-arm-r" style="transform-origin:19px 11px;">
+      <rect x="17" y="10" width="3" height="7" fill="${C.arm}"/>
+      <rect x="17" y="17" width="3" height="2" fill="${C.glove}"/>
+      ${C.weaponR}
+    </g>
+
+  </svg>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  THREE.JS 3D WORLD ENGINE
+//  - 3인칭 + 1인칭 전환
+//  - 100명 최적화 (instanced rendering)
+//  - 빌보드 스프라이트 캐릭터
+// ══════════════════════════════════════════════════════════════
+
+let THREE_SCENE = null; // Three.js state singleton
+
+function initThreeWorld() {
+  if (!window.THREE) { console.error('Three.js not loaded'); return null; }
+  const canvas = document.getElementById('threeCanvas');
+  if (!canvas) return null;
+
+  const W = canvas.clientWidth || window.innerWidth;
+  const H = canvas.clientHeight || window.innerHeight;
+
+  // ── Renderer ──
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x7ec0ee, 1);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+
+  // ── Scene ──
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x87ceeb, 0.022);
+
+  // ── Camera (3rd person, can switch to 1st) ──
+  const camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 500);
+  camera.position.set(0, 8, 14);
+  camera.lookAt(0, 1, 0);
+
+  // ── Lighting ──
+  const ambient = new THREE.AmbientLight(0xffeedd, 0.55);
+  scene.add(ambient);
+
+  const sun = new THREE.DirectionalLight(0xfff5e0, 1.3);
+  sun.position.set(80, 100, 60);
+  sun.castShadow = true;
+  sun.shadow.camera.near = 0.1;
+  sun.shadow.camera.far = 300;
+  sun.shadow.camera.left = -80;
+  sun.shadow.camera.right = 80;
+  sun.shadow.camera.top = 80;
+  sun.shadow.camera.bottom = -80;
+  sun.shadow.mapSize.width = 2048;
+  sun.shadow.mapSize.height = 2048;
+  sun.shadow.bias = -0.001;
+  scene.add(sun);
+
+  const hemi = new THREE.HemisphereLight(0x87ceeb, 0x4a8a20, 0.4);
+  scene.add(hemi);
+
+  // ── Ground (grass) with procedural texture ──
+  const gGeo = new THREE.PlaneGeometry(200, 200, 30, 30);
+  // Subtle vertex displacement for uneven terrain
+  const pos = gGeo.attributes.position;
+  for (let i=0;i<pos.count;i++){
+    const x=pos.getX(i), z=pos.getZ(i);
+    const h = Math.sin(x*0.15)*0.3 + Math.cos(z*0.12)*0.25 + Math.sin(x*0.3+z*0.2)*0.15;
+    pos.setY(i, h);
+  }
+  gGeo.computeVertexNormals();
+  const grassTex = createGrassTexture();
+  const gMat = new THREE.MeshLambertMaterial({ map: grassTex });
+  const ground = new THREE.Mesh(gGeo, gMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // ── Path (dirt road) with texture ──
+  const dirtTex = createDirtTexture();
+  const pathGeo = new THREE.PlaneGeometry(5, 120);
+  const pathMat = new THREE.MeshLambertMaterial({ map: dirtTex });
+  const path = new THREE.Mesh(pathGeo, pathMat);
+  path.rotation.x = -Math.PI/2;
+  path.position.set(0, 0.01, 0);
+  path.receiveShadow = true;
+  scene.add(path);
+
+  // ── Sky dome ──
+  const skyGeo = new THREE.SphereGeometry(200, 16, 8);
+  const skyMat = new THREE.MeshBasicMaterial({
+    color: 0x7ec8f0, side: THREE.BackSide
+  });
+  scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+  // ── Terrain features ──
+  buildWorld(scene);
+
+  // ── Particle systems ──
+  const fireflies = createFireflies(scene);
+  const smoke = createChimneySmoke(scene, {x:27, y:11, z:-4}); // 대장간 굴뚝 위
+  const portalFx = createPortalParticles(scene, {x:44, y:6, z:-1.8});
+  const clouds = createClouds(scene);
+
+  // ── FPS mode crosshair ──
+  const crosshairEl = document.createElement('div');
+  crosshairEl.id = 'fpsCrosshair';
+  crosshairEl.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:24px;height:24px;pointer-events:none;z-index:100;display:none;`;
+  crosshairEl.innerHTML = `<svg viewBox="0 0 24 24" width="24" height="24">
+    <line x1="12" y1="4" x2="12" y2="10" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+    <line x1="12" y1="14" x2="12" y2="20" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+    <line x1="4" y1="12" x2="10" y2="12" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="2" fill="none" stroke="rgba(245,200,66,0.6)" stroke-width="1"/>
+  </svg>`;
+  document.body.appendChild(crosshairEl);
+
+  // ── Player sprite (self) ──
+  const selfSprite = createPlayerSprite(0, true);
+  selfSprite.position.set(0, 1.5, 0);
+  scene.add(selfSprite);
+
+  // ── Camera rig (follows player) ──
+  const camRig = new THREE.Group();
+  camRig.add(camera);
+  scene.add(camRig);
+
+  let camMode = '3rd'; // '3rd' or '1st'
+  let camYaw = 0; // horizontal rotation
+  let camPitch = -0.35; // vertical angle
+  let camDist = 12;
+
+  // ── Input state ──
+  const keys = {};
+  const joyDir = { x: 0, y: 0 };
+  let playerPos = new THREE.Vector3(0, 0, 0);
+  let playerAngle = 0;
+  let moving = false;
+
+  // ── Other players map ──
+  const otherSprites = {}; // username -> { sprite, label, targetPos }
+
+  // ── Labels container ──
+  const labelsEl = document.getElementById('v3dLabels');
+
+  // ── Raycaster for building interaction ──
+  const raycaster = new THREE.Raycaster();
+  const buildingMeshes = []; // {mesh, label, action}
+
+  // ── Animation loop (optimized) ──
+  let animId = null;
+  let lastFrame = 0;
+  const WALK_SPEED = 0.08;
+
+  function animate(now) {
+    animId = requestAnimationFrame(animate);
+    const dt = Math.min((now - lastFrame)/16.7, 3); // cap delta
+    lastFrame = now;
+
+    // Move player from joystick or keys
+    const jx = joyDir.x + (keys['ArrowLeft']?-1:0) + (keys['ArrowRight']?1:0);
+    const jy = joyDir.y + (keys['ArrowUp']?-1:0) + (keys['ArrowDown']?1:0);
+    const len = Math.sqrt(jx*jx + jy*jy);
+    moving = len > 0.1;
+
+    if (moving) {
+      const nx = jx/Math.max(len,1), ny = jy/Math.max(len,1);
+      const moveAngle = camMode === '3rd'
+        ? Math.atan2(nx, ny) + camYaw
+        : Math.atan2(nx, ny) + camYaw;
+
+      playerPos.x += Math.sin(moveAngle) * WALK_SPEED * dt;
+      playerPos.z += Math.cos(moveAngle) * WALK_SPEED * dt;
+      // Clamp to world bounds
+      playerPos.x = Math.max(-45, Math.min(45, playerPos.x));
+      playerPos.z = Math.max(-45, Math.min(45, playerPos.z));
+      playerAngle = moveAngle;
+    }
+
+    // Snap to terrain height
+    playerPos.y = 0;
+
+    // Update self sprite
+    selfSprite.position.set(playerPos.x, 1.5, playerPos.z);
+    if (moving) {
+      selfSprite.rotation.y = playerAngle;
+      // Walk bob
+      selfSprite.position.y = 1.5 + Math.abs(Math.sin(now*0.008)) * 0.18;
+    }
+
+    // Camera follow
+    if (camMode === '3rd') {
+      selfSprite.visible = true;
+      crosshairEl.style.display = 'none';
+      const cx = playerPos.x + Math.sin(camYaw) * camDist * Math.cos(camPitch);
+      const cy = playerPos.y + Math.sin(-camPitch) * camDist + 3;
+      const cz = playerPos.z + Math.cos(camYaw) * camDist * Math.cos(camPitch);
+      camera.position.lerp(new THREE.Vector3(cx, cy, cz), 0.12);
+      camera.lookAt(playerPos.x, playerPos.y + 1.5, playerPos.z);
+    } else {
+      // 1st person - 자기 캐릭터 숨김, 크로스헤어 표시
+      selfSprite.visible = false;
+      crosshairEl.style.display = 'block';
+      camera.position.set(playerPos.x, playerPos.y + 1.7, playerPos.z);
+      camera.rotation.order = 'YXZ';
+      camera.rotation.y = Math.PI + camYaw;
+      camera.rotation.x = camPitch;
+    }
+
+    // Update other player sprites (smooth lerp)
+    for (const [uname, op] of Object.entries(otherSprites)) {
+      if (!op.sprite) continue;
+      op.sprite.position.lerp(op.targetPos, 0.18);
+      op.sprite.position.y = 1.5 + Math.abs(Math.sin(now*0.008 + op.offset)) * 0.12;
+      // Update name label position (project 3D -> 2D)
+      updateLabel(op.sprite.position, op.label, uname, camera, W, H);
+    }
+
+    // ── 파티클 시스템 업데이트 ──
+    // 반딧불
+    const ffPos = fireflies.points.geometry.attributes.position;
+    for(let i=0;i<fireflies.speeds.length;i++){
+      const s=fireflies.speeds[i];
+      ffPos.array[i*3]   += s.sx + Math.sin(now*0.001+s.phase)*0.003;
+      ffPos.array[i*3+1] += Math.sin(now*0.002+s.phase)*0.005;
+      ffPos.array[i*3+2] += s.sz + Math.cos(now*0.001+s.phase)*0.003;
+      // 범위 제한
+      if(Math.abs(ffPos.array[i*3])>45) s.sx*=-1;
+      if(ffPos.array[i*3+1]<0.5||ffPos.array[i*3+1]>6) s.sy*=-1;
+      if(Math.abs(ffPos.array[i*3+2])>45) s.sz*=-1;
+    }
+    ffPos.needsUpdate=true;
+    fireflies.points.material.opacity = 0.5+Math.sin(now*0.003)*0.3;
+
+    // 굴뚝 연기
+    for(const p of smoke){
+      p.sprite.position.y += p.vy * dt;
+      p.sprite.position.x += p.vx * dt + Math.sin(now*0.001+p.life)*0.003;
+      p.life += 0.01 * dt;
+      p.sprite.material.opacity = Math.max(0, 0.35 * (1 - p.life/p.maxLife));
+      const s = 0.3 + (p.life/p.maxLife)*1.5;
+      p.sprite.scale.set(s,s,1);
+      if(p.life >= p.maxLife){
+        p.life = 0;
+        p.sprite.position.set(27+(Math.random()-0.5)*0.5, 11, -4+(Math.random()-0.5)*0.5);
+      }
+    }
+
+    // 포탈 파티클
+    const ppPos = portalFx.points.geometry.attributes.position;
+    for(let i=0;i<portalFx.data.length;i++){
+      const d=portalFx.data[i];
+      d.angle += d.speed * 0.02 * dt;
+      ppPos.array[i*3]   = portalFx.portalPos.x + Math.cos(d.angle)*d.radius;
+      ppPos.array[i*3+1] = portalFx.portalPos.y + Math.sin(d.angle)*d.radius;
+      ppPos.array[i*3+2] = portalFx.portalPos.z + Math.sin(now*0.003+i)*0.3;
+    }
+    ppPos.needsUpdate=true;
+
+    // 구름 이동
+    for(const cl of clouds){
+      cl.group.position.x += cl.speed * dt;
+      if(cl.group.position.x > 100) cl.group.position.x = -100;
+    }
+
+    // Interaction zone check
+    checkInteractionZones(playerPos);
+
+    // Throttled server position send
+    if (moving && (now - last3DMove > 80)) {
+      last3DMove = now;
+      // Map 3D pos to 0-100 range for server
+      const sx = ((playerPos.x + 50) / 100) * 100;
+      const sy = ((50 - playerPos.z) / 100) * 100;
+      wsSend({ type: 'village_move', x: Math.round(sx), y: Math.round(sy) });
+      if (typeof updateMinimapDot === 'function') updateMinimapDot();
+    }
+
+    // Minimap dot update
+    villagePos.x = ((playerPos.x + 50) / 100) * 100;
+    villagePos.y = ((50 - playerPos.z) / 100) * 100;
+
+    renderer.render(scene, camera);
+  }
+
+  // ── Handle resize ──
+  function onResize() {
+    const W2=canvas.clientWidth, H2=canvas.clientHeight;
+    renderer.setSize(W2, H2);
+    camera.aspect = W2/H2;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  // ── Touch drag for camera rotation ──
+  let touchStart = null;
+  canvas.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) touchStart = null;
+    else touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, yaw: camYaw, pitch: camPitch };
+  }, { passive: true });
+  canvas.addEventListener('touchmove', e => {
+    if (!touchStart || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - touchStart.x;
+    const dy = e.touches[0].clientY - touchStart.y;
+    camYaw = touchStart.yaw - dx * 0.006;
+    camPitch = Math.max(-0.8, Math.min(0.2, touchStart.pitch + dy * 0.005));
+  }, { passive: true });
+
+  // Mouse drag for camera
+  let mouseDown = false;
+  let lastMouse = { x: 0, y: 0 };
+  canvas.addEventListener('mousedown', e => { mouseDown=true; lastMouse={x:e.clientX,y:e.clientY}; });
+  window.addEventListener('mouseup', ()=>mouseDown=false);
+  window.addEventListener('mousemove', e => {
+    if (!mouseDown) return;
+    const dx = e.clientX - lastMouse.x, dy = e.clientY - lastMouse.y;
+    camYaw -= dx * 0.005;
+    camPitch = Math.max(-0.8, Math.min(0.2, camPitch + dy * 0.004));
+    lastMouse = { x: e.clientX, y: e.clientY };
+  });
+
+  // Scroll zoom
+  canvas.addEventListener('wheel', e => {
+    camDist = Math.max(3, Math.min(25, camDist + e.deltaY * 0.01));
+  }, { passive: true });
+
+  // ── 포인터 락 (1인칭 FPS 마우스 조작) ──
+  let pointerLocked = false;
+  document.addEventListener('pointerlockchange', () => {
+    pointerLocked = document.pointerLockElement === canvas;
+  });
+  canvas.addEventListener('click', () => {
+    if (camMode === '1st' && !pointerLocked) {
+      canvas.requestPointerLock();
+    }
+  });
+  document.addEventListener('mousemove', e => {
+    if (pointerLocked && camMode === '1st') {
+      camYaw -= e.movementX * 0.003;
+      camPitch = Math.max(-1.2, Math.min(0.8, camPitch + e.movementY * 0.003));
+    }
+  });
+
+  // Keyboard
+  window.addEventListener('keydown', e => {
+    keys[e.key] = true;
+    if (e.key === 'v' || e.key === 'V') {
+      camMode = camMode === '3rd' ? '1st' : '3rd';
+      showNotif(camMode === '3rd' ? '📷 3인칭 모드' : '👁️ 1인칭 모드');
+      // 모드 전환 시 포인터 락 해제/요청
+      if (camMode === '3rd' && pointerLocked) {
+        document.exitPointerLock();
+      }
+    }
+    if (e.key === 'f' || e.key === 'F') doInteract();
+    // WASD 이동 (1인칭에서 더 직관적)
+    if (e.key === 'w' || e.key === 'W') keys['ArrowUp'] = true;
+    if (e.key === 's' || e.key === 'S') keys['ArrowDown'] = true;
+    if (e.key === 'a' || e.key === 'A') keys['ArrowLeft'] = true;
+    if (e.key === 'd' || e.key === 'D') keys['ArrowRight'] = true;
+    // ESC로 포인터 락 해제
+    if (e.key === 'Escape' && pointerLocked) document.exitPointerLock();
+  });
+  window.addEventListener('keyup', e => {
+    keys[e.key] = false;
+    if (e.key === 'w' || e.key === 'W') keys['ArrowUp'] = false;
+    if (e.key === 's' || e.key === 'S') keys['ArrowDown'] = false;
+    if (e.key === 'a' || e.key === 'A') keys['ArrowLeft'] = false;
+    if (e.key === 'd' || e.key === 'D') keys['ArrowRight'] = false;
+  });
+
+  // Start loop
+  animId = requestAnimationFrame(animate);
+
+  // ── Return control object ──
+  return {
+    scene, camera, renderer, selfSprite,
+    otherSprites, playerPos, buildingMeshes, labelsEl,
+    get camYaw() { return camYaw; },
+    set camYaw(v) { camYaw = v; },
+    get camMode() { return camMode; },
+    set camMode(v) { camMode = v; },
+    get joyDir() { return joyDir; },
+    stop() {
+      if (animId) cancelAnimationFrame(animId);
+      renderer.dispose();
+      window.removeEventListener('resize', onResize);
+      if (crosshairEl) crosshairEl.style.display = 'none';
+      if (pointerLocked) document.exitPointerLock();
+    },
+    addOtherPlayer(username, x, y, heroClass, level) {
+      if (otherSprites[username]) return;
+      const sprite = createPlayerSprite(heroClass, false);
+      const pos = serverToWorld(x, y);
+      sprite.position.copy(pos);
+      scene.add(sprite);
+      const label = document.createElement('div');
+      label.style.cssText = `position:absolute;transform:translate(-50%,-100%);
+        background:rgba(0,0,0,0.65);color:#fff;font-size:0.55rem;font-weight:700;
+        padding:2px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;
+        border:1px solid rgba(255,255,255,0.15);backdrop-filter:blur(3px);display:none;`;
+      label.textContent = username;
+      labelsEl.appendChild(label);
+      otherSprites[username] = { sprite, label, targetPos: pos.clone(), offset: Math.random()*Math.PI*2 };
+    },
+    moveOtherPlayer(username, x, y) {
+      const op = otherSprites[username];
+      if (!op) return;
+      op.targetPos.copy(serverToWorld(x, y));
+    },
+    removeOtherPlayer(username) {
+      const op = otherSprites[username];
+      if (!op) return;
+      scene.remove(op.sprite);
+      op.sprite.material.dispose();
+      op.label.remove();
+      delete otherSprites[username];
+    },
+    dispose() {
+      if (animId) cancelAnimationFrame(animId);
+      renderer.dispose();
+    }
+  };
+}
+
+let last3DMove = 0;
+
+// Server coord (0-100) -> 3D world coord
+function serverToWorld(sx, sy) {
+  return new THREE.Vector3(
+    (sx/100)*100 - 50,
+    0,
+    50 - (sy/100)*100
+  );
+}
+
+// Update DOM label position from 3D world pos
+function updateLabel(worldPos, label, name, camera, W, H) {
+  const vec = worldPos.clone().project(camera);
+  const sx = (vec.x * 0.5 + 0.5) * W;
+  const sy = (-vec.y * 0.5 + 0.5) * H;
+  if (vec.z > 1 || sx < -50 || sx > W+50 || sy < -50 || sy > H+50) {
+    label.style.display = 'none'; return;
+  }
+  label.style.display = 'block';
+  label.style.left = sx + 'px';
+  label.style.top = (sy - 30) + 'px';
+}
+
+// Create billboard sprite for player
+function createPlayerSprite(heroClass, isSelf) {
+  const colors = [0x4860a0, 0x2a5020, 0x5818a0];
+  const color = colors[heroClass % 3];
+  const canvas2 = document.createElement('canvas');
+  canvas2.width = 64; canvas2.height = 96;
+  const ctx = canvas2.getContext('2d');
+
+  // Draw pixel art character on canvas
+  const c = color;
+  const hex = '#' + c.toString(16).padStart(6,'0');
+  const bodyColors = [
+    {body:'#4860a0',skin:'#e0c090',belt:'#f0c840',boot:'#302008'},
+    {body:'#2a5020',skin:'#d0a070',belt:'#8a4020',boot:'#4a2810'},
+    {body:'#5818a0',skin:'#d8c0e8',belt:'#f0c840',boot:'#281060'},
+  ];
+  const bc = bodyColors[heroClass % 3];
+  const sc = 4; // scale factor (64/16 = 4)
+
+  // Clear
+  ctx.clearRect(0,0,64,96);
+
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,0.25)';
+  ctx.beginPath(); ctx.ellipse(32,92,16,5,0,0,Math.PI*2); ctx.fill();
+
+  // Body (simplified pixel art at 4x scale)
+  // Boots
+  ctx.fillStyle=bc.boot;
+  ctx.fillRect(22,76,10,8); ctx.fillRect(32,76,10,8);
+  // Legs
+  ctx.fillStyle=bc.body;
+  ctx.fillRect(23,60,9,16); ctx.fillRect(32,60,9,16);
+  // Belt
+  ctx.fillStyle=bc.belt;
+  ctx.fillRect(20,56,24,5);
+  // Torso
+  ctx.fillStyle=bc.body;
+  ctx.fillRect(18,28,28,28);
+  // Arms
+  ctx.fillRect(10,30,8,20); ctx.fillRect(46,30,8,20);
+  // Highlight on torso
+  ctx.fillStyle='rgba(255,255,255,0.18)';
+  ctx.fillRect(18,28,4,28);
+  // Head
+  ctx.fillStyle=bc.skin;
+  ctx.fillRect(20,8,24,20);
+  // Eyes
+  ctx.fillStyle='#3a2010';
+  ctx.fillRect(24,16,4,3); ctx.fillRect(36,16,4,3);
+  // Helmet rim
+  ctx.fillStyle=bc.body;
+  ctx.fillRect(18,6,28,6);
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.fillRect(18,6,28,2);
+
+  // Self indicator
+  if (isSelf) {
+    ctx.fillStyle='rgba(245,200,66,0.8)';
+    ctx.beginPath(); ctx.arc(32,3,4,0,Math.PI*2); ctx.fill();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas2);
+  tex.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(2, 3, 1);
+  return sprite;
+}
+
+// Build world objects (buildings, trees, rocks)
+function buildWorld(scene) {
+  const mats = {
+    inn:   new THREE.MeshLambertMaterial({ color: 0xede0c4 }),
+    smith: new THREE.MeshLambertMaterial({ color: 0x888070 }),
+    shop:  new THREE.MeshLambertMaterial({ color: 0xd4b068 }),
+    dark:  new THREE.MeshLambertMaterial({ color: 0x1a0830 }),
+    wood:  new THREE.MeshLambertMaterial({ color: 0x7a5028 }),
+    roof:  new THREE.MeshLambertMaterial({ color: 0x1e2430 }),
+    stone: new THREE.MeshLambertMaterial({ color: 0x909888 }),
+    water: new THREE.MeshLambertMaterial({ color: 0x3888c8, transparent:true, opacity:0.8 }),
+    tree1: new THREE.MeshLambertMaterial({ color: 0x2a8020 }),
+    tree2: new THREE.MeshLambertMaterial({ color: 0x38a028 }),
+    grass: new THREE.MeshLambertMaterial({ color: 0x5ab430 }),
+    portal:new THREE.MeshLambertMaterial({ color:0x8000d0, transparent:true, opacity:0.85, emissive:0x4000a0, emissiveIntensity:0.6 }),
+    gate:  new THREE.MeshLambertMaterial({ color:0x180638 }),
+  };
+
+  function box(w,h,d,mat,x,y,z, castShadow=true) {
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+    m.position.set(x,y,z); m.castShadow=castShadow; m.receiveShadow=true;
+    scene.add(m); return m;
+  }
+
+  // ── INN (left) ──
+  box(8,6,6, mats.inn, -25, 3, -5);      // walls
+  box(10,0.5,8, mats.roof, -25, 6.5, -5); // roof base
+  // Roof pyramid
+  const innRoof = new THREE.Mesh(new THREE.ConeGeometry(6,4,4), mats.roof);
+  innRoof.position.set(-25,9,-5); innRoof.rotation.y=Math.PI/4;
+  innRoof.castShadow=true; scene.add(innRoof);
+  box(1.5,5,0.2, mats.wood, -25,5,-1.9); // door
+  // Sign
+  box(3,1,0.2, new THREE.MeshLambertMaterial({color:0xc09840}), -25,5.5,-1.9);
+
+  // ── BLACKSMITH (right) ──
+  box(8,6,6, mats.smith, 25, 3, -5);
+  box(10,0.5,8, mats.roof, 25, 6.5, -5);
+  const bsRoof = new THREE.Mesh(new THREE.ConeGeometry(6,4,4), mats.roof);
+  bsRoof.position.set(25,9,-5); bsRoof.rotation.y=Math.PI/4; bsRoof.castShadow=true; scene.add(bsRoof);
+  // Chimney
+  box(1.5,5,1.5, mats.stone, 27,8,-4); // chimney
+  // Fire light
+  const fireLight = new THREE.PointLight(0xff6020, 2, 8);
+  fireLight.position.set(25,5,-5); scene.add(fireLight);
+
+  // ── SHOP (center) ──
+  box(7,5,5, mats.shop, 0, 2.5, -8);
+  box(9,0.5,7, mats.roof, 0, 5.5, -8);
+  // Awning
+  box(9,0.3,3, new THREE.MeshLambertMaterial({color:0xc03820}), 0,4,-5.5);
+
+  // ── WELL ──
+  const wellBody = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,1.8,8), mats.stone);
+  wellBody.position.set(10,0.9,5); wellBody.castShadow=true; scene.add(wellBody);
+  // Water
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,0.1,8), mats.water);
+  water.position.set(10,0.9,5); scene.add(water);
+  // Roof
+  const wellRoof = new THREE.Mesh(new THREE.ConeGeometry(2,1.5,8), mats.roof);
+  wellRoof.position.set(10,3,5); wellRoof.castShadow=true; scene.add(wellRoof);
+
+  // ── DUNGEON GATE (far) ──
+  box(0.8,10,1, mats.gate, 42,5,-2);  // left pillar
+  box(0.8,10,1, mats.gate, 46,5,-2);  // right pillar
+  box(5,1,1, mats.gate, 44,10,-2);    // top bar
+  // Portal oval
+  const portalGeo = new THREE.TorusGeometry(3,0.4,8,24);
+  const portalMesh = new THREE.Mesh(portalGeo, mats.portal);
+  portalMesh.position.set(44,6,-1.8);
+  portalMesh.castShadow=false; scene.add(portalMesh);
+  // Portal fill
+  const innerMat = new THREE.MeshBasicMaterial({color:0xc040ff, transparent:true, opacity:0.55});
+  const inner = new THREE.Mesh(new THREE.CircleGeometry(2.8,16), innerMat);
+  inner.position.set(44,6,-1.7); scene.add(inner);
+  // Portal point light
+  const portalLight = new THREE.PointLight(0xc040ff, 2.5, 15);
+  portalLight.position.set(44,6,-2); scene.add(portalLight);
+
+  // Animate portal
+  let portalT=0;
+  const portalTick = () => {
+    portalT += 0.02;
+    portalLight.intensity = 1.8 + Math.sin(portalT)*0.8;
+    portalMesh.rotation.z = portalT*0.5;
+    innerMat.opacity = 0.45 + Math.sin(portalT)*0.12;
+    requestAnimationFrame(portalTick);
+  };
+  requestAnimationFrame(portalTick);
+
+  // ── TREES ──
+  [[-30,0,15],[-28,0,22],[30,0,18],[32,0,12],[-15,0,25],[15,0,28],[0,0,35],
+   [-35,0,5],[35,0,8],[-20,0,-25],[20,0,-25]].forEach(([x,_,z])=>{
+    // Trunk
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.35,3,6), mats.wood);
+    trunk.position.set(x,1.5,z); trunk.castShadow=true; scene.add(trunk);
+    // Canopy layers
+    [[0,3.5,2.8,0],[0,5,2.2,1],[0,6.2,1.4,2]].forEach(([,cy,cr,i])=>{
+      const c=new THREE.Mesh(new THREE.ConeGeometry(cr,2,7),
+        i===0?mats.tree1:mats.tree2);
+      c.position.set(x,cy,z); c.castShadow=true; scene.add(c);
+    });
+  });
+
+  // ── FENCE ──
+  for(let i=-8;i<=8;i++){
+    box(0.15,1.5,0.15, mats.wood, i*2.5, 0.75, -15);
+    if(i<8) box(5,0.15,0.15, mats.wood, i*2.5+1.25, 1.2, -15);
+  }
+
+  // ── ROCKS ──
+  [[15,0,10],[18,0,12],[-16,0,10],[-12,0,14],[38,0,5]].forEach(([x,_,z])=>{
+    const r=new THREE.Mesh(new THREE.DodecahedronGeometry(0.6+Math.random()*0.4,0),
+      new THREE.MeshLambertMaterial({color:0x7a7060}));
+    r.position.set(x,0.4,z); r.rotation.set(Math.random(),Math.random(),Math.random());
+    r.castShadow=true; r.receiveShadow=true; scene.add(r);
+  });
+
+  // ── GRASS PATCHES (particle-like) ──
+  const grassMat = new THREE.MeshBasicMaterial({color:0x60c030, side:THREE.DoubleSide});
+  for(let i=0;i<80;i++){
+    const x=(Math.random()-0.5)*80, z=(Math.random()-0.5)*80;
+    if(Math.abs(x)<4) continue; // skip path
+    const g=new THREE.Mesh(new THREE.PlaneGeometry(0.4,0.7), grassMat);
+    g.position.set(x,0.35,z); g.rotation.y=Math.random()*Math.PI;
+    scene.add(g);
+  }
+
+  // ── SUN VISUAL ──
+  const sunSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(8,8,8),
+    new THREE.MeshBasicMaterial({color:0xfff5a0})
+  );
+  sunSphere.position.set(80,100,60); scene.add(sunSphere);
+}
+
+// Interaction zones (3D world positions)
+const INTERACTION_ZONES_3D = [
+  { x:-25, z:-5, r:6,  label:'🏨 여관 입장',    fn:'openInn()' },
+  { x:25,  z:-5, r:6,  label:'⚒️ 대장간 입장',  fn:'openBlacksmith()' },
+  { x:0,   z:-8, r:6,  label:'🏪 상점 입장',    fn:'openVillageShop()' },
+  { x:10,  z:5,  r:4,  label:'🌊 우물',          fn:'' },
+  { x:44,  z:-2, r:7,  label:'⚔️ 던전 입장!',   fn:'goToBattle()' },
+];
+
+function checkInteractionZones(playerPos) {
   const iEl = document.getElementById('hudInteract');
   const tEl = document.getElementById('hudInteractText');
+  const near = INTERACTION_ZONES_3D.find(z => {
+    const dx=playerPos.x-z.x, dz=playerPos.z-z.z;
+    return Math.sqrt(dx*dx+dz*dz) < z.r;
+  });
   if (near && near.fn) {
     currentInteraction = near.fn;
     if (tEl) tEl.textContent = near.label;
@@ -6127,321 +6651,335 @@ function checkInteractionZone() {
   }
 }
 
-function doInteract() {
-  if (currentInteraction) eval(currentInteraction);
+// ══════════════════════════════════════════════════════════════
+//  3D PARTICLE SYSTEMS & TEXTURE ENHANCEMENTS
+// ══════════════════════════════════════════════════════════════
+
+// 프로시저럴 잔디 텍스처 생성
+function createGrassTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  const ctx = c.getContext('2d');
+  // Base green
+  ctx.fillStyle = '#4aab28';
+  ctx.fillRect(0,0,256,256);
+  // Noise patches
+  for (let i=0;i<600;i++){
+    const x=Math.random()*256, y=Math.random()*256;
+    const g = 100 + Math.random()*80;
+    ctx.fillStyle = `rgba(${30+Math.random()*30},${g},${20+Math.random()*20},0.6)`;
+    ctx.fillRect(x,y,2+Math.random()*3,2+Math.random()*3);
+  }
+  // Dark patches for variety
+  for (let i=0;i<80;i++){
+    const x=Math.random()*256, y=Math.random()*256;
+    ctx.fillStyle = `rgba(20,80,10,0.3)`;
+    ctx.beginPath(); ctx.arc(x,y,4+Math.random()*8,0,Math.PI*2); ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(12,12);
+  return tex;
 }
 
-function toggleHudMenu() {
-  const m = document.getElementById('hudMenu');
-  if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+// 프로시저럴 흙길 텍스처
+function createDirtTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#b8905a';
+  ctx.fillRect(0,0,128,128);
+  for (let i=0;i<300;i++){
+    const x=Math.random()*128, y=Math.random()*128;
+    ctx.fillStyle = `rgba(${140+Math.random()*40},${100+Math.random()*30},${60+Math.random()*20},0.5)`;
+    ctx.fillRect(x,y,1+Math.random()*3,1+Math.random()*2);
+  }
+  // 돌멩이
+  for(let i=0;i<20;i++){
+    const x=Math.random()*128, y=Math.random()*128;
+    ctx.fillStyle=`rgba(100,90,80,0.4)`;
+    ctx.beginPath();ctx.arc(x,y,1+Math.random()*2,0,Math.PI*2);ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(1,8);
+  return tex;
 }
 
-// 스킬 버튼 → 맵 스킬 탭
-function onHSkill(idx) {
-  if (typeof handleMapSkillTap === 'function') handleMapSkillTap(idx);
-  else if (typeof handleSkillTap === 'function') handleSkillTap(idx);
-}
-function onHAttack() {
-  // Auto-attack or trigger battle
-  if (typeof triggerBattle === 'function') triggerBattle();
-}
-
-
-function renderVillageScene() {
-  const W = window.innerWidth, H = window.innerHeight;
-
-  // ── Sky ──
-  const skyEl = document.getElementById('vSky');
-  if (skyEl) {
-    skyEl.style.cssText = `position:absolute;top:0;left:0;right:0;height:42%;
-      background:linear-gradient(180deg,#6ec6f0 0%,#a8dcf8 50%,#d0eefc 100%);pointer-events:none;`;
-    skyEl.innerHTML = `
-      <div style="position:absolute;top:8%;left:5%;animation:cloud-drift 26s linear infinite;">
-        <svg viewBox="0 0 110 38" width="220" height="76" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="55" cy="28" rx="50" ry="13" fill="rgba(255,255,255,0.92)"/>
-          <ellipse cx="35" cy="24" rx="22" ry="16" fill="rgba(255,255,255,0.95)"/>
-          <ellipse cx="75" cy="23" rx="26" ry="15" fill="rgba(255,255,255,0.90)"/>
-          <ellipse cx="55" cy="22" rx="28" ry="18" fill="rgba(255,255,255,0.97)"/>
-        </svg>
-      </div>
-      <div style="position:absolute;top:4%;left:50%;animation:cloud-drift 18s linear infinite;animation-delay:-7s;">
-        <svg viewBox="0 0 80 28" width="160" height="56" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="40" cy="20" rx="36" ry="10" fill="rgba(255,255,255,0.88)"/>
-          <ellipse cx="25" cy="17" rx="18" ry="13" fill="rgba(255,255,255,0.93)"/>
-          <ellipse cx="56" cy="16" rx="20" ry="12" fill="rgba(255,255,255,0.90)"/>
-          <ellipse cx="40" cy="15" rx="22" ry="14" fill="rgba(255,255,255,0.95)"/>
-        </svg>
-      </div>`;
-  }
-
-  // ── Mountains (behind hills) ──
-  const mEl = document.getElementById('vMountains');
-  if (mEl) {
-    mEl.style.cssText = `position:absolute;bottom:38%;left:0;right:0;height:22%;pointer-events:none;overflow:hidden;`;
-    mEl.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 1200 160" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="0,160 80,40 180,110 300,20 420,90 540,10 660,80 780,30 900,100 1020,50 1140,90 1200,60 1200,160" fill="rgba(150,185,210,0.55)"/>
-      <polygon points="0,160 60,70 160,120 280,45 400,105 520,30 640,95 760,55 880,115 1000,65 1120,100 1200,75 1200,160" fill="rgba(120,160,195,0.45)"/>
-    </svg>`;
-  }
-
-  // ── Rolling hills (green, just above ground) ──
-  const hEl = document.getElementById('vHills');
-  if (hEl) {
-    hEl.style.cssText = `position:absolute;bottom:38%;left:-2%;right:-2%;height:16%;pointer-events:none;`;
-    hEl.innerHTML = `<svg width="104%" height="100%" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,120 Q150,30 300,70 Q450,110 600,40 Q750,0 900,60 Q1050,110 1200,50 L1200,120 Z" fill="#7ec855"/>
-      <path d="M0,120 Q120,50 260,80 Q400,110 550,55 Q700,15 850,75 Q1000,110 1200,65 L1200,120 Z" fill="#6ab840" opacity="0.75"/>
-    </svg>`;
-  }
-
-  // ── Ground (grass tiles) ──
-  const gEl = document.getElementById('vGround');
-  if (gEl) {
-    gEl.style.cssText = `position:absolute;bottom:0;left:0;right:0;height:42%;overflow:hidden;`;
-    const COLS = 18, ROWS = 6;
-    const tW = Math.ceil(W / COLS);
-    const tH = Math.ceil(H * 0.42 / ROWS);
-    const GC = [
-      ['#5ab830','#48a020','#3a8018'],
-      ['#64c838','#52b028','#409020'],
-      ['#50a828','#409018','#307810'],
-      ['#6acc40','#58b830','#48a028'],
-    ];
-    let g = '';
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLS; col++) {
-        const isPath = col >= 7 && col <= 10;
-        const seed = (col * 5 + row * 9) % 4;
-        const c = isPath ? ['#b09050','#a07840','#906830'] : GC[seed];
-        const sh = 6 + seed * 3;
-        g += `<div style="position:absolute;left:${col*tW}px;top:${row*tH}px;width:${tW}px;height:${tH}px;background:${c[0]};box-shadow:inset 0 -${sh}px 0 ${c[2]},inset 0 2px 0 rgba(255,255,255,0.18);"></div>`;
-      }
-    }
-    gEl.innerHTML = g;
-  }
-
-  // ── Fog/atmosphere ──
-  const fogEl = document.getElementById('vFog');
-  if (fogEl) {
-    fogEl.style.cssText = `position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 42%,transparent 30%,rgba(200,230,250,0.12) 70%,rgba(200,230,250,0.28) 100%);`;
-  }
-
-  // ── Flowers & trees ──
-  const dEl = document.getElementById('villageDecos');
-  if (dEl) {
-    dEl.style.cssText = `position:absolute;inset:0;pointer-events:none;`;
-    const items = [];
-    // Flowers (scattered on ground)
-    const flowers = ['🌸','🌼','🌺','🌻','🍀','🌿'];
-    const rng = (n) => Math.floor(Math.random()*n);
-    for (let i = 0; i < 18; i++) {
-      const x = 2 + Math.random()*96;
-      const y = 40 + Math.random()*20;
-      if (x > 38 && x < 64 && y > 50) continue; // skip path
-      const f = flowers[rng(flowers.length)];
-      const sz = (0.6 + Math.random()*0.5).toFixed(1);
-      const delay = (Math.random()*3).toFixed(1);
-      items.push(`<div style="position:absolute;left:${x.toFixed(1)}%;bottom:${y.toFixed(1)}%;font-size:${sz}rem;animation:vflower-sway 3s ease-in-out ${delay}s infinite;transform-origin:bottom center;pointer-events:none;">${f}</div>`);
-    }
-    // Trees (side view, base at ground level)
-    const trees = [[6,42],[10,46],[87,44],[92,48],[15,40],[80,41]];
-    trees.forEach(([x,y]) => {
-      items.push(`<div style="position:absolute;left:${x}%;bottom:${y}%;pointer-events:none;filter:drop-shadow(3px 6px 8px rgba(0,0,0,0.3));">
-        <svg viewBox="0 0 32 52" width="64" height="104" xmlns="http://www.w3.org/2000/svg">
-          <rect x="12" y="34" width="8" height="18" fill="#7a5028"/>
-          <rect x="11" y="34" width="10" height="3" fill="#5a3818"/>
-          <rect x="2" y="18" width="28" height="18" fill="#2a8020"/>
-          <rect x="4" y="18" width="24" height="3" fill="#3a9830"/>
-          <rect x="4" y="10" width="24" height="12" fill="#38a028"/>
-          <rect x="6" y="10" width="20" height="3" fill="#48b038"/>
-          <rect x="6" y="2" width="20" height="12" fill="#42b030"/>
-          <rect x="8" y="2" width="16" height="3" fill="#52c040"/>
-          <rect x="10" y="0" width="12" height="5" fill="#58c840"/>
-          <rect x="2" y="18" width="5" height="18" fill="#1a6010" opacity="0.35"/>
-        </svg>
-      </div>`);
+// 반딧불 파티클 시스템
+function createFireflies(scene) {
+  const count = 40;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count*3);
+  const speeds = [];
+  for(let i=0;i<count;i++){
+    positions[i*3]   = (Math.random()-0.5)*80;
+    positions[i*3+1] = 1 + Math.random()*4;
+    positions[i*3+2] = (Math.random()-0.5)*80;
+    speeds.push({
+      sx: (Math.random()-0.5)*0.02,
+      sy: (Math.random()-0.5)*0.01,
+      sz: (Math.random()-0.5)*0.02,
+      phase: Math.random()*Math.PI*2
     });
-    dEl.innerHTML = items.join('');
   }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+
+  // 반딧불 텍스처
+  const fc = document.createElement('canvas');
+  fc.width = 32; fc.height = 32;
+  const fctx = fc.getContext('2d');
+  const grad = fctx.createRadialGradient(16,16,0,16,16,16);
+  grad.addColorStop(0, 'rgba(200,255,100,1)');
+  grad.addColorStop(0.3, 'rgba(160,255,60,0.6)');
+  grad.addColorStop(1, 'rgba(100,200,30,0)');
+  fctx.fillStyle = grad;
+  fctx.fillRect(0,0,32,32);
+
+  const mat = new THREE.PointsMaterial({
+    size: 0.6,
+    map: new THREE.CanvasTexture(fc),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  return { points, speeds, positions };
 }
 
-function renderVillageBuildings() {
-  const obj = document.getElementById('villageObjects');
-  if (!obj) return;
-  obj.style.cssText = 'position:absolute;inset:0;pointer-events:auto;';
+// 굴뚝 연기 파티클 시스템
+function createChimneySmoke(scene, chimneyPos) {
+  const count = 25;
+  const particles = [];
+  const smokeMat = new THREE.SpriteMaterial({
+    color: 0xaaaaaa,
+    transparent: true,
+    opacity: 0.3,
+    blending: THREE.NormalBlending
+  });
 
-  // Helper: building label
-  const lbl = (text) => `<div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.72);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(4px);">${text}</div>`;
-
-  obj.innerHTML = `
-    <!-- INN (left) - half-timbered -->
-    <div style="position:absolute;left:3%;bottom:42%;cursor:pointer;" onclick="openInn()">
-      ${lbl('🏨 여관 (전직)')}
-      <svg viewBox="0 0 80 96" width="130" height="156" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="84" width="80" height="12" fill="#707860" rx="1"/>
-        <rect x="2" y="36" width="76" height="50" fill="#ede0c4"/>
-        <rect x="2" y="36" width="76" height="3" fill="#d0c4a0"/>
-        <rect x="2" y="36" width="4" height="50" fill="#6a4020"/>
-        <rect x="74" y="36" width="4" height="50" fill="#6a4020"/>
-        <rect x="2" y="60" width="76" height="3" fill="#6a4020"/>
-        <rect x="38" y="36" width="4" height="50" fill="#6a4020"/>
-        <line x1="2" y1="36" x2="38" y2="60" stroke="#7a4828" stroke-width="3"/>
-        <line x1="42" y1="36" x2="78" y2="60" stroke="#7a4828" stroke-width="3"/>
-        <rect x="6" y="42" width="22" height="16" fill="#5aa0d8" opacity="0.85"/>
-        <rect x="7" y="43" width="20" height="14" fill="#80c0f0" opacity="0.55"/>
-        <rect x="16" y="42" width="2" height="16" fill="#3878a8"/>
-        <rect x="6" y="50" width="22" height="2" fill="#3878a8"/>
-        <rect x="52" y="42" width="22" height="16" fill="#5aa0d8" opacity="0.85"/>
-        <rect x="53" y="43" width="20" height="14" fill="#80c0f0" opacity="0.55"/>
-        <rect x="62" y="42" width="2" height="16" fill="#3878a8"/>
-        <rect x="52" y="50" width="22" height="2" fill="#3878a8"/>
-        <rect x="30" y="62" width="20" height="24" fill="#8a3c18"/>
-        <rect x="31" y="63" width="18" height="22" fill="#7a2e10"/>
-        <rect x="39" y="63" width="2" height="22" fill="#681e08"/>
-        <rect x="41" y="74" width="3" height="2" fill="#d8a030"/>
-        <rect x="26" y="38" width="28" height="8" fill="#c09840"/>
-        <rect x="27" y="39" width="26" height="6" fill="#b08830"/>
-        <text x="28" y="45" font-size="6" fill="#fff8e0" font-weight="bold" font-family="sans-serif">여 관</text>
-        <polygon points="0,36 40,2 80,36" fill="#22282e"/>
-        <polygon points="2,36 40,5 78,36" fill="#2c343e"/>
-        <rect x="0" y="34" width="80" height="4" fill="#181e24"/>
-        <rect x="55" y="0" width="12" height="22" fill="#404848"/>
-        <rect x="53" y="0" width="16" height="4" fill="#303838"/>
-        <circle cx="61" cy="-3" r="5" fill="#c0c0c0" opacity="0.6"/>
-        <circle cx="65" cy="-7" r="3" fill="#d0d0d0" opacity="0.4"/>
-        <rect x="36" y="28" width="8" height="10" fill="#f0c840" opacity="0.7"/>
-        <rect x="35" y="26" width="10" height="4" fill="#a07828"/>
-      </svg>
-    </div>
-
-    <!-- SHOP (center-left) -->
-    <div style="position:absolute;left:30%;bottom:42%;cursor:pointer;" onclick="openVillageShop()">
-      ${lbl('🏪 상점')}
-      <svg viewBox="0 0 72 64" width="110" height="98" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="16" width="68" height="48" fill="#d4b068"/>
-        <rect x="2" y="16" width="68" height="4" fill="#e4c078"/>
-        <rect x="0" y="10" width="72" height="10" fill="#c84020"/>
-        <rect x="0" y="10" width="72" height="4" fill="#e05030"/>
-        <rect x="6" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
-        <rect x="18" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
-        <rect x="30" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
-        <rect x="42" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
-        <rect x="54" y="10" width="7" height="10" fill="rgba(255,255,255,0.25)"/>
-        <rect x="2" y="10" width="5" height="54" fill="#b07828"/>
-        <rect x="65" y="10" width="5" height="54" fill="#b07828"/>
-        <rect x="4" y="26" width="64" height="6" fill="#c09030"/>
-        <rect x="4" y="26" width="64" height="1" fill="#d8a840"/>
-        <rect x="8" y="21" width="7" height="6" fill="#e03838" rx="1"/>
-        <rect x="20" y="20" width="6" height="7" fill="#38c038" rx="1"/>
-        <rect x="32" y="21" width="7" height="6" fill="#3850e0" rx="1"/>
-        <rect x="44" y="20" width="7" height="7" fill="#e0c030" rx="1"/>
-        <rect x="56" y="21" width="6" height="6" fill="#c030a0" rx="1"/>
-        <rect x="28" y="32" width="16" height="30" fill="#9a5010"/>
-        <rect x="29" y="33" width="14" height="28" fill="#8a3e08"/>
-        <rect x="35" y="33" width="2" height="28" fill="#7a2e04"/>
-        <rect x="37" y="46" width="3" height="2" fill="#c09030"/>
-        <polygon points="0,10 36,0 72,10" fill="#282018"/>
-        <rect x="0" y="8" width="72" height="4" fill="#1e1810"/>
-        <rect x="22" y="2" width="28" height="7" fill="#b88028"/>
-        <rect x="23" y="3" width="26" height="5" fill="#a87018"/>
-        <text x="25" y="8" font-size="5" fill="#fff0c0" font-weight="bold" font-family="sans-serif">상 점</text>
-      </svg>
-    </div>
-
-    <!-- WELL (center) -->
-    <div style="position:absolute;left:52%;bottom:43%;pointer-events:none;">
-      <svg viewBox="0 0 44 52" width="72" height="85" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="22" width="36" height="30" fill="#909888"/>
-        <rect x="4" y="22" width="36" height="4" fill="#b0b8a8"/>
-        <rect x="2" y="22" width="6" height="30" fill="#808878"/>
-        <rect x="36" y="22" width="6" height="30" fill="#808878"/>
-        <rect x="8" y="26" width="28" height="24" fill="#3888c8"/>
-        <rect x="8" y="26" width="28" height="3" fill="#58a8e8"/>
-        <ellipse cx="22" cy="38" rx="10" ry="3" fill="#6abcf0" opacity="0.5"/>
-        <rect x="0" y="20" width="44" height="4" fill="#a0a898"/>
-        <rect x="16" y="0" width="5" height="22" fill="#8a5828"/>
-        <rect x="12" y="2" width="20" height="5" fill="#a06830"/>
-        <rect x="10" y="0" width="5" height="10" fill="#785020"/>
-        <rect x="29" y="0" width="5" height="10" fill="#785020"/>
-        <rect x="18" y="7" width="3" height="15" fill="#c0a060" opacity="0.8"/>
-        <rect x="15" y="15" width="9" height="7" fill="#8a5020" rx="1"/>
-      </svg>
-    </div>
-
-    <!-- BLACKSMITH (right) -->
-    <div style="position:absolute;right:3%;bottom:42%;cursor:pointer;" onclick="openBlacksmith()">
-      ${lbl('⚒️ 대장간 (강화)')}
-      <svg viewBox="0 0 76 88" width="118" height="137" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="76" width="72" height="12" fill="#585048" rx="1"/>
-        <rect x="4" y="32" width="68" height="46" fill="#888070"/>
-        <rect x="4" y="32" width="68" height="4" fill="#9890a0"/>
-        <rect x="4" y="44" width="68" height="1" fill="#706860" opacity="0.6"/>
-        <rect x="4" y="56" width="68" height="1" fill="#706860" opacity="0.6"/>
-        <rect x="22" y="32" width="1" height="46" fill="#706860" opacity="0.5"/>
-        <rect x="54" y="32" width="1" height="46" fill="#706860" opacity="0.5"/>
-        <rect x="6" y="40" width="14" height="12" fill="#3898b0" opacity="0.7"/>
-        <rect x="7" y="41" width="12" height="10" fill="#58b8d0" opacity="0.5"/>
-        <rect x="26" y="38" width="22" height="20" fill="#1a1a1a"/>
-        <rect x="27" y="39" width="20" height="18" fill="#ff4800" opacity="0.92"/>
-        <rect x="30" y="38" width="14" height="6" fill="#ff7820"/>
-        <rect x="33" y="35" width="8" height="6" fill="#ffc030"/>
-        <rect x="26" y="38" width="22" height="20" fill="#ff5800" opacity="0.18"/>
-        <rect x="30" y="58" width="16" height="26" fill="#252520"/>
-        <rect x="31" y="59" width="14" height="24" fill="#1a1a18"/>
-        <rect x="38" y="69" width="3" height="2" fill="#888080"/>
-        <polygon points="0,32 38,2 76,32" fill="#202028"/>
-        <polygon points="2,32 38,5 74,32" fill="#282830"/>
-        <rect x="0" y="30" width="76" height="4" fill="#181820"/>
-        <rect x="52" y="0" width="14" height="24" fill="#383830"/>
-        <rect x="50" y="0" width="18" height="4" fill="#282820"/>
-        <circle cx="59" cy="-4" r="6" fill="#c0c0b0" opacity="0.6"/>
-        <circle cx="63" cy="-9" r="4" fill="#d0d0c0" opacity="0.45"/>
-        <circle cx="57" cy="-12" r="3" fill="#c8c8b8" opacity="0.3"/>
-        <rect x="18" y="34" width="26" height="6" fill="#484840"/>
-        <text x="19" y="40" font-size="5" fill="#88c8ff" font-weight="bold" font-family="sans-serif">대장간</text>
-      </svg>
-    </div>
-
-    <!-- DUNGEON GATE (far right) -->
-    <div style="position:absolute;right:5%;bottom:42%;cursor:pointer;filter:drop-shadow(0 0 16px rgba(120,0,200,0.6));" onclick="goToBattle()" title="던전 입장">
-      ${lbl('⚔️ 던전 입장!')}
-      <svg viewBox="0 0 72 90" width="100" height="126" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="12" width="56" height="78" fill="#180830"/>
-        <rect x="6" y="9" width="60" height="7" fill="#280a50" rx="2"/>
-        <rect x="6" y="9" width="5" height="78" fill="#1e0640"/>
-        <rect x="61" y="9" width="5" height="78" fill="#1e0640"/>
-        <ellipse cx="36" cy="32" rx="22" ry="24" fill="#280a50"/>
-        <ellipse cx="36" cy="34" rx="18" ry="20" fill="#0a0018"/>
-        <ellipse cx="36" cy="35" rx="14" ry="16" fill="#5000b0" opacity="0.75"/>
-        <ellipse cx="36" cy="36" rx="10" ry="12" fill="#8020e0" opacity="0.65"/>
-        <ellipse cx="36" cy="37" rx="6" ry="8" fill="#b040ff" opacity="0.55"/>
-        <ellipse cx="36" cy="38" rx="3" ry="4" fill="#fff" opacity="0.25"/>
-        <rect x="18" y="48" width="4" height="40" fill="#302040"/>
-        <rect x="27" y="48" width="4" height="40" fill="#302040"/>
-        <rect x="36" y="48" width="4" height="40" fill="#302040"/>
-        <rect x="45" y="48" width="4" height="40" fill="#302040"/>
-        <rect x="14" y="59" width="44" height="4" fill="#302040"/>
-        <rect x="14" y="72" width="44" height="4" fill="#302040"/>
-        <circle cx="8" cy="14" r="5" fill="#2a1840"/>
-        <circle cx="64" cy="14" r="5" fill="#2a1840"/>
-        <text x="8" y="17" text-anchor="middle" font-size="7" fill="#8030c0">💀</text>
-        <text x="64" y="17" text-anchor="middle" font-size="7" fill="#8030c0">💀</text>
-        <text x="36" y="24" text-anchor="middle" font-size="9" fill="#c060ff" opacity="0.8">⚡</text>
-      </svg>
-    </div>
-  `;
+  for(let i=0;i<count;i++){
+    const sprite = new THREE.Sprite(smokeMat.clone());
+    sprite.position.set(
+      chimneyPos.x + (Math.random()-0.5)*0.5,
+      chimneyPos.y + Math.random()*3,
+      chimneyPos.z + (Math.random()-0.5)*0.5
+    );
+    sprite.scale.set(0.3+Math.random()*0.5, 0.3+Math.random()*0.5, 1);
+    scene.add(sprite);
+    particles.push({
+      sprite,
+      vy: 0.01 + Math.random()*0.015,
+      vx: (Math.random()-0.5)*0.005,
+      life: Math.random(),
+      maxLife: 2 + Math.random()*2
+    });
+  }
+  return particles;
 }
 
-function leaveVillage() {
-  if (!villageActive) return;
-  villageActive = false;
-  document.getElementById('villageScreen').classList.remove('active');
+// 포탈 파티클 이펙트
+function createPortalParticles(scene, portalPos) {
+  const count = 30;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count*3);
+  const data = [];
+  for(let i=0;i<count;i++){
+    const angle = (i/count)*Math.PI*2;
+    positions[i*3]   = portalPos.x + Math.cos(angle)*3;
+    positions[i*3+1] = portalPos.y + Math.sin(angle)*3;
+    positions[i*3+2] = portalPos.z;
+    data.push({ angle, speed: 0.5+Math.random()*1.5, radius: 2.5+Math.random()*1 });
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+
+  const pc = document.createElement('canvas');
+  pc.width=16; pc.height=16;
+  const pctx=pc.getContext('2d');
+  const pg=pctx.createRadialGradient(8,8,0,8,8,8);
+  pg.addColorStop(0,'rgba(200,100,255,1)');
+  pg.addColorStop(0.5,'rgba(150,50,255,0.5)');
+  pg.addColorStop(1,'rgba(100,0,200,0)');
+  pctx.fillStyle=pg; pctx.fillRect(0,0,16,16);
+
+  const mat = new THREE.PointsMaterial({
+    size: 0.5,
+    map: new THREE.CanvasTexture(pc),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+  return { points, data, positions, portalPos };
+}
+
+// 구름 시스템
+function createClouds(scene) {
+  const clouds = [];
+  const cloudMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.7,
+    side: THREE.DoubleSide
+  });
+  for(let i=0;i<12;i++){
+    const group = new THREE.Group();
+    // 여러 sphere를 합쳐서 구름 형태
+    const numBlobs = 3+Math.floor(Math.random()*4);
+    for(let j=0;j<numBlobs;j++){
+      const r = 2+Math.random()*3;
+      const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(r,6,4),
+        cloudMat.clone()
+      );
+      sphere.position.set(j*2.5-(numBlobs*1.25), Math.random()*1, (Math.random()-0.5)*2);
+      sphere.material.opacity = 0.5+Math.random()*0.3;
+      group.add(sphere);
+    }
+    group.position.set(
+      (Math.random()-0.5)*180,
+      40+Math.random()*30,
+      (Math.random()-0.5)*100
+    );
+    scene.add(group);
+    clouds.push({ group, speed: 0.005+Math.random()*0.01 });
+  }
+  return clouds;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ENTER / LEAVE VILLAGE
+// ══════════════════════════════════════════════════════════════
+function enterVillage(fromLogin) {
+  villageActive = true;
+
+  document.getElementById('battleArea').style.display = 'none';
+  document.getElementById('battleMapScreen').classList.remove('active');
+  const vs = document.getElementById('villageScreen');
+  vs.classList.add('active');
+  vs.style.display = 'block';
+
+  const hud = document.getElementById('gameHud');
+  if (hud) hud.classList.add('active');
+  document.getElementById('gameScreen').style.display = 'block';
+
+  const flash = document.createElement('div');
+  flash.className = 'village-transition';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 500);
+
+  // Initialize / restart Three.js world
+  if (THREE_SCENE) { THREE_SCENE.stop(); THREE_SCENE = null; }
+  // Small delay to ensure canvas is visible
+  setTimeout(() => {
+    THREE_SCENE = initThreeWorld();
+    if (!THREE_SCENE) return;
+    // Hook joystick into Three.js
+    hookJoystickToThree();
+  }, 60);
+
+  updateGameHud();
+  showAreaName('🏘️ 평화의 마을');
+
+  villagePos = { x: 50, y: 50 };
+  setupJoystick();
   if (villageMoveLoop) clearInterval(villageMoveLoop);
-  if (npcTimer) clearTimeout(npcTimer);
-  hideNpc();
-  villageOtherPlayers = {};
-  document.getElementById('villageOtherPlayers').innerHTML = '';
+  villageMoveLoop = setInterval(() => {
+    if (typeof updateMinimapDot === 'function') updateMinimapDot();
+    if (typeof checkNpcProximity === 'function') checkNpcProximity();
+  }, 100);
+
+  wsSend({ type: 'village_enter', x: 50, y: 50, heroClass: player ? ((player.level||1)%3) : 0 });
+  scheduleNpc();
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+}
+
+// Hook joystick direction to Three.js joyDir
+function hookJoystickToThree() {
+  if (!THREE_SCENE) return;
+  // Override joystickDir to feed into Three.js
+  const origTick = () => {
+    if (!THREE_SCENE) return;
+    THREE_SCENE.joyDir.x = joystickDir.x;
+    THREE_SCENE.joyDir.y = joystickDir.y;
+  };
+  // Poll joystick direction every frame
+  if (villageMoveLoop) clearInterval(villageMoveLoop);
+  villageMoveLoop = setInterval(() => {
+    origTick();
+    if (typeof updateMinimapDot === 'function') updateMinimapDot();
+  }, 50);
+}
+
+// Override other player functions to use Three.js
+function addVillagePlayer(username, x, y, heroClass, level) {
+  if (!THREE_SCENE) return;
+  THREE_SCENE.addOtherPlayer(username, x, y, heroClass, level);
+}
+function moveVillagePlayer(username, x, y) {
+  if (!THREE_SCENE) return;
+  THREE_SCENE.moveOtherPlayer(username, x, y);
+}
+function removeVillagePlayer(username) {
+  if (!THREE_SCENE) return;
+  THREE_SCENE.removeOtherPlayer(username);
+}
+
+// Legacy stubs (no longer needed but keep for compat)
+function renderVillageScene() {}
+function renderVillageBuildings() {}
+
+// ── 누락 함수 정의 ──
+function leaveVillage() {
+  villageActive = false;
+  if (villageMoveLoop) { clearInterval(villageMoveLoop); villageMoveLoop = null; }
+  if (npcTimer) { clearTimeout(npcTimer); npcTimer = null; }
+  if (THREE_SCENE) { THREE_SCENE.stop(); THREE_SCENE = null; }
+  playerPositions = {};
+  const vs = document.getElementById('villageScreen');
+  if (vs) { vs.classList.remove('active'); vs.style.display = 'none'; }
   wsSend({ type: 'village_leave' });
+}
+
+function updateGameHud() {
+  const hud = document.getElementById('gameHud');
+  if (!hud || !player) return;
+  hud.classList.add('active');
+  const nameEl = hud.querySelector('.hud-name');
+  const lvEl = hud.querySelector('.hud-level');
+  const hpEl = hud.querySelector('.hud-hp');
+  if (nameEl) nameEl.textContent = player.username || '';
+  if (lvEl) lvEl.textContent = 'Lv.' + (player.level || 1);
+  if (hpEl) hpEl.textContent = `HP ${player.hp||0}/${player.maxHp||100}`;
+}
+
+function showAreaName(name) {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:18%;left:50%;transform:translateX(-50%);font-size:1.6rem;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.7);z-index:9999;pointer-events:none;opacity:1;transition:opacity 1.5s;';
+  el.textContent = name;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; }, 1500);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function buildMonsterSVG(m) {
+  const body = m.bodyColor || '#888';
+  const eye = m.eyeColor || '#ff4040';
+  const accent = m.accentColor || '#f0c840';
+  return `<svg viewBox="0 0 32 36" width="128" height="144" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+    <rect x="8" y="8" width="16" height="16" fill="${body}"/>
+    <rect x="10" y="4" width="12" height="4" fill="${body}"/>
+    <rect x="8" y="24" width="6" height="6" fill="${body}"/>
+    <rect x="18" y="24" width="6" height="6" fill="${body}"/>
+    <rect x="4" y="12" width="4" height="8" fill="${accent}"/>
+    <rect x="24" y="12" width="4" height="8" fill="${accent}"/>
+    <rect x="12" y="12" width="3" height="3" fill="${eye}"/>
+    <rect x="18" y="12" width="3" height="3" fill="${eye}"/>
+    <rect x="13" y="18" width="6" height="2" fill="${eye}"/>
+  </svg>`;
 }
 
 function goToBattle() {
@@ -6759,6 +7297,35 @@ function handleVillageWsMsg(msg) {
   if (msg.type === 'village_player_join') { addVillagePlayer(msg.username, msg.x, msg.y, msg.heroClass||0, msg.level||1); return; }
   if (msg.type === 'village_player_move') { moveVillagePlayer(msg.username, msg.x, msg.y); return; }
   if (msg.type === 'village_player_leave') { removeVillagePlayer(msg.username); return; }
+
+  // Batched position update (100명 최적화)
+  if (msg.type === 'positions_batch') {
+    for (const [uname, pos] of Object.entries(msg.positions)) {
+      if (uname === player?.username) continue;
+      moveVillagePlayer(uname, pos.x, pos.y);
+    }
+    return;
+  }
+
+  // Force logout (ban/kick)
+  if (msg.type === 'force_logout') {
+    showNotif('🔨 ' + (msg.msg || '강제 퇴장'));
+    // WS 재연결 방지를 위해 먼저 닫기
+    if (ws) { ws.onclose = null; ws.close(); ws = null; }
+    setTimeout(() => {
+      player = null;
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('gameHud').classList.remove('active');
+      document.getElementById('loginScreen').style.display = 'flex';
+    }, 2000);
+    return;
+  }
+
+  // Admin heal all
+  if (msg.type === 'admin_heal_all') {
+    if (player) { player.hp = player.maxHp || 100; updateGameHud(); showNotif('💊 관리자가 HP를 회복시켰습니다!'); }
+    return;
+  }
 }
 
 // ============================================================
@@ -7241,7 +7808,7 @@ function deleteFriend(name) { wsSend({type:'friend_delete',target:name}); player
 let customWeapons = [];
 
 function switchAdminTab(tab, el) {
-  ['stat','item','weapon','stage','monster','notice','manage'].forEach(t => {
+  ['stat','item','weapon','stage','monster','notice','manage','punish','chatlog'].forEach(t => {
     const e = document.getElementById('adminTab_'+t);
     if (e) e.style.display = t === tab ? 'block' : 'none';
   });
@@ -7252,6 +7819,177 @@ function switchAdminTab(tab, el) {
   if (tab === 'manage') { loadAdminManageUsers(); }
   if (tab === 'stage') { initStageEditor(); }
   if (tab === 'monster') { initMonsterEditor(); }
+  if (tab === 'punish') { adminLoadPunishments(); adminLoadPunishTargets(); }
+  if (tab === 'chatlog') { adminLoadChatLog(); adminLoadBadWords(); }
+}
+
+// ══════════════════════════════════════════════
+// ADMIN: PUNISH / BAN / MUTE SYSTEM
+// ══════════════════════════════════════════════
+let customBadWords = [];
+
+function adminLoadPunishTargets() {
+  fetch(SERVER_URL + '/api/users').then(r=>r.json()).then(data=>{
+    const users = Array.isArray(data) ? data : (data.users || []);
+    const sel = document.getElementById('punishTarget');
+    if (!sel) return;
+    sel.innerHTML = users.filter(u=>u.username!=='admin').map(u=>`<option value="${u.username}">${u.username} (Lv.${u.level||1})</option>`).join('');
+  }).catch(()=>{});
+}
+
+function adminPunishPlayer() {
+  if (!player?.isAdmin) return;
+  const target = document.getElementById('punishTarget')?.value;
+  const reason = document.getElementById('punishReason')?.value || '규칙 위반';
+  const duration = document.getElementById('punishDuration')?.value;
+  const type = document.getElementById('punishType')?.value;
+  if (!target) { showNotif('⛔ 대상을 선택하세요'); return; }
+
+  wsSend({ type: 'admin_punish', target, punishType: type, duration, reason,
+    adminUser: player.username, adminPass: player.password });
+  showNotif(`🔨 ${target}에게 ${type === 'ban' ? '밴' : type === 'mute' ? '뮤트' : '킥'} 적용`);
+}
+
+function adminLoadPunishments() {
+  if (!player?.isAdmin) return;
+  fetch(SERVER_URL + '/api/admin/punishments?adminUser=' + encodeURIComponent(player.username) + '&adminPass=' + encodeURIComponent(player.password))
+    .then(r=>r.json()).then(d=>{
+      const list = document.getElementById('adminPunishList');
+      if (!list) return;
+      const bans = d.bans || {};
+      const mutes = d.mutes || {};
+      let html = '';
+      for (const [u, b] of Object.entries(bans)) {
+        const until = b.until === 'permanent' ? '영구' : new Date(b.until).toLocaleString('ko-KR');
+        html += `<div style="padding:6px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px;">
+          <span style="color:#ff8080;font-weight:700;">[밴]</span>
+          <span style="flex:1;">${u}</span>
+          <span style="color:rgba(240,232,200,0.4);font-size:0.6rem;">${until}</span>
+          <button onclick="adminUnpunish('ban','${u}')" style="padding:2px 6px;background:rgba(255,80,80,0.2);border:1px solid rgba(255,80,80,0.3);border-radius:4px;color:#ff8080;font-size:0.6rem;cursor:pointer;">해제</button>
+        </div>`;
+      }
+      for (const [u, m] of Object.entries(mutes)) {
+        const until = m.until === 'permanent' ? '영구' : new Date(m.until).toLocaleString('ko-KR');
+        html += `<div style="padding:6px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px;">
+          <span style="color:#ffa080;font-weight:700;">[뮤트]</span>
+          <span style="flex:1;">${u}</span>
+          <span style="color:rgba(240,232,200,0.4);font-size:0.6rem;">${until}</span>
+          <button onclick="adminUnpunish('mute','${u}')" style="padding:2px 6px;background:rgba(255,160,80,0.2);border:1px solid rgba(255,160,80,0.3);border-radius:4px;color:#ffa080;font-size:0.6rem;cursor:pointer;">해제</button>
+        </div>`;
+      }
+      list.innerHTML = html || '<div style="color:rgba(240,232,200,0.3);text-align:center;padding:12px;">처벌 기록 없음</div>';
+    }).catch(()=>{});
+}
+
+function adminUnpunish(type, username) {
+  wsSend({ type: 'admin_unpunish', target: username, punishType: type,
+    adminUser: player.username, adminPass: player.password });
+  setTimeout(adminLoadPunishments, 500);
+  showNotif(`✅ ${username} ${type === 'ban' ? '밴' : '뮤트'} 해제`);
+}
+
+function adminKickAll() {
+  if (!confirm('모든 플레이어를 강제 퇴장시킬까요?')) return;
+  wsSend({ type: 'admin_kick_all', adminUser: player.username, adminPass: player.password });
+  showNotif('🔨 전체 강제퇴장 실행');
+}
+
+function adminSilentMode() {
+  wsSend({ type: 'admin_silent_toggle', adminUser: player.username, adminPass: player.password });
+  showNotif('🔇 전체 채팅금지 토글');
+}
+
+function adminGodMode() {
+  if (!player) return;
+  player.hp = 999999; player.maxHp = 999999; player.attack = 99999; player.defense = 9999;
+  updateGameHud(); showNotif('⚡ 갓모드 ON');
+}
+
+function adminHealAll() {
+  wsSend({ type: 'admin_heal_all', adminUser: player.username, adminPass: player.password });
+  showNotif('💊 전원 HP 완전회복 전송');
+}
+
+// ══════════════════════════════════════════════
+// ADMIN: CHAT LOG VIEWER
+// ══════════════════════════════════════════════
+let allChatLog = [];
+let chatLogFilter = 'all';
+
+function adminLoadChatLog() {
+  if (!player?.isAdmin) return;
+  fetch(SERVER_URL + '/api/admin/chatlog?adminUser=' + encodeURIComponent(player.username) + '&adminPass=' + encodeURIComponent(player.password))
+    .then(r=>r.json()).then(d=>{
+      allChatLog = d.log || [];
+      renderChatLogUI();
+    }).catch(()=>{ showNotif('채팅 로그 로드 실패'); });
+}
+
+function adminFilterChat(filter) {
+  chatLogFilter = filter;
+  renderChatLogUI();
+}
+
+function adminSearchChatLog() {
+  const q = (document.getElementById('chatlogSearch')?.value || '').toLowerCase();
+  const filtered = allChatLog.filter(e =>
+    e.username?.toLowerCase().includes(q) || e.displayed?.toLowerCase().includes(q)
+  );
+  renderChatLogUIData(filtered);
+}
+
+function renderChatLogUI() {
+  let data = allChatLog;
+  if (chatLogFilter === 'filtered') data = data.filter(e => e.filtered);
+  else if (chatLogFilter === 'spam') data = data.filter(e => e.spam);
+  renderChatLogUIData(data);
+}
+
+function renderChatLogUIData(data) {
+  const list = document.getElementById('adminChatLogList');
+  if (!list) return;
+  const reversed = [...data].reverse();
+  list.innerHTML = reversed.map(e => {
+    const t = e.time ? new Date(e.time).toLocaleTimeString('ko-KR') : '';
+    const flagColor = e.filtered ? '#ff6060' : e.spam ? '#ffa060' : '#80d080';
+    const flag = e.filtered ? '🚫' : e.spam ? '⚠️' : '✅';
+    return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <span style="color:${flagColor};">${flag}</span>
+      <span style="color:rgba(240,232,200,0.4);">[${t}]</span>
+      <span style="color:var(--gold);font-weight:700;">${escapeHtml(e.username||'?')}</span>
+      <span style="color:${e.filtered?'#ff8080':'rgba(240,232,200,0.8)'};">${escapeHtml(e.displayed||e.original||'')}</span>
+      ${e.filtered ? `<span style="color:rgba(255,100,100,0.5);font-size:0.6rem;">[원본: ${escapeHtml(e.original||'')}]</span>` : ''}
+    </div>`;
+  }).join('') || '<div style="color:rgba(240,232,200,0.3);text-align:center;padding:12px;">로그 없음</div>';
+}
+
+function adminLoadBadWords() {
+  const list = document.getElementById('badWordList');
+  if (!list) return;
+  list.innerHTML = customBadWords.length === 0
+    ? '<div style="color:rgba(240,232,200,0.3);">추가된 금지어 없음 (서버 기본 금지어는 항상 적용)</div>'
+    : customBadWords.map((w,i) =>
+        `<span style="display:inline-block;padding:2px 6px;margin:2px;background:rgba(200,50,50,0.2);border:1px solid rgba(200,50,50,0.3);border-radius:4px;cursor:pointer;font-size:0.68rem;" onclick="adminRemoveBadWord(${i})">${w} ✕</span>`
+      ).join('');
+}
+
+function adminAddBadWord() {
+  const w = (document.getElementById('badWordInput')?.value || '').trim();
+  if (!w) return;
+  if (!customBadWords.includes(w)) {
+    customBadWords.push(w);
+    wsSend({ type: 'admin_add_badword', word: w, adminUser: player.username, adminPass: player.password });
+  }
+  document.getElementById('badWordInput').value = '';
+  adminLoadBadWords();
+  showNotif(`🚫 금지어 추가: "${w}"`);
+}
+
+function adminRemoveBadWord(idx) {
+  const w = customBadWords[idx];
+  customBadWords.splice(idx, 1);
+  wsSend({ type: 'admin_remove_badword', word: w, adminUser: player.username, adminPass: player.password });
+  adminLoadBadWords();
 }
 
 // ── 스테이지 편집 ──
@@ -8036,7 +8774,7 @@ function renderPartyStatus() {
   const heroIcons = [
     `<svg viewBox="0 0 20 30" width="32" height="48" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="1" width="6" height="1" fill="#9898d0"/><rect x="6" y="2" width="8" height="4" fill="#6878b8"/><rect x="5" y="4" width="10" height="2" fill="#181c38"/><rect x="6" y="8" width="8" height="8" fill="#4058a0"/><rect x="4" y="9" width="4" height="6" fill="#5068a8"/><rect x="12" y="9" width="4" height="6" fill="#5068a8"/><rect x="6" y="16" width="3" height="6" fill="#30406a"/><rect x="11" y="16" width="3" height="6" fill="#30406a"/><rect x="5" y="21" width="4" height="2" fill="#3c2010"/><rect x="11" y="21" width="4" height="2" fill="#3c2010"/><rect x="16" y="4" width="2" height="14" fill="#c0cce0"/><rect x="14" y="10" width="6" height="2" fill="#b09040"/><rect x="1" y="5" width="3" height="7" fill="#4060b8"/><rect x="2" y="8" width="1" height="1" fill="#e8d040"/></svg>`,
     `<svg viewBox="0 0 18 28" width="30" height="46" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="1" width="10" height="2" fill="#284018"/><rect x="5" y="3" width="8" height="5" fill="#dca070"/><rect x="6" y="5" width="2" height="1" fill="#402010"/><rect x="10" y="5" width="2" height="1" fill="#402010"/><rect x="3" y="8" width="12" height="6" fill="#385028"/><rect x="3" y="8" width="4" height="4" fill="#2a4018"/><rect x="11" y="8" width="4" height="4" fill="#2a4018"/><rect x="5" y="14" width="3" height="5" fill="#5c3820"/><rect x="10" y="14" width="3" height="5" fill="#5c3820"/><rect x="4" y="18" width="4" height="2" fill="#3c200c"/><rect x="10" y="18" width="4" height="2" fill="#3c200c"/><rect x="15" y="1" width="2" height="14" fill="#805020"/><rect x="14" y="6" width="6" height="1" fill="#d8c090"/></svg>`,
-    `<svg viewBox="0 0 18 30" width="30" height="48" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#5018900"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="2" fill="#281060"/><rect x="10" y="21" width="3" height="2" fill="#281060"/><rect x="0" y="2" width="2" height="14" fill="#806040"/><rect x="0" y="0" width="3" height="3" fill="#c040f0"/><rect x="1" y="0" width="1" height="2" fill="#f8c0ff"/></svg>`
+    `<svg viewBox="0 0 18 30" width="30" height="48" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="10" height="2" fill="#6020a0"/><rect x="7" y="0" width="4" height="4" fill="#401080"/><rect x="5" y="5" width="8" height="5" fill="#e0d0e8"/><rect x="6" y="6" width="2" height="2" fill="#8020c0"/><rect x="10" y="6" width="2" height="2" fill="#8020c0"/><rect x="4" y="10" width="10" height="10" fill="#501890"/><rect x="3" y="18" width="12" height="4" fill="#401080"/><rect x="5" y="21" width="3" height="2" fill="#281060"/><rect x="10" y="21" width="3" height="2" fill="#281060"/><rect x="0" y="2" width="2" height="14" fill="#806040"/><rect x="0" y="0" width="3" height="3" fill="#c040f0"/><rect x="1" y="0" width="1" height="2" fill="#f8c0ff"/></svg>`
   ];
 
   if (memberList) {
