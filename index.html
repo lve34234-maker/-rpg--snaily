@@ -250,6 +250,7 @@ footer a{color:var(--accent);text-decoration:none;}
     <div class="tab" data-tab="shapes">🔷 모양</div>
     <div class="tab" data-tab="legends">✦ 각인</div>
     <div class="tab" data-tab="effects">✨ 효과</div>
+    <div class="tab" data-tab="sounds">🔊 소리</div>
     <div class="tab" data-tab="upgrades">⚙️ 업그레이드</div>
   </div>
 
@@ -309,10 +310,60 @@ const SOUND = (()=>{
     isMuted:()=>muted,
     toggle(){ muted=!muted; localStorage.setItem('keycapMuted', muted?'1':'0'); if(!muted){ ensure(); tone({type:'triangle',f0:660,f1:880,dur:0.1,vol:0.25}); } return muted; },
     unlock(){ ensure(); },
-    click(){ // 기계식 키캡 느낌: 낮은 클릭 + 노이즈 톡
+    click(){ // 기본 클릭(클래식)
       noise({dur:0.045, vol:0.16});
       tone({type:'square', f0:180, f1:90, dur:0.05, vol:0.16});
       tone({type:'sine', f0:520, f1:380, dur:0.07, vol:0.10, delay:0.005});
+    },
+    playClick(id){ // 선택한 소리 종류로 클릭음 재생
+      switch(id){
+        case 'brown':  // 갈축: 부드러운 택타일
+          noise({dur:0.04, vol:0.10});
+          tone({type:'triangle', f0:220, f1:120, dur:0.06, vol:0.16});
+          break;
+        case 'red':    // 적축: 리니어, 매끄러운 저음
+          tone({type:'sine', f0:300, f1:190, dur:0.07, vol:0.17});
+          noise({dur:0.025, vol:0.05});
+          break;
+        case 'blue':   // 청축: 또렷한 클릭
+          noise({dur:0.03, vol:0.20});
+          tone({type:'square', f0:340, f1:170, dur:0.04, vol:0.17});
+          tone({type:'sine', f0:1200, f1:700, dur:0.05, vol:0.08, delay:0.004});
+          break;
+        case 'cream':  // 크림: 깊은 톡(thock)
+          tone({type:'sine', f0:170, f1:80, dur:0.12, vol:0.24});
+          tone({type:'triangle', f0:300, f1:140, dur:0.08, vol:0.08});
+          break;
+        case 'clack':  // 도각도각: 묵직한 두 번 톡
+          noise({dur:0.05, vol:0.22});
+          tone({type:'square', f0:260, f1:130, dur:0.06, vol:0.20});
+          noise({dur:0.03, vol:0.13, delay:0.045});
+          break;
+        case 'mellow': // 마시멜로: 포근한 사인
+          tone({type:'sine', f0:330, f1:280, dur:0.16, vol:0.18});
+          break;
+        case 'pop':    // 팝: 풍선 터지는 느낌
+          tone({type:'sine', f0:400, f1:1100, dur:0.05, vol:0.20});
+          noise({dur:0.03, vol:0.12, delay:0.03});
+          break;
+        case 'drop':   // 물방울: 빠른 피치 하강
+          tone({type:'sine', f0:950, f1:280, dur:0.14, vol:0.22});
+          break;
+        case 'bell':   // 종: 배음 울림
+          tone({type:'sine', f0:880, dur:0.4, vol:0.16});
+          tone({type:'sine', f0:1320, dur:0.4, vol:0.07});
+          break;
+        case 'retro':  // 8비트: 사각파 블립
+          tone({type:'square', f0:740, dur:0.05, vol:0.16});
+          tone({type:'square', f0:988, dur:0.05, vol:0.13, delay:0.05});
+          break;
+        case 'laser':  // 레이저: 하강 쏘우
+          tone({type:'sawtooth', f0:1400, f1:200, dur:0.16, vol:0.16});
+          break;
+        case 'classic':
+        default:
+          this.click();
+      }
     },
     buy(){ // 상승 아르페지오
       tone({type:'triangle', f0:523, dur:0.1, vol:0.22, delay:0});
@@ -374,6 +425,20 @@ const SHOP = {
     {id:'rainbow', nm:'레인보우',  cost:900,  cls:'fx-rainbow'},
     {id:'gold',    nm:'골드 오라', cost:1600, cls:'fx-gold'},
   ],
+  sounds:[
+    {id:'classic', nm:'클래식',   cost:0,    ic:'⌨️'},
+    {id:'brown',   nm:'갈축',     cost:0,    ic:'🟤'},
+    {id:'red',     nm:'적축',     cost:120,  ic:'🔴'},
+    {id:'blue',    nm:'청축',     cost:120,  ic:'🔵'},
+    {id:'cream',   nm:'크림',     cost:250,  ic:'🍦'},
+    {id:'clack',   nm:'도각도각', cost:250,  ic:'🪵'},
+    {id:'mellow',  nm:'마시멜로', cost:350,  ic:'☁️'},
+    {id:'pop',     nm:'팝',       cost:350,  ic:'🎈'},
+    {id:'drop',    nm:'물방울',   cost:500,  ic:'💧'},
+    {id:'bell',    nm:'종',       cost:600,  ic:'🔔'},
+    {id:'retro',   nm:'8비트',    cost:700,  ic:'🎮'},
+    {id:'laser',   nm:'레이저',   cost:900,  ic:'🔫'},
+  ],
 };
 
 const UPGRADES = [
@@ -388,8 +453,8 @@ const todayStr = ()=>{ const d=new Date(); return d.getFullYear()+'-'+(d.getMont
 const defaultState = ()=>({
   points:0, totalEarned:0, totalClicks:0,
   todayClicks:0, todayDate:todayStr(), gotDailyBonus:false,
-  owned:{ colors:['white','ink'], shapes:['classic'], legends:['kbd','A'], effects:['none'] },
-  equipped:{ color:'white', shape:'classic', legend:'kbd', effect:'none' },
+  owned:{ colors:['white','ink'], shapes:['classic'], legends:['kbd','A'], effects:['none'], sounds:['classic','brown'] },
+  equipped:{ color:'white', shape:'classic', legend:'kbd', effect:'none', sound:'classic' },
   power:1, auto:0,
 });
 
@@ -471,6 +536,7 @@ const NOTES = {
   shapes:'키캡 모양을 바꿔 나만의 키를 만들어 보세요.',
   legends:'키캡 위에 새겨질 각인(글자·아이콘)을 선택하세요.',
   effects:'키캡 주변 특수 효과를 입혀보세요.',
+  sounds:'클릭할 때 나는 소리를 골라보세요. 카드를 누르면 미리 들어볼 수 있어요.',
   upgrades:'포인트 획득량을 늘려 더 빠르게 모아보세요.',
 };
 
@@ -480,7 +546,7 @@ function renderPanel(){
 
   const list = SHOP[curTab];
   const ownedArr = state.owned[curTab];
-  const equipKey = {colors:'color',shapes:'shape',legends:'legend',effects:'effect'}[curTab];
+  const equipKey = {colors:'color',shapes:'shape',legends:'legend',effects:'effect',sounds:'sound'}[curTab];
   const equipped = state.equipped[equipKey];
 
   let html = '<div class="grid">';
@@ -503,6 +569,8 @@ function renderPanel(){
       sw = `<div class="swatch" style="background:#1c2036">${item.ch}</div>`;
     }else if(curTab==='effects'){
       sw = `<div class="swatch" style="background:#1c2036">${item.id==='none'?'∅':'✨'}</div>`;
+    }else if(curTab==='sounds'){
+      sw = `<div class="swatch" style="background:#1c2036">${item.ic}</div>`;
     }
 
     let price;
@@ -552,13 +620,13 @@ function handleShopClick(id){
   const list = SHOP[curTab];
   const item = list.find(x=>x.id===id);
   const ownedArr = state.owned[curTab];
-  const equipKey = {colors:'color',shapes:'shape',legends:'legend',effects:'effect'}[curTab];
+  const equipKey = {colors:'color',shapes:'shape',legends:'legend',effects:'effect',sounds:'sound'}[curTab];
 
   if(ownedArr.includes(id)){
-    // 착용
+    // 착용 (소리 탭은 해당 소리를 바로 미리듣기)
     state.equipped[equipKey] = id;
     applyKeycap(); save(); renderPanel();
-    SOUND.equip();
+    if(curTab==='sounds') SOUND.playClick(id); else SOUND.equip();
     toast('적용했어요: '+item.nm,'good');
   }else{
     // 구매
@@ -568,6 +636,7 @@ function handleShopClick(id){
     state.equipped[equipKey] = id;
     applyKeycap(); renderStats(); save(); renderPanel();
     SOUND.buy();
+    if(curTab==='sounds') setTimeout(()=>SOUND.playClick(id), 420); // 구매 효과음 뒤 미리듣기
     toast('구매 완료! '+item.nm+' 착용 🎉','good');
   }
 }
@@ -610,7 +679,7 @@ function doClick(e){
     toast('🎁 오늘의 첫 클릭 보너스 +50!','good');
     renderDaily();
   }else{
-    SOUND.click();
+    SOUND.playClick(state.equipped.sound);
   }
 
   const val = state.power;
