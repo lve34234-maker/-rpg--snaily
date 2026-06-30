@@ -220,7 +220,10 @@ footer a{color:var(--accent);text-decoration:none;}
 
   <div class="topbar">
     <div class="logo">⌨️ 키캡 클리커 <small>CLICK · EARN · CUSTOMIZE</small></div>
-    <button class="icon-btn" id="resetBtn" title="초기화">↺</button>
+    <div style="display:flex;gap:8px;">
+      <button class="icon-btn" id="soundBtn" title="소리 켜기/끄기">🔊</button>
+      <button class="icon-btn" id="resetBtn" title="초기화">↺</button>
+    </div>
   </div>
 
   <div class="daily" id="dailyBanner">🎁 오늘의 첫 클릭 보너스가 기다리고 있어요!</div>
@@ -263,6 +266,67 @@ footer a{color:var(--accent);text-decoration:none;}
 
 <script>
 "use strict";
+
+/* ============== 사운드 엔진 (Web Audio, 외부 파일 없음) ============== */
+const SOUND = (()=>{
+  let ctx=null;
+  let muted = localStorage.getItem('keycapMuted')==='1';
+  const ensure = ()=>{
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } }
+    if(ctx.state==='suspended') ctx.resume();
+    return ctx;
+  };
+  // 단순 톤 재생: 주파수 슬라이드 + 볼륨 엔벨로프
+  function tone({type='sine', f0=440, f1=null, dur=0.12, vol=0.3, delay=0}){
+    const c = ensure(); if(!c||muted) return;
+    const t0 = c.currentTime + delay;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(f0, t0);
+    if(f1!==null) osc.frequency.exponentialRampToValueAtTime(Math.max(1,f1), t0+dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    osc.connect(g).connect(c.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
+  }
+  // 짧은 노이즈 버스트 (기계식 키 "톡" 질감)
+  function noise({dur=0.05, vol=0.18, delay=0}){
+    const c = ensure(); if(!c||muted) return;
+    const t0 = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur);
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2); }
+    const src = c.createBufferSource(); src.buffer = buf;
+    const g = c.createGain(); g.gain.value = vol;
+    const hp = c.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1200;
+    src.connect(hp).connect(g).connect(c.destination);
+    src.start(t0); src.stop(t0+dur);
+  }
+  return {
+    isMuted:()=>muted,
+    toggle(){ muted=!muted; localStorage.setItem('keycapMuted', muted?'1':'0'); if(!muted){ ensure(); tone({type:'triangle',f0:660,f1:880,dur:0.1,vol:0.25}); } return muted; },
+    unlock(){ ensure(); },
+    click(){ // 기계식 키캡 느낌: 낮은 클릭 + 노이즈 톡
+      noise({dur:0.045, vol:0.16});
+      tone({type:'square', f0:180, f1:90, dur:0.05, vol:0.16});
+      tone({type:'sine', f0:520, f1:380, dur:0.07, vol:0.10, delay:0.005});
+    },
+    buy(){ // 상승 아르페지오
+      tone({type:'triangle', f0:523, dur:0.1, vol:0.22, delay:0});
+      tone({type:'triangle', f0:659, dur:0.1, vol:0.22, delay:0.08});
+      tone({type:'triangle', f0:784, dur:0.16, vol:0.24, delay:0.16});
+    },
+    equip(){ tone({type:'sine', f0:440, f1:660, dur:0.12, vol:0.2}); },
+    error(){ tone({type:'sawtooth', f0:200, f1:120, dur:0.2, vol:0.18}); },
+    bonus(){ // 화려한 보너스 팡파레
+      [659,784,988,1319].forEach((f,i)=>tone({type:'triangle', f0:f, dur:0.18, vol:0.22, delay:i*0.09}));
+    },
+    upgrade(){ tone({type:'square', f0:330, f1:660, dur:0.18, vol:0.2}); },
+  };
+})();
 
 /* ============== 데이터 정의 ============== */
 const SHOP = {
@@ -494,14 +558,16 @@ function handleShopClick(id){
     // 착용
     state.equipped[equipKey] = id;
     applyKeycap(); save(); renderPanel();
+    SOUND.equip();
     toast('적용했어요: '+item.nm,'good');
   }else{
     // 구매
-    if(state.points < item.cost){ toast('포인트가 부족해요 (💰'+fmt(item.cost)+')','bad'); return; }
+    if(state.points < item.cost){ SOUND.error(); toast('포인트가 부족해요 (💰'+fmt(item.cost)+')','bad'); return; }
     state.points -= item.cost;
     ownedArr.push(id);
     state.equipped[equipKey] = id;
     applyKeycap(); renderStats(); save(); renderPanel();
+    SOUND.buy();
     toast('구매 완료! '+item.nm+' 착용 🎉','good');
   }
 }
@@ -509,10 +575,11 @@ function handleShopClick(id){
 function buyUpgrade(uid){
   const u = UPGRADES.find(x=>x.id===uid);
   const cost = upgradeCost(u);
-  if(state.points < cost){ toast('포인트가 부족해요','bad'); return; }
+  if(state.points < cost){ SOUND.error(); toast('포인트가 부족해요','bad'); return; }
   state.points -= cost;
   state[uid] += 1;
   renderStats(); renderUpgrades(); save();
+  SOUND.upgrade();
   toast(u.t+' 업그레이드! 🚀','good');
 }
 
@@ -539,8 +606,11 @@ function doClick(e){
   if(!state.gotDailyBonus){
     state.gotDailyBonus = true;
     gainPoints(50);
+    SOUND.bonus();
     toast('🎁 오늘의 첫 클릭 보너스 +50!','good');
     renderDaily();
+  }else{
+    SOUND.click();
   }
 
   const val = state.power;
@@ -646,11 +716,26 @@ $('resetBtn').addEventListener('click',()=>{
   }
 });
 
+/* ============== 사운드 토글 ============== */
+const soundBtn = $('soundBtn');
+function renderSoundBtn(){
+  soundBtn.textContent = SOUND.isMuted() ? '🔇' : '🔊';
+  soundBtn.title = SOUND.isMuted() ? '소리 켜기' : '소리 끄기';
+}
+soundBtn.addEventListener('click', ()=>{
+  const muted = SOUND.toggle();
+  renderSoundBtn();
+  toast(muted ? '🔇 소리를 껐어요' : '🔊 소리를 켰어요', 'good');
+});
+// 첫 사용자 상호작용에서 오디오 컨텍스트 잠금 해제(모바일 정책 대응)
+window.addEventListener('pointerdown', ()=>SOUND.unlock(), {once:true});
+
 /* ============== 시작 ============== */
 checkDaily();
 applyKeycap();
 renderStats();
 renderDaily();
+renderSoundBtn();
 renderPanel();
 </script>
 </body>
